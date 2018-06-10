@@ -552,6 +552,7 @@ void system_init(void)
 
 	// GPIO on PA10
 
+#if SEALHAT_HARDWARE_VERSION == 10040
 	// Set pin direction to input
 	gpio_set_pin_direction(ENV_IRQ, GPIO_DIRECTION_IN);
 
@@ -564,6 +565,7 @@ void system_init(void)
 	                       GPIO_PULL_OFF);
 
 	gpio_set_pin_function(ENV_IRQ, GPIO_PIN_FUNCTION_OFF);
+#endif
 
 	// GPIO on PA14
 
@@ -581,6 +583,7 @@ void system_init(void)
 
 	// GPIO on PA18
 
+#if SEALHAT_HARDWARE_VERSION == 10040
 	// Set pin direction to input
 	gpio_set_pin_direction(GPS_TIMEPULSE, GPIO_DIRECTION_IN);
 
@@ -593,6 +596,7 @@ void system_init(void)
 	                       GPIO_PULL_OFF);
 
 	gpio_set_pin_function(GPS_TIMEPULSE, GPIO_PIN_FUNCTION_OFF);
+#endif
 
 	// GPIO on PB02
 
@@ -666,6 +670,7 @@ void system_init(void)
 
 	// GPIO on PB23
 
+#if SEALHAT_HARDWARE_VERSION == 10040
 	// Set pin direction to output
 	gpio_set_pin_direction(GPS_RESET, GPIO_DIRECTION_OUT);
 
@@ -677,6 +682,7 @@ void system_init(void)
 	                   true);
 
 	gpio_set_pin_function(GPS_RESET, GPIO_PIN_FUNCTION_OFF);
+#endif
 
 	CRC_0_init();
 	EXTERNAL_IRQ_init();

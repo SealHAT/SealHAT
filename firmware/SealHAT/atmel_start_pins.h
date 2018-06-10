@@ -10,7 +10,7 @@
 
 #include <hal_gpio.h>
 
-#define SEALHAT_HARDWARE_VERSION 10040
+#define SEALHAT_HARDWARE_VERSION 10060
 
 // SAML21 has 9 pin functions
 
@@ -84,11 +84,20 @@
     #define LED_GREEN       GPIO(GPIO_PORTB, 2)
     #define LED_BLUE        GPIO(GPIO_PORTB, 3)
 
+    #define MOD_MISO        GPIO(GPIO_PORTA, 4)
+    #define MOD_SCK         GPIO(GPIO_PORTA, 5)
+    #define MOD_CS          GPIO(GPIO_PORTA, 6)
+    #define MOD_MOSI        GPIO(GPIO_PORTA, 7)
     #define MOD_VREF        GPIO(GPIO_PORTA, 3)
     #define MOD1            GPIO(GPIO_PORTB, 8)
     #define MOD2            GPIO(GPIO_PORTB, 9)
     #define MOD3            GPIO(GPIO_PORTA, 10)
-    
+
+    // legacy pins from 104
+    #define MOD9            GPIO(GPIO_PORTB, 8)
+    #define MOD2            GPIO(GPIO_PORTB, 9)
+    #define MOD8            GPIO(GPIO_PORTA, 3)
+
     #define ENV_SDA         GPIO(GPIO_PORTA, 8)
     #define ENV_SCL         GPIO(GPIO_PORTA, 9)
 
@@ -98,13 +107,13 @@
     #define MEM_CS0         GPIO(GPIO_PORTB, 10)
     #define MEM_CS1         GPIO(GPIO_PORTB, 11)
     #define MEM_CS2         GPIO(GPIO_PORTA, 14)
-    #define MEM_CS3         GPIO(GPIO_PORTA, 11)  
+    #define MEM_CS3         GPIO(GPIO_PORTA, 11)
 
     #define GPS_SDA         GPIO(GPIO_PORTA, 16)
     #define GPS_SCL         GPIO(GPIO_PORTA, 17)
     #define GPS_TXD         GPIO(GPIO_PORTA, 19)
     #define GPS_EXT_INT     GPIO(GPIO_PORTB, 22)
-    
+
     #define IMU_SDA         GPIO(GPIO_PORTA, 22)
     #define IMU_SCL         GPIO(GPIO_PORTA, 23)
     #define IMU_INT1_XL     GPIO(GPIO_PORTA, 20)

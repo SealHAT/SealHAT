@@ -58,11 +58,11 @@ int32_t CTRL_task_init(void)
     int32_t err = ERR_NONE;
     struct calendar_date    date;
     struct calendar_time    time;
-    
+
     // create 24-bit system event group for system alerts
     xSYSEVENTS_handle = xEventGroupCreateStatic(&xSYSEVENTS_eventgroup);
     configASSERT(xSYSEVENTS_handle);
-    
+
     /* initialize (clear all) event group and check current VBUS level */
     xEventGroupClearBits(xSYSEVENTS_handle, EVENT_MASK_ALL);
     if(gpio_get_pin_level(VBUS_DETECT)) {
@@ -78,7 +78,7 @@ int32_t CTRL_task_init(void)
     time.hour = 15;
     time.min  = 59;
     time.sec  = 50;
-    
+
     // TODO enforce start date beyond current date
     RTC_ALARM.cal_alarm.datetime.date.year  = eeprom_data.config_settings.start_year;
     RTC_ALARM.cal_alarm.datetime.date.month = eeprom_data.config_settings.start_month;
@@ -96,7 +96,7 @@ int32_t CTRL_task_init(void)
 
     calendar_set_alarm(&RTC_CALENDAR, &RTC_ALARM, alarm_startsensors_cb);
     xEventGroupSetBits(xSYSEVENTS_handle, EVENT_TIME_CHANGE);
-    
+
     /* create a timer with a one hour period for controlling sensors */
     configASSERT(!configUSE_16_BIT_TICKS);
     xCTRL_timer = xTimerCreateStatic(   "HourTimer",                /* text name of the timer       */
@@ -107,7 +107,7 @@ int32_t CTRL_task_init(void)
                                         &xCTRL_timerbuf);           /* timer data buffer            */
     if (NULL == xCTRL_timer) { /* if the timer was not created */
         err = DEVICE_ERR_TIMEOUT; // TODO determine proper handling
-    } /* timer will not start until an update time event to prevent scheduling before RTC is set */    
+    } /* timer will not start until an update time event to prevent scheduling before RTC is set */
 
     xCTRL_th = xTaskCreateStatic(CTRL_task, "CTRL", CTRL_STACK_SIZE, NULL, CTRL_TASK_PRI, xCTRL_stack, &xCTRL_taskbuf);
     configASSERT(xCTRL_th);
@@ -129,24 +129,27 @@ void CTRL_task(void* pvParameters)
 
     // enable watchdog timer
      wdt_enable(&WATCHDOG);
-    
+
     /* Receive and write data forever. */
     for(;;) {
         /* feed the mangy dog */
-        gpio_toggle_pin_level(LED_GREEN);
+        #ifdef SEAL_DEBUG
+            gpio_toggle_pin_level(LED_GREEN);
+        #endif
+
         wdt_feed(&WATCHDOG);
-        
+
         /* if the USB has been attached */
         if (xEventGroupGetBits(xSYSEVENTS_handle) & EVENT_VBUS) {
             vTaskResume(xSERIAL_th);
-        }            
-            
+        }
+
         /* check if the system time has changed */
         if (xEventGroupGetBits(xSYSEVENTS_handle) & EVENT_TIME_CHANGE) {
             xEventGroupClearBits(xSYSEVENTS_handle, EVENT_TIME_CHANGE);
             CTRL_timer_update(xCTRL_timer);
         }
-        
+
         /* handle hourly events and state changes */
         if (xEventGroupGetBits(xSYSEVENTS_handle) & EVENT_TIME_HOUR) {
             xEventGroupClearBits(xSYSEVENTS_handle, EVENT_TIME_HOUR);
@@ -162,7 +165,7 @@ void CTRL_task(void* pvParameters)
                 xEventGroupClearBits(xSYSEVENTS_handle, EVENT_MASK_IMU);
             }
         }
-        
+
         os_sleep(pdMS_TO_TICKS(1000));
     }
 }
@@ -171,7 +174,7 @@ void CTRL_timer_update(TimerHandle_t xTimer)
 {
     uint32_t msoffset;
     struct calendar_date_time datetime;
-    
+
     /* set the timer to expire at the top of the next hour */
     calendar_get_date_time(&RTC_CALENDAR, &datetime);
     msoffset    = 60000*(59 - datetime.time.min) + 1000*(60 - (datetime.time.sec % 60));
@@ -182,21 +185,21 @@ void CTRL_hourly_update()
 {
     uint32_t hour, prev, sensor;
     struct calendar_date_time datetime;
-    
+
     // TODO add a check to see if logging has started ( eeprom_data.config_settings.start_logging_<day/time> )
     //  can use calendar alarm for this
-    
+
     /* get the active hour and represented as a bit field and a mask for the current and previous hours */
     calendar_get_date_time(&RTC_CALENDAR, &datetime);
     hour = (1 << datetime.time.hour);
     prev = hour == 0 ? 1 << 23 : hour >> 1;
-    
+
     // TODO add to the GPS section to prevent redundant notifications
     /* reset the GPS high precision counter */
     if (xGPS_th) {
         xTaskNotify(xGPS_th, GPS_NOTIFY_HOUR, eSetBits);
     }
-    
+
     /* check the active hours for each sensor */
     sensor = eeprom_data.config_settings.accelerometer_config.xcel_activeHour;
     if ((sensor & (hour|prev)) == hour) {
@@ -204,34 +207,34 @@ void CTRL_hourly_update()
     } else if ((sensor & (hour|prev)) == prev) {
         /* sleep */
     }
-    
+
     sensor = eeprom_data.config_settings.ekg_config.ekg_activeHour;
     if ((sensor & (hour|prev)) == hour) {
         /* wakeup */
     } else if ((sensor & (hour|prev)) == prev) {
         /* sleep */
     }
-    
+
     sensor = eeprom_data.config_settings.gps_config.gps_activeHour;
     if ((sensor & (hour|prev)) == hour) {
         /* wakeup */
     } else if ((sensor & (hour|prev)) == prev) {
         /* sleep */
     }
-    
+
     sensor = eeprom_data.config_settings.magnetometer_config.mag_activeHour;
     if ((sensor & (hour|prev)) == hour) {
         /* wakeup */
     } else if ((sensor & (hour|prev)) == prev) {
         /* sleep */
     }
-    
+
     sensor = eeprom_data.config_settings.temperature_config.temp_activeHour;
     if ((sensor & (hour|prev)) == hour) {
-        /* wakeup */   
+        /* wakeup */
     } else if ((sensor & (hour|prev)) == prev) {
         /* sleep */
     }
-    
-    
+
+
 }

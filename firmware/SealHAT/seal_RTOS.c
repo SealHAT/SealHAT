@@ -13,7 +13,9 @@ void vApplicationIdleHook(void)
 
 void vApplicationTickHook(void)
 {
+    #ifdef SEAL_DEBUG
     gpio_toggle_pin_level(LED_RED);
+    #endif
 }
 
 void vApplicationStackOverflowHook( TaskHandle_t xTask, signed char *pcTaskName )
@@ -42,12 +44,12 @@ int32_t checkResetReason(void) {
     switch(cause) {
         case RESET_REASON_SYST   : gpio_set_pin_level(LED_RED, false);  // only blink LED, data is filled in function that requested reset
                                    break;
-        case RESET_REASON_WDT    : 
-        case RESET_REASON_POR    : 
-        case RESET_REASON_BOD12  : 
-        case RESET_REASON_BOD33  : 
-        case RESET_REASON_EXT    : 
-        case RESET_REASON_BACKUP : 
+        case RESET_REASON_WDT    :
+        case RESET_REASON_POR    :
+        case RESET_REASON_BOD12  :
+        case RESET_REASON_BOD33  :
+        case RESET_REASON_EXT    :
+        case RESET_REASON_BACKUP :
         default:                   gpio_set_pin_level(LED_RED, false);
                                    hri_rtcmode0_set_GP_reg(RTC, 0, cause);
                                    hri_rtcmode0_write_GP_reg(RTC, 1, _calendar_get_counter(&RTC_CALENDAR.device));

@@ -25,7 +25,7 @@ int main(void)
 
     // enable the calendar driver. this function ALWAYS returns ERR_NONE.
     calendar_enable(&RTC_CALENDAR);
-    
+
     // check what caused the reset and log as necessary. return value is not needed (handled in function)
     checkResetReason();
 
@@ -38,19 +38,19 @@ int main(void)
     if(ENV_task_init(1) != ERR_NONE) {
         while(1) {;}
     }
-    
+
     // start the ECG
-    if(ERR_NONE != ECG_task_init()) {
+    if(ECG_task_init() != ERR_NONE) {
         while(1) {;}
     }
 
     // GPS task init
-    if(GPS_task_init(0) != ERR_NONE) {
-        while(1) {;}
-    }
+//     if(GPS_task_init(0) != ERR_NONE) {
+//         while(1) {;}
+//     }
 
     // IMU task init.
-    if(IMU_task_init(ACC_SCALE_2G, ACC_HR_50_HZ, MAG_LP_50_HZ) != ERR_NONE) {
+    if(IMU_task_init(ACC_SCALE_2G, ACC_HR_50_HZ, MAG_LP_20_HZ) != ERR_NONE) {
         while(1) {;}
     }
 
