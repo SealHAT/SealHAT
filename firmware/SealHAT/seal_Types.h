@@ -96,7 +96,7 @@ typedef struct __attribute__((__packed__)) {
 /***********************GUI------------->MICROCONTROLLER*****************/
 typedef struct{
    DATA_HEADER_t    acc_headerData;
-   uint32_t         xcel_activeHour;
+   uint32_t         acc_activeHour;
    ACC_FULL_SCALE_t acc_scale;
    ACC_OPMODE_t     acc_mode;
    MOTION_DETECT_t  motionDetection;
