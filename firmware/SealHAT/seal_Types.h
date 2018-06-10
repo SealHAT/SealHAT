@@ -8,7 +8,12 @@
 #ifndef SEAL_TYPES_H_
 #define SEAL_TYPES_H_
 
-#define SEALHAT_HARDWARE_VERSION    (10060)
+// SealHAT hardware version: The format is two digits each for Major.Minor.patch with two digits
+// for each number (NO LEADING ZEROS)
+//#define SEALHAT_HARDWARE_VERSION    (10040) // Large proto-board with test points
+#define SEALHAT_HARDWARE_VERSION    (10060) // small PCB version for final checkoff
+
+// The year to use as the base year. All timestamps will be in seconds since this date, January 1st midnight.
 #define SEALHAT_BASE_YEAR           (2018)
 
 #define PAGE_SIZE_EXTRA             (2176)  /* Maximum NAND Flash page size (*including* extra space) */
