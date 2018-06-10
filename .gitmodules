@@ -1,0 +1,18 @@
+[submodule "firmware/SealHAT/si705x"]
+	path = firmware/SealHAT/si705x
+	url = https://github.com/SealHAT/SI705x.git
+[submodule "firmware/SealHAT/max44009"]
+	path = firmware/SealHAT/max44009
+	url = https://github.com/SealHAT/MAX44009.git
+[submodule "firmware/SealHAT/lsm303"]
+	path = firmware/SealHAT/lsm303
+	url = https://github.com/SealHAT/LSM303.git
+[submodule "firmware/SealHAT/sam-m8q"]
+	path = firmware/SealHAT/sam-m8q
+	url = https://github.com/SealHAT/SAM-M8Q.git
+[submodule "firmware/SealHAT/storage"]
+	path = firmware/SealHAT/storage
+	url = https://github.com/SealHAT/storage.git
+[submodule "firmware/SealHAT/max30003"]
+	path = firmware/SealHAT/max30003
+	url = https://github.com/SealHAT/MAX30003.git
