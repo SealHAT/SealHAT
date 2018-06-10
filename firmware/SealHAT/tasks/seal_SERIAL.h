@@ -9,11 +9,7 @@
 #define SEAL_SERIAL_H_
 
 #include "seal_RTOS.h"
-#include "seal_USB.h"
-#include "sealPrint.h"
-#include "storage\flash_io.h"
-#include "driver_init.h"
-#include "seal_DATA.h"
+#include "seal_Types.h"
 
 #define SERIAL_STACK_SIZE               (1000 / sizeof(portSTACK_TYPE))
 #define SERIAL_TASK_PRI                 (tskIDLE_PRIORITY)
@@ -21,19 +17,11 @@
 extern TaskHandle_t xSERIAL_th;                       // Message accumulator for USB/MEM
 
 typedef enum {
-    NO_COMMAND      = 0,
-    CONFIGURE_DEV   = 'c',
-    RETRIEVE_DATA   = 'r',
-    STREAM_DATA     = 's',
-} SYSTEM_COMMANDS;
-
-typedef enum {
     UNDEFINED_CMD   = -2,
     CMD_ERROR       = -1,
     NO_ERROR        = 0,
 } CMD_RETURN_TYPES;
 
-extern bool STOP_LISTENING;     /* This should be set to true if the device should no longer listen for incoming commands. */
 extern char READY_TO_RECEIVE;
 
 /*************************************************************

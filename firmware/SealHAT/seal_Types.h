@@ -55,6 +55,20 @@ typedef enum {
 #define MSG_START_SYM           (0xADDE)
 #define USB_PACKET_START_SYM    (0x0DD0FECA)
 
+/** Packet that gets sent over USB to the host computer **/
+typedef struct __attribute__((__packed__)){
+    uint32_t startSymbol;           // start symbol for the data transmission
+    uint8_t  data[PAGE_SIZE_LESS]; // one page of data from flash
+    uint32_t crc;                   // crc32 of the DATA (not the start symbol) using IEEE CRC32 polynomial
+} DATA_TRANSMISSION_t;
+
+typedef enum {
+    NO_COMMAND      = 0,
+    CONFIGURE_DEV   = 'c',
+    RETRIEVE_DATA   = 'r',
+    STREAM_DATA     = 's',
+} SYSTEM_COMMANDS;
+
 /** Header for data packets from the device **/
 typedef struct __attribute__((__packed__)){
     uint16_t startSym;    // symbol to indicate start of packet
@@ -153,12 +167,5 @@ typedef struct __attribute__((__packed__)){
     Ekg_TX               ekg_config;           // configuration data for the EKG
     GPS_TX               gps_config;           // configuration data for the GPS
 } SENSOR_CONFIGS;
-
-/** Packet that gets sent over USB to the host computer **/
-typedef struct __attribute__((__packed__)){
-    uint32_t startSymbol;           // start symbol for the data transmission
-    uint8_t  data[PAGE_SIZE_LESS]; // one page of data from flash
-    uint32_t crc;                   // crc32 of the DATA (not the start symbol) using IEEE CRC32 polynomial
-} DATA_TRANSMISSION_t;
 
 #endif /* SEAL_TYPES_H_ */

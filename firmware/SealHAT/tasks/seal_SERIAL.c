@@ -3,9 +3,12 @@
  *
  * Created: 27-May-18 2:35:51 PM
  *  Author: Krystine
- */ 
+ */
 
 #include "seal_SERIAL.h"
+#include "seal_DATA.h"
+#include "sealPrint.h"
+#include "storage\flash_io.h"
 
 TaskHandle_t        xSERIAL_th;                                 // Message accumulator for USB/MEM
 static StaticTask_t xSERIAL_taskbuf;                            // task buffer for the SERIAL task
@@ -38,107 +41,122 @@ void SERIAL_task(void* pvParameters)
     /* Receive and commands forever. */
     for(;;)
     {
-        if(usb_state() == USB_Configured && usb_dtr())
+        if(usb_state() == USB_Configured)
         {
-            /* Print menu to console. */
-            do {
-                err = usb_write(menu, (sizeof(menu) - 1));
-            } while((err != USB_OK) || !usb_dtr());
-            
-            /* Wait for command to be given. */
-            cmd = listen_for_commands();
-            
-            /****************************************************
-             * Perform specific tasks based on given command.
-             *      -> configure device
-             *      -> retrieve all stored data from flash
-             *      -> set flags for streaming/logging data
-             ****************************************************/
-            switch(cmd)
-            {
-                case CONFIGURE_DEV: 
-                {
-                    /* Notify CTRL that the device is to undergo configuration and wait for green light */
-                    
-                    // TODO output "please wait while devices shutdown" and then "configuring device" messages
-                    xEventGroupSetBits(xSYSEVENTS_handle, EVENT_CONFIG_START);
-                    ulTaskNotifyTake( pdTRUE, portMAX_DELAY); // TODO add timeout and error handling
-                    
-                    if (ERR_NONE != configure_sealhat_device()) {
-                        /* TODO: handle error writing new configs should probably fallback or notify usb */
-                        gpio_toggle_pin_level(LED_RED);
-                    }
-                    xEventGroupClearBits(xSYSEVENTS_handle, EVENT_CONFIG_START);
-                    break;
-                }                    
-                case RETRIEVE_DATA: 
-                {
-                    /* Notify CTRL that the device is to undergo data retrieval and wait for sensors to sleep */
-                    xEventGroupSetBits(xSYSEVENTS_handle, EVENT_RETRIEVE);
-                    ulTaskNotifyTake( pdTRUE, portMAX_DELAY); // TODO add timeout and error handling
-                    
-                    if (ERR_NONE != retrieve_sealhat_data()) {
-                        /* TODO: handle error writing new configs should probably fallback or notify usb */
-                        gpio_toggle_pin_level(LED_RED);
-                    }
-                    xEventGroupClearBits(xSYSEVENTS_handle, EVENT_RETRIEVE);
-                    break;
-                }                    
-                case STREAM_DATA:
-                {
-                    /* Print stream or log menu to console. */
-                    done = false;
-                    
+            if(usb_dtr()) {
+                if(!(xEventGroupGetBits(xSYSEVENTS_handle) & EVENT_LOGTOUSB)) {
+                    /* Print menu to console. */
                     do {
-                        err = usb_write(steamLogMenu, (sizeof(steamLogMenu) - 1));
+                        err = usb_write(menu, (sizeof(menu) - 1));
                     } while((err != USB_OK) || !usb_dtr());
-                    
-                    /* TODO: make the while() WAY less gross.. */
-                    do {
-                        option = usb_get();
-                        
-                        if((option == 'o') || (option == 'l') || (option == 'b')) {
-                            done = true;
+
+                    /* Wait for command to be given. */
+                    cmd = listen_for_commands();
+
+                    /****************************************************
+                     * Perform specific tasks based on given command.
+                     *      -> configure device
+                     *      -> retrieve all stored data from flash
+                     *      -> set flags for streaming/logging data
+                     ****************************************************/
+                    switch(cmd)
+                    {
+                        case CONFIGURE_DEV:
+                        {
+                            /* Notify CTRL that the device is to undergo configuration and wait for green light */
+
+                            // TODO output "please wait while devices shutdown" and then "configuring device" messages
+                            xEventGroupSetBits(xSYSEVENTS_handle, EVENT_CONFIG_START);
+                            ulTaskNotifyTake( pdTRUE, portMAX_DELAY); // TODO add timeout and error handling
+
+                            if (ERR_NONE != configure_sealhat_device()) {
+                                /* TODO: handle error writing new configs should probably fallback or notify usb */
+                                gpio_toggle_pin_level(LED_RED);
+                            }
+                            xEventGroupClearBits(xSYSEVENTS_handle, EVENT_CONFIG_START);
+                            break;
                         }
-                    } while(((option != USB_OK) || !usb_dtr()) && !done);
-                    
-                    /* Set the stream data flag, the log to flash flag, or both flags. */
-                    if(option == 'o') {
-                        xEventGroupSetBits(xSYSEVENTS_handle, EVENT_LOGTOUSB);
-                        xEventGroupClearBits(xSYSEVENTS_handle, EVENT_LOGTOFLASH);
-                    } else if(option == 'l') {
-                        /* Print stream or log menu to console. */
-                        do {
-                            err = usb_write(loggingToFlashMSG, (sizeof(loggingToFlashMSG) - 1));
-                        } while((err != USB_OK) || !usb_dtr());
-                        
-                        xEventGroupClearBits(xSYSEVENTS_handle, EVENT_LOGTOUSB);
-                        xEventGroupSetBits(xSYSEVENTS_handle, EVENT_LOGTOFLASH);
-                    } else {
-                        xEventGroupSetBits(xSYSEVENTS_handle, (EVENT_LOGTOUSB | EVENT_LOGTOFLASH));
+                        case RETRIEVE_DATA:
+                        {
+                            /* Notify CTRL that the device is to undergo data retrieval and wait for sensors to sleep */
+                            xEventGroupSetBits(xSYSEVENTS_handle, EVENT_RETRIEVE);
+                            ulTaskNotifyTake( pdTRUE, portMAX_DELAY); // TODO add timeout and error handling
+
+                            if (ERR_NONE != retrieve_sealhat_data()) {
+                                /* TODO: handle error writing new configs should probably fallback or notify usb */
+                                gpio_toggle_pin_level(LED_RED);
+                            }
+                            xEventGroupClearBits(xSYSEVENTS_handle, EVENT_RETRIEVE);
+                            break;
+                        }
+                        case STREAM_DATA:
+                        {
+                            /* Print stream or log menu to console. */
+                            done = false;
+
+                            do {
+                                err = usb_write(steamLogMenu, (sizeof(steamLogMenu) - 1));
+                            } while((err != USB_OK) || !usb_dtr());
+
+                            /* TODO: make the while() WAY less gross.. */
+                            do {
+                                option = usb_get();
+
+                                if((option == 'o') || (option == 'l') || (option == 'b')) {
+                                    done = true;
+                                }
+                            } while(((option != USB_OK) || !usb_dtr()) && !done);
+
+                            /* Set the stream data flag, the log to flash flag, or both flags. */
+                            if(option == 'o') {
+                                xEventGroupSetBits(xSYSEVENTS_handle, EVENT_LOGTOUSB);
+                                xEventGroupClearBits(xSYSEVENTS_handle, EVENT_LOGTOFLASH);
+                            } else if(option == 'l') {
+                                /* Print stream or log menu to console. */
+                                do {
+                                    err = usb_write(loggingToFlashMSG, (sizeof(loggingToFlashMSG) - 1));
+                                } while((err != USB_OK) || !usb_dtr());
+
+                                xEventGroupClearBits(xSYSEVENTS_handle, EVENT_LOGTOUSB);
+                                xEventGroupSetBits(xSYSEVENTS_handle, EVENT_LOGTOFLASH);
+                            } else {
+                                xEventGroupSetBits(xSYSEVENTS_handle, (EVENT_LOGTOUSB | EVENT_LOGTOFLASH));
+                            }
+                            break;
+                        }
+                        default: err = UNDEFINED_CMD; break;
                     }
-                    break;
-                }                    
-                default: err = UNDEFINED_CMD; break;
+                } // Logging Active
+                else {
+                    int32_t stopCmd = usb_get();
+                    if(stopCmd == 's') {
+                        xEventGroupClearBits(xSYSEVENTS_handle, EVENT_LOGTOUSB);
+                        usb_write("\0\0\0\0\0\n\n", 7);
+                    }
+                }
             }
-            
+            else {  // USB connected but no terminal ready
+                xEventGroupClearBits(xSYSEVENTS_handle, EVENT_LOGTOUSB);
+            }
+
         } /* END if(usb_state() == USB_Configured) */
-        else 
+        else
         {
             /* Log data to flash only (and not USB) if USB not connected. */
             eBits = xEventGroupGetBits(xSYSEVENTS_handle);
-            
+
             if((eBits & EVENT_LOGTOUSB) == EVENT_LOGTOUSB || (eBits & EVENT_LOGTOFLASH) != EVENT_LOGTOFLASH) {
                 xEventGroupClearBits(xSYSEVENTS_handle, EVENT_LOGTOUSB);
                 xEventGroupSetBits(xSYSEVENTS_handle, EVENT_LOGTOFLASH);
             }
-            
+
             /* if the USB disconnects, suspend the serial interface task */
             if ((eBits & EVENT_VBUS) != EVENT_VBUS) {
                 vTaskSuspend(xSERIAL_th);
             }
-            
+
         } /* END else */
+
         os_sleep(pdMS_TO_TICKS(100));
     } /* END forever loop */
 }
@@ -146,7 +164,7 @@ void SERIAL_task(void* pvParameters)
 /*************************************************************
  * FUNCTION: configure_device_state()
  * -----------------------------------------------------------
- * This function receives configuration data and sets it 
+ * This function receives configuration data and sets it
  * within the SealHAT device. A ready signal is first sent to
  * the receiver, then the data packet is awaited. The packet
  * integrity is checked before updating configuration data.
@@ -162,39 +180,39 @@ CMD_RETURN_TYPES configure_sealhat_device()
     CMD_RETURN_TYPES errVal;            /* Return value for the function call. */
     bool             packetOK;          /* Checking for incoming packet integrity. */
     uint32_t         retVal;            /* Return value of USB function calls. */
-    
+
     /* Initialize return value. */
     errVal = CMD_ERROR;
-    
+
     /* Reinitialize loop control variable. */
     STOP_LISTENING = false;
-    packetOK = false;   
+    packetOK = false;
 
     /* Send the ready to receive signal. */
-    do { 
+    do {
         retVal = usb_put(READY_TO_RECEIVE);
     } while((retVal != USB_OK) || (!usb_dtr()));
-    
+
     /* Wait for configuration packet to arrive. */
     do {
         retVal = usb_read(&tempConfigStruct, sizeof(SENSOR_CONFIGS));
     } while((retVal == 0) || (STOP_LISTENING == true));
-    
+
     // TODO: error check packet
     packetOK = true; //for testing. will actually need to be checked.
-    
+
     if(packetOK)
     {
         /* Temp struct has passed the test and may become the real struct. */
         eeprom_data.config_settings = tempConfigStruct;
-        
+
         /* Save new configuration settings. */
         errVal = eeprom_save_configs(&eeprom_data);
-        
+
         // TODO: ANTHONY uncomment next line and do your thing
         //xEventGroupSetBits(xSYSEVENTS_handle, EVENT_CONFIG_COMPLETE);
     }
-    
+
     return (errVal);
 }
 
@@ -202,7 +220,7 @@ CMD_RETURN_TYPES configure_sealhat_device()
  * FUNCTION: retrieve_data_state()
  * -----------------------------------------------------------
  * This function streams all data from the device's external
- * flash to the PC via USB connection. One page's worth of 
+ * flash to the PC via USB connection. One page's worth of
  * data is sent at a time.
  *
  * Parameters: none
@@ -215,26 +233,26 @@ CMD_RETURN_TYPES retrieve_sealhat_data()
     uint32_t pageIndex;         /* Loop control for iterating over flash pages. */
     uint32_t numPagesWritten;   /* Total number of pages currently written to flash. */
     uint32_t retVal;            /* USB return value for error checking/handling. */
-    
+
     /* Initializations */
     numPagesWritten = num_pages_written();
     pageIndex = 0;
-    
+
     /* Loop through every page that has data and send it over USB in PAGE_SIZE buffers.
      * TODO: send address or page index here too for crash recovery. */
     while(pageIndex < numPagesWritten)
     {
         /* Read a page of data from external flash. */
         retVal = flash_io_read(&seal_flash_descriptor, seal_flash_descriptor.buf_0, PAGE_SIZE_LESS);
-        
+
         /* Write data to USB. */
         do {
            retVal = usb_write(seal_flash_descriptor.buf_0, PAGE_SIZE_LESS);
-        } while((retVal != USB_OK) || (!usb_dtr()));    
-        
-        pageIndex++;        
+        } while((retVal != USB_OK) || (!usb_dtr()));
+
+        pageIndex++;
     }
-    
+
     return (NO_ERROR);
 }
 
@@ -242,8 +260,8 @@ CMD_RETURN_TYPES retrieve_sealhat_data()
  * FUNCTION: listen_for_commands()
  * -----------------------------------------------------------
  * This function listens for a command coming in over USB
- * connection. The listening loop may also be broken by setting 
- * the global variable STOP_LISTENING to true. The received 
+ * connection. The listening loop may also be broken by setting
+ * the global variable STOP_LISTENING to true. The received
  * command is returned to the calling function.
  *
  * Parameters: none
@@ -256,27 +274,22 @@ SYSTEM_COMMANDS listen_for_commands()
 {
     bool noCommand = true;
     char command;
-    
-    STOP_LISTENING = false;
-    
+
     /* Keep listening for a command until one is received or until the kill command (STOP_LISTENING) is received. */
-    while((noCommand == true) && (STOP_LISTENING == false))
-    {
+    while(noCommand && usb_dtr()) {
         command = usb_get();
-        
+
         /* If a command was given, break loop. */
-        if((command == CONFIGURE_DEV) || (command == RETRIEVE_DATA) || (command == STREAM_DATA))
-        {
+        if((command == CONFIGURE_DEV) || (command == RETRIEVE_DATA) || (command == STREAM_DATA)) {
             noCommand = false;
         }
     }
-    
+
     /* If the loop was broken before a valid command was received, set the return value
      * to NO COMMAND. */
-    if(STOP_LISTENING == true)
-    {
+    if(noCommand || !usb_dtr()) {
         command = NO_COMMAND;
     }
-    
+
     return ((SYSTEM_COMMANDS) command);
 }
