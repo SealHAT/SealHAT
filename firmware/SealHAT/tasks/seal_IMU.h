@@ -6,19 +6,12 @@
  */
 #include "seal_RTOS.h"
 #include "seal_Types.h"
-#include "lsm303/LSM303AGR.h"
 
 #ifndef SEAL_IMU_H_
 #define SEAL_IMU_H_
 
 #define IMU_STACK_SIZE                  (700 / sizeof(portSTACK_TYPE))  // high water mark of 96 on 26MAY18
 #define IMU_TASK_PRI                    (tskIDLE_PRIORITY + 2)
-
-#define IMU_DATA_SIZE       (25)
-typedef struct __attribute__((__packed__)){
-    DATA_HEADER_t header;
-    AxesRaw_t     data[IMU_DATA_SIZE];
-} IMU_MSG_t;
 
 extern TaskHandle_t xIMU_th;        // IMU task handle
 

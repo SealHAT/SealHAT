@@ -123,6 +123,13 @@ void CTRL_task(void* pvParameters)
     // register VBUS detection interrupt
     ext_irq_register(VBUS_DETECT, vbus_detection_cb);
 
+    // TODO: log to flash
+    if(hri_rtcmode0_read_GP_reg(RTC, 0)) {
+        SYSTEM_ERROR_t systemErr;
+        dataheader_init(&systemErr.header);
+        systemErr.header.id = DEVICE_ID_SYSTEM | DEVICE_ERR_TIMEOUT;
+    }
+
     gpio_toggle_pin_level(LED_GREEN);
     delay_ms(100);
     gpio_toggle_pin_level(LED_GREEN);

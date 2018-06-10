@@ -6,6 +6,8 @@
  */
 #include "seal_ENV.h"
 #include "seal_DATA.h"
+#include "max44009/max44009.h"
+#include "si705x/si705x.h"
 
 #define TEMP_READ_TIME      (pdMS_TO_TICKS(8)) // time to block between reading start and get in ms
 

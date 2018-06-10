@@ -11,13 +11,12 @@
 #define SEALHAT_HARDWARE_VERSION    (10060)
 #define SEALHAT_BASE_YEAR           (2018)
 
-#define PAGE_SIZE_EXTRA         (2176)              /* Maximum NAND Flash page size (*including* extra space) */
-#define PAGE_SIZE_LESS          (2048)              /* Maximum NAND Flash page size (*excluding* extra space) */
+#define PAGE_SIZE_EXTRA             (2176)  /* Maximum NAND Flash page size (*including* extra space) */
+#define PAGE_SIZE_LESS              (2048)  /* Maximum NAND Flash page size (*excluding* extra space) */
 
-#include "LSM303AGR.h"
-#include "gps.h"
-//#include "max30003.h"
-#include "max44009.h"
+#include "lsm303/LSM303_types.h"
+#include "sam-m8q/gps_types.h"
+#include "max30003/ecg_types.h"
 
 /** Sensor types */
 typedef enum {
@@ -48,15 +47,6 @@ typedef enum {
     DEVICE_ERR_MASK             = 0x0F
 } DEVICE_ERR_CODES_t;
 
-enum SENSOR_OP {
-    XCEL_OP              = 1,
-    MAG_OP               = 2,
-    GPS_OP               = 3,
-    EKG_OP               = 4,
-    TEMPERATURE_OP       = 5,
-    LIGHT_OP             = 6,
-};
-
 #define MSG_START_SYM           (0xADDE)
 #define USB_PACKET_START_SYM    (0x0DD0FECA)
 
@@ -69,13 +59,47 @@ typedef struct __attribute__((__packed__)){
     uint16_t size;		  // size of data packet to follow in bytes
 } DATA_HEADER_t;
 
+typedef struct __attribute__((__packed__)){
+    DATA_HEADER_t header;    // packet header
+    uint32_t      data[2];   // size of the GP reg in RTC
+} SYSTEM_ERROR_t;
+
+typedef struct __attribute__((__packed__)){
+    uint16_t light;
+    uint16_t temp;
+} ENV_DATA_t;
+
+#define ENV_PACKET_LEGTH            (12)
+typedef struct __attribute__((__packed__)){
+    DATA_HEADER_t header;
+    ENV_DATA_t    data[ENV_PACKET_LEGTH];
+} ENV_MSG_t;
+
+#define IMU_DATA_SIZE               (25)
+typedef struct __attribute__((__packed__)){
+    DATA_HEADER_t header;
+    AxesRaw_t     data[IMU_DATA_SIZE];
+} IMU_MSG_t;
+
+#define GPS_LOGSIZE		            (2)
+typedef struct __attribute__((__packed__)) {
+    DATA_HEADER_t header;
+    gps_log_t     log[GPS_LOGSIZE];
+} GPS_MSG_t;
+
+#define  ECG_LOGSIZE                (24)
+typedef struct __attribute__((__packed__)) {
+    DATA_HEADER_t header;
+    ECG_SAMPLE_t  log[ECG_LOGSIZE];
+} ECG_MSG_t;
+
 /***********************GUI------------->MICROCONTROLLER*****************/
 typedef struct{
    DATA_HEADER_t    acc_headerData;
    uint32_t         xcel_activeHour;
    ACC_FULL_SCALE_t acc_scale;
    ACC_OPMODE_t     acc_mode;
-   //MOTION_DETECT_t  motionDetection;
+   MOTION_DETECT_t  motionDetection;
 } Xcel_TX;
 
 typedef struct{
@@ -92,11 +116,11 @@ typedef struct{
 } Temp_TX;
 
 typedef struct{
-   DATA_HEADER_t    ekg_headerData;
-   uint32_t         ekg_activeHour;
-//    CNFGECG_RATE_VAL ekg_sampleRate;
-//    CNFGECG_GAIN_VAL ekg_gain;
-//    CNFGECG_DLPF_VAL ekg_lpFreq;
+   DATA_HEADER_t      ekg_headerData;
+   uint32_t           ekg_activeHour;
+   ECG_SAMPLE_RATE_t  ekg_sampleRate;
+   ECG_GAIN_t         ekg_gain;
+   ECG_LOW_PASS_t     ekg_lpFreq;
 } Ekg_TX;
 
 typedef struct{

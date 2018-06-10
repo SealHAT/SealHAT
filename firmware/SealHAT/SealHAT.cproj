@@ -1074,7 +1074,10 @@
     <Compile Include="lsm303\LSM303AGR.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="lsm303\LSM303AGRTypes.h">
+    <Compile Include="lsm303\LSM303AGR_private.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="lsm303\LSM303_types.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="main.c">
@@ -1086,13 +1089,16 @@
     <Compile Include="max30003\ecg.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="max30003\ecg_types.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="max30003\max30003.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="max30003\max30003.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="max30003\max30003types.h">
+    <Compile Include="max30003\max30003_private.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="max44009\max44009.c">
@@ -1101,13 +1107,16 @@
     <Compile Include="max44009\max44009.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="max44009\max44009Types.h">
+    <Compile Include="max44009\max44009_private.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="sam-m8q\gps.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="sam-m8q\gps.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="sam-m8q\gps_types.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="sam-m8q\ubxproto\portable_endian.h">
@@ -1161,7 +1170,7 @@
     <Compile Include="si705x\si705x.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="si705x\si705xTypes.h">
+    <Compile Include="si705x\si705x_private.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="storage\flash_io.c">

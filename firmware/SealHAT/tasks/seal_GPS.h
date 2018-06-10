@@ -26,11 +26,6 @@ typedef enum GPS_NOTIFY_VALS {
     GPS_NOTIFY_ALL      = 0xFFFFFFFF
 } GPS_NOTIFY_VALS;
 
-typedef struct __attribute__((__packed__)) {
-    DATA_HEADER_t header;
-    gps_log_t     log[GPS_LOGSIZE];
-} GPS_MSG_t;
-
 extern TaskHandle_t xGPS_th;
 
 int32_t GPS_task_init(void *profile);   // TODO restrict to enumerated type or struct

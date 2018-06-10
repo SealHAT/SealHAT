@@ -7,6 +7,7 @@
 
 #include "seal_IMU.h"
 #include "seal_DATA.h"
+#include "LSM303AGR.h"
 
 // bit masks for direct to task notifications
 #define ACC_DATA_READY      (0x01)

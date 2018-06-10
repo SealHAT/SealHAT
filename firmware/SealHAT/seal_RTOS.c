@@ -23,12 +23,6 @@ void vApplicationStackOverflowHook( TaskHandle_t xTask, signed char *pcTaskName 
     STACK_OVERFLOW_PACKET_t msg;
     (void)xTask;
 
-    dataheader_init(&msg.header);
-    msg.header.id        = DEVICE_ID_SYSTEM | DEVICE_ERR_OVERFLOW;
-    msg.header.timestamp = _calendar_get_counter(&RTC_CALENDAR.device);
-    msg.header.size      = snprintf((char*)msg.buff, STACK_OVERFLOW_DATA_SIZE, "OVF,%s", pcTaskName);
-    msg.header.size      = (msg.header.size > STACK_OVERFLOW_DATA_SIZE ? STACK_OVERFLOW_DATA_SIZE : msg.header.size);
-
     // write the task name and time that "overflown" to the RTC user register to be dealt with after reset
     hri_rtcmode0_write_GP_reg(RTC, 0, (uint32_t)pcTaskName);
     hri_rtcmode0_write_GP_reg(RTC, 1, _calendar_get_counter(&RTC_CALENDAR.device));
