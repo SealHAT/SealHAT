@@ -101,13 +101,15 @@ void ECG_isr_dataready(void)
                 uxECG_highwatermark = uxTaskGetStackHighWaterMark(xECG_th);
                 os_sleep(1);
                 #endif
-            } else {
+            }
+            else {
                 ecg_msg.header.id |= DEVICE_ERR_TIMEOUT;
                 ctrlLog_write((uint8_t*)&ecg_msg, sizeof(ECG_MSG_t));
-            } else {// END Notification response
-                ecg_synch();
             }
         } // END Notification response
+        else {
+            ecg_synch();
+        }
     } // END forever loop
  }
 

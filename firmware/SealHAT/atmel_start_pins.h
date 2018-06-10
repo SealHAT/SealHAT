@@ -9,8 +9,7 @@
 #define ATMEL_START_PINS_H_INCLUDED
 
 #include <hal_gpio.h>
-
-#define SEALHAT_HARDWARE_VERSION 10060
+#include "seal_Types.h"
 
 // SAML21 has 9 pin functions
 
