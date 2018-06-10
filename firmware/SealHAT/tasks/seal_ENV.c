@@ -39,7 +39,7 @@ void ENV_task(void* pvParameters)
 
     // set the header data
     dataheader_init(&msg.header);
-    msg.header.size     = ENV_PACKET_LEGTH * sizeof(ENV_DATA_t);
+    msg.header.size     = ENV_LOG_SIZE * sizeof(ENV_DATA_t);
     msg.header.id       = DEVICE_ID_ENVIRONMENTAL;
 
     // Initialize the xLastWakeTime variable with the current time.
@@ -49,7 +49,7 @@ void ENV_task(void* pvParameters)
     for(;;) {
 
         uint_fast8_t i;
-        for(i = 0; i < ENV_PACKET_LEGTH; i++) {
+        for(i = 0; i < ENV_LOG_SIZE; i++) {
             // initialize the start time, or re-init if the task was suspended
             if((xLastWakeTime + xPeriod) < xTaskGetTickCount()) {
                 xLastWakeTime = xTaskGetTickCount();

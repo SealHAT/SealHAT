@@ -69,28 +69,28 @@ typedef struct __attribute__((__packed__)){
     uint16_t temp;
 } ENV_DATA_t;
 
-#define ENV_PACKET_LEGTH            (12)
+#define ENV_LOG_SIZE            (12)
 typedef struct __attribute__((__packed__)){
     DATA_HEADER_t header;
-    ENV_DATA_t    data[ENV_PACKET_LEGTH];
+    ENV_DATA_t    data[ENV_LOG_SIZE];
 } ENV_MSG_t;
 
-#define IMU_DATA_SIZE               (25)
+#define IMU_LOG_SIZE               (25)
 typedef struct __attribute__((__packed__)){
     DATA_HEADER_t header;
-    AxesRaw_t     data[IMU_DATA_SIZE];
+    AxesRaw_t     data[IMU_LOG_SIZE];
 } IMU_MSG_t;
 
-#define GPS_LOGSIZE		            (2)
+#define GPS_LOG_SIZE               (2)
 typedef struct __attribute__((__packed__)) {
     DATA_HEADER_t header;
-    gps_log_t     log[GPS_LOGSIZE];
+    gps_log_t     log[GPS_LOG_SIZE];
 } GPS_MSG_t;
 
-#define  ECG_LOGSIZE                (24)
+#define  ECG_LOG_SIZE              (24)
 typedef struct __attribute__((__packed__)) {
     DATA_HEADER_t header;
-    ECG_SAMPLE_t  log[ECG_LOGSIZE];
+    ECG_SAMPLE_t  log[ECG_LOG_SIZE];
 } ECG_MSG_t;
 
 /***********************GUI------------->MICROCONTROLLER*****************/
@@ -99,7 +99,9 @@ typedef struct{
    uint32_t         acc_activeHour;
    ACC_FULL_SCALE_t acc_scale;
    ACC_OPMODE_t     acc_mode;
-   MOTION_DETECT_t  motionDetection;
+   int16_t          threshold;      // threshold of motion to detect in milligravity
+   int16_t          duration;       // Duration of movement to detect. not used.
+   uint8_t          sensitivity;    // axis to check for motion as defined by ACC_MOTION_AXIS_t
 } Xcel_TX;
 
 typedef struct{

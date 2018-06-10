@@ -208,7 +208,7 @@ void CTRL_hourly_update()
     }
 
     /* check the active hours for each sensor */
-    sensor = eeprom_data.config_settings.accelerometer_config.xcel_activeHour;
+    sensor = eeprom_data.config_settings.accelerometer_config.acc_activeHour;
     if ((sensor & (hour|prev)) == hour) {
         /* wakeup */
     } else if ((sensor & (hour|prev)) == prev) {

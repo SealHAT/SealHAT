@@ -70,7 +70,7 @@ void ECG_isr_dataready(void)
     /* prepare the logging header */
     dataheader_init(&ecg_msg.header);
     ecg_msg.header.id   = DEVICE_ID_EKG;
-    ecg_msg.header.size = sizeof(ECG_SAMPLE_t)*ECG_LOGSIZE;
+    ecg_msg.header.size = sizeof(ECG_SAMPLE_t)*ECG_LOG_SIZE;
 
     /* clear the fifo */
     ecg_fifo_reset();
@@ -85,7 +85,7 @@ void ECG_isr_dataready(void)
         if (pdPASS == xResult) {
             /* if the watermark was hit */
             if (ECG_DATA_READY) {
-                count = ecg_get_sample_burst(ecg_msg.log, ECG_LOGSIZE);
+                count = ecg_get_sample_burst(ecg_msg.log, ECG_LOG_SIZE);
 
                 timestamp_FillHeader(&ecg_msg.header);
                 if (0 < count) {

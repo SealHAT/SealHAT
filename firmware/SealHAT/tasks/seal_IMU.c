@@ -119,7 +119,7 @@ void IMU_task(void* pvParameters)
                 bool overrun;   // TODO: set overflow flag
 
                 portENTER_CRITICAL();
-                err = lsm303_acc_FIFOread(&accMsg.data[0], IMU_DATA_SIZE, &overrun);
+                err = lsm303_acc_FIFOread(&accMsg.data[0], IMU_LOG_SIZE, &overrun);
                 portEXIT_CRITICAL();
 
                 // set timestamp and set error flag if needed
@@ -151,7 +151,7 @@ void IMU_task(void* pvParameters)
                 }
                 magItr++;
 
-                if(magItr >= IMU_DATA_SIZE) {
+                if(magItr >= IMU_LOG_SIZE) {
                     timestamp_FillHeader(&magMsg.header);
                     ctrlLog_write((uint8_t*)&magMsg, sizeof(IMU_MSG_t));
                     magMsg.header.id &= ~(DEVICE_ERR_MASK);
