@@ -5,7 +5,6 @@
 #-------------------------------------------------
 
 QT       += core gui serialport
-         sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -13,11 +12,6 @@ TARGET = fastfoodfantasy
 TEMPLATE = app
 
 INCLUDEPATH += $$PWD/../firmware/SealHAT
-INCLUDEPATH += $$PWD/../firmware/SealHAT/lsm303
-INCLUDEPATH += $$PWD/../firmware/SealHAT/si7050x
-INCLUDEPATH += $$PWD/../firmware/SealHAT/max44009
-INCLUDEPATH += $$PWD/../firmware/SealHAT/max30003
-INCLUDEPATH += $$PWD/../firmware/SealHAT/sam-m8q
 
 SOURCES += main.cpp\
     maindialog.cpp \
@@ -29,11 +23,14 @@ SOURCES += main.cpp\
     config_pages/gps_config.cpp \
     config_pages/mag_config.cpp \
     config_pages/temp_config.cpp \
-    serial/usb_receiving_serialization.cpp \
-    serial/usb_sending_serialization.cpp \
-    serial/usb_serial_port_setup.cpp \
-    serial/data_retrieval.cpp \
-    config_pages/xcel_config.cpp
+    config_pages/xcel_config.cpp \
+    src/usb_receiving_serialization.cpp \
+    src/usb_sending_serialization.cpp \
+    src/usb_serial_port_setup.cpp \
+    src/sealhat_device.cpp \
+    src/data_streaming.cpp \
+    src/data_retreival.cpp \
+    src/sealhat_deserialize.cpp
 
 FORMS    += \
     maindialog.ui
@@ -42,7 +39,9 @@ FORMS    += \
 HEADERS  += \
     maindialog.h \
     analyze.h \
-    ../firmware/SealHAT/seal_Types.h
+    ../firmware/SealHAT/seal_Types.h \
+    src/sealhat_device.h \
+    src/sealhat_deserialize.h
 
 RESOURCES += \
     images.qrc

@@ -37,13 +37,8 @@ maindialog::maindialog(QWidget *parent) : QDialog(parent), ui(new Ui::maindialog
     display_setReadOnly();
     configureSettingListDisplay();
 
-    //receiveSerial_samples();
-
-    //microSerial = new QSerialPort(this);
-
     on_TX_ReScanButton_clicked();
     on_RXstream_ReScanButton_clicked();
-
 
 }
 
@@ -150,12 +145,6 @@ void maindialog::on_streamDataButton_clicked()
     this->centerDialog();
 }
 
-void maindialog::on_backButton_StreamPage_clicked()
-{
-    on_backButton_clicked();
-    //closeFile_saving();
-}
-
 void maindialog::closeFile_saving()
 {
     acc_file.close();
@@ -188,9 +177,4 @@ foreach(const QSerialPortInfo &serialPortInfo, QSerialPortInfo::availablePorts()
 void maindialog::on_batterySizeText_selectionChanged()
 {
     ui->batterySizeText->clear();
-}
-
-void maindialog::on_xcel_b_24_pressed()
-{
-    qDebug() << "button presed";
 }

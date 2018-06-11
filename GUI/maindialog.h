@@ -11,6 +11,11 @@
 #include <QDataStream>
 #include <QFile>
 #include <QByteArray>
+
+#include <QThread>
+#include <QSemaphore>
+#include "src/sealhat_device.h"
+
 #include "seal_Types.h"
 #include "analyze.h"
 
@@ -21,89 +26,18 @@ class maindialog : public QDialog
 {
     Q_OBJECT
 
-    /* Struct containing all sensor and micro configuration data. */
-
-  //Analyzation Variables
-    uint32_t total_sampleNumber;
-
-    uint64_t templight_storage;
-    uint64_t acc_storage;
-    uint64_t mag_storage;
-    uint64_t gps_storage;
-    uint64_t ekg_storage;
-
-    double micro_lightActiveTime;
-    double micro_tempActiveTime;
-    double micro_accActiveTime;
-    double micro_magActiveTime;
-    double micro_gpsActiveTime;
-    double micro_ekgActiveTime;
-
-
-    uint64_t templight_groupNum;
-    uint64_t acc_groupNum;
-    uint64_t mag_groupNum;
-    uint64_t gps_groupNum;
-    uint64_t ekg_groupNum;
-
-    uint32_t temp_sampleNumber;
-    uint8_t temp_activeHour;
-    double temp_activePower;
-    double temp_inactivePower;
-    double temp_totalPower;
-
-    uint32_t light_sampleNumber;
-    uint8_t light_activeHour;
-    double light_activePower;
-    double light_inactivePower;
-    double light_totalPower;
-
-    uint8_t acc_tens;
-    uint8_t acc_pwrMode;
-    uint32_t acc_sampleNumber;
-    uint8_t acc_activeHour;
-    double acc_activePower;
-    double acc_inactivePower;
-    double acc_totalPower;
-
-    uint8_t mag_ones;
-    uint8_t mag_pwrMode;
-    uint32_t mag_sampleNumber;
-    uint8_t mag_activeHour;
-    double mag_activePower;
-    double mag_inactivePower;
-    double mag_totalPower;
-
-    uint32_t ekg_sampleNumber;
-    uint8_t ekg_activeHour;
-    double ekg_activePower;
-    double ekg_inactivePower;
-    double ekg_totalPower;
-
-    uint32_t gps_sampleNumber;
-    uint8_t gps_activeHour;
-    double gps_activePower;
-    double gps_inactivePower;
-    double gps_totalPower;
-
-    double memory_totalpower;
-
-
-    double micro_totalpower;
-    double micro_activehour;
-
-    uint16_t accFrequency[7] = {1,10,25,50,100,200,400};
-    double acc_actPower[3][7] = {
-                                 {(3.7/1000000), (5.4/1000000), (8.0/1000000), (12.6/1000000), (22.0/1000000), (40.0/1000000), (75.0/1000000)},
-                                 {(3.7/1000000), (5.4/1000000), (8.0/1000000), (12.6/1000000), (22.0/1000000), (40.0/1000000), (75.0/1000000)},
-                                  {(3.7/1000000), (4.4/1000000), (5.6/1000000), (7.7/1000000),(11.7/1000000),(20.0/1000000),(36.0/1000000)}
-                                };
+    uint16_t accFrequency[7]    = {1,10,25,50,100,200,400};
+    double   acc_actPower[3][7] = {
+                                   {(3.7/1000000), (5.4/1000000), (8.0/1000000), (12.6/1000000), (22.0/1000000), (40.0/1000000), (75.0/1000000)},
+                                   {(3.7/1000000), (5.4/1000000), (8.0/1000000), (12.6/1000000), (22.0/1000000), (40.0/1000000), (75.0/1000000)},
+                                   {(3.7/1000000), (4.4/1000000), (5.6/1000000), (7.7/1000000),(11.7/1000000),(20.0/1000000),(36.0/1000000)}
+                                  };
 
     uint16_t magFrequency[4] = {1,20,50,100};
-    double magPower[2][4] = {
-                                 {(100.0/1000000), (200.0/1000000), (475.0/1000000), (950.0/1000000)},
-                                 {(25.0/1000000), (50.0/1000000), (125.0/1000000), (250.0/1000000)}
-                                };
+    double   magPower[2][4]  = {
+                                {(100.0/1000000), (200.0/1000000), (475.0/1000000), (950.0/1000000)},
+                                {(25.0/1000000), (50.0/1000000), (125.0/1000000), (250.0/1000000)}
+                               };
 
     double powerEst;
     uint32_t storageEst;
@@ -111,7 +45,6 @@ class maindialog : public QDialog
     //Time button mask and setting
     uint8_t shift_property;
     uint32_t bit_Mask;
-
 
 
     typedef enum {
@@ -220,7 +153,7 @@ public:
     ~maindialog();
 
 private slots:
-    void serialReceived();
+    void serialReceived(QByteArray data);
 
 //Page switch
     void on_ekgButton_clicked();
@@ -373,81 +306,66 @@ private slots:
 //TX side of GUI
     void on_TX_ReScanButton_clicked();
     QByteArray config_serialize();
-    void send_serialSetup();
     void sendSerial_Config();
 
 //RX side of GUI
     void on_RXstream_ReScanButton_clicked();
     void data_deserialize(QByteArray& byteArray);
-    void receiveSerial_samples();
-    void receive_serialSetup();
-    void closeSerialPort();
-
-    //
 
 //Data Sample Stream
     void on_captureDatatoFile_button_clicked();
     void on_startStream_button_clicked();
     void recognizeData(DATA_HEADER_t *header);
     void searchingHeader();
-    void findDataBuffer_fromPacket();
     void recognizeData_fromBuffer();
     void header_deserialize(QByteArray& byteArray);
     void headerAnalyze_display();
 
     void on_sendConfigsButton_clicked();
     void on_configureHomeButton_clicked();
-    void dataFiles_Setup();
     void closeFile_saving();
-
 
     //void on_batterySizeText_returnPressed();
 
-    void on_xcel_b_3_pressed();
-
-    void on_xcel_b_3_clicked();
-
-    void on_xcel_b_24_clicked(bool checked);
-
-    void on_xcel_b_24_pressed();
-
     private:
-    Ui::maindialog *ui;
-    QMap<QString, uint32_t> config;
-    SENSOR_CONFIGS configuration_settings;
+        Ui::maindialog *ui;
+        QMap<QString, uint32_t> config;
+        SENSOR_CONFIGS configuration_settings;
 
-    QSerialPort *microSerial;
-    static const quint16 microSerial_vendor_id = 1003;
-    static const quint16 microSerial_product_id = 9220;
+        QSerialPort *microSerial;
+        static const quint16 microSerial_vendor_id = 1003;
+        static const quint16 microSerial_product_id = 9220;
 
-    QByteArray serial_readData;
-    QByteArray dataBuffer;
-    QByteArray sampleBuf;
-    QByteArray header_ba;
-    QString serialDataBuffer;
-    QString acc_DataBuffer;
-    QString mag_DataBuffer;
-    QString light_DataBuffer;
-    QString temp_DataBuffer;
-    QString gps_DataBuffer;
-    QString ekg_DataBuffer;
+        SealHAT_device  device;         // the sealHat device
+        QByteArray      dataBuffer;     // data from the device
+        QFile           streamOut;      // stream file output
 
-    QFile acc_file;
-    QFile mag_file;
-    QFile ekg_file;
-    QFile temp_file;
-    QFile light_file;
-    QFile gps_file;
+        QByteArray sampleBuf;
+        QByteArray header_ba;
+        QString serialDataBuffer;
+        QString acc_DataBuffer;
+        QString mag_DataBuffer;
+        QString light_DataBuffer;
+        QString temp_DataBuffer;
+        QString gps_DataBuffer;
+        QString ekg_DataBuffer;
 
-    //bool data_to_file_available;
+        QFile acc_file;
+        QFile mag_file;
+        QFile ekg_file;
+        QFile temp_file;
+        QFile light_file;
+        QFile gps_file;
 
-    QString microSerial_port_name;
-    int pos;
-    bool microSerial_is_available;
-    bool serial_retry;
+        //bool data_to_file_available;
 
-    DATA_TRANSMISSION_t retrieve_data;
-    DATA_HEADER_t header;
+        QString microSerial_port_name;
+        int pos;
+        bool microSerial_is_available;
+        bool serial_retry;
+
+        DATA_TRANSMISSION_t retrieve_data;
+        DATA_HEADER_t header;
 
 
 };

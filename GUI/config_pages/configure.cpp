@@ -173,3 +173,22 @@ void maindialog::setActiveButtonColor(CONFIGURE_PAGES pageToHighlight)
         } break;
     }
 }
+
+/**************************************************************
+ * FUNCTION: on_TX_ReScanButton_clicked
+ * ------------------------------------------------------------
+ *  This function checks what serial port users selected
+ *  in the TX_serialPort_comboBox. Set serial port to Read only.
+ *
+ *  Parameters: None
+ *
+ *  Returns: void
+ **************************************************************/
+void maindialog::on_TX_ReScanButton_clicked()
+{
+    ui->TX_serialPort_comboBox->clear();
+
+    foreach (const QSerialPortInfo &serialPortInfo, QSerialPortInfo::availablePorts()) {
+            ui->TX_serialPort_comboBox->addItem(serialPortInfo.portName());
+        }
+}

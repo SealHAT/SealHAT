@@ -118,9 +118,9 @@ void maindialog::on_xcel_freqBox_currentIndexChanged(int)
 void maindialog::on_xcel_sway_checkBox_clicked(bool checked)
 {
     if(checked){
-        configuration_settings.accelerometer_config.acc_sensitivity |= (MOTION_INT_X_LOW|MOTION_INT_X_HIGH);
+        configuration_settings.accelerometer_config.sensitivity |= (MOTION_INT_X_LOW|MOTION_INT_X_HIGH);
     }else{
-        configuration_settings.accelerometer_config.acc_sensitivity &= (~(MOTION_INT_X_LOW|MOTION_INT_X_HIGH));
+        configuration_settings.accelerometer_config.sensitivity &= (~(MOTION_INT_X_LOW|MOTION_INT_X_HIGH));
     }
 
 }
@@ -128,18 +128,18 @@ void maindialog::on_xcel_sway_checkBox_clicked(bool checked)
 void maindialog::on_xcel_surge_checkBox_clicked(bool checked)
 {
     if(checked){
-        configuration_settings.accelerometer_config.acc_sensitivity |= (MOTION_INT_Y_LOW|MOTION_INT_Y_HIGH);
+        configuration_settings.accelerometer_config.sensitivity |= (MOTION_INT_Y_LOW|MOTION_INT_Y_HIGH);
     }else{
-        configuration_settings.accelerometer_config.acc_sensitivity &= (~(MOTION_INT_Y_LOW|MOTION_INT_Y_HIGH));
+        configuration_settings.accelerometer_config.sensitivity &= (~(MOTION_INT_Y_LOW|MOTION_INT_Y_HIGH));
     }
 }
 
 void maindialog::on_xcel_heave_checkBox_clicked(bool checked)
 {
     if(checked){
-        configuration_settings.accelerometer_config.acc_sensitivity |= (MOTION_INT_Z_LOW|MOTION_INT_Z_HIGH);
+        configuration_settings.accelerometer_config.sensitivity |= (MOTION_INT_Z_LOW|MOTION_INT_Z_HIGH);
     }else{
-        configuration_settings.accelerometer_config.acc_sensitivity &= (~(MOTION_INT_Z_LOW|MOTION_INT_Z_HIGH));
+        configuration_settings.accelerometer_config.sensitivity &= (~(MOTION_INT_Z_LOW|MOTION_INT_Z_HIGH));
     }
 }
 
@@ -268,7 +268,7 @@ void maindialog::on_xcel_thres_editingFinished()
         ui->thres_warnLABEL->show();
     }else{
         ui->thres_warnLABEL->hide();
-        configuration_settings.accelerometer_config.acc_threshold = (ui->xcel_thres->text().toDouble())*1000;
+        configuration_settings.accelerometer_config.threshold = (ui->xcel_thres->text().toDouble())*1000;
         //qDebug() << configuration_settings.accelerometer_config.acc_threshold << endl;
     }
 
@@ -333,8 +333,8 @@ void maindialog::xcel_getloadData(){
     uint8_t acc_scaleSelect =  (configuration_settings.accelerometer_config.acc_scale/16)%10 ;
     uint8_t acc_freqSelect = (configuration_settings.accelerometer_config.acc_mode/16)%10 - 1;
     uint8_t xcel_pwrSelect = (configuration_settings.accelerometer_config.acc_mode%16)/4;
-    uint8_t xcel_sensitivity = configuration_settings.accelerometer_config.acc_sensitivity;
-    QString xcel_threshold = QString::number((double)configuration_settings.accelerometer_config.acc_threshold/1000,'f',2);    
+    uint8_t xcel_sensitivity = configuration_settings.accelerometer_config.sensitivity;
+    QString xcel_threshold = QString::number((double)configuration_settings.accelerometer_config.threshold/1000,'f',2);
 
     ui->xcel_scaleBox->setCurrentIndex(acc_scaleSelect);
     ui->xcel_pwrBox->setCurrentIndex(xcel_pwrSelect);

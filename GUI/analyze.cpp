@@ -9,6 +9,75 @@
 #include "seal_Types.h"
 #include "ui_maindialog.h"
 
+/** Analyzation Variables - WTF??? **/
+uint32_t total_sampleNumber;
+
+uint64_t templight_storage;
+uint64_t acc_storage;
+uint64_t mag_storage;
+uint64_t gps_storage;
+uint64_t ekg_storage;
+
+double micro_lightActiveTime;
+double micro_tempActiveTime;
+double micro_accActiveTime;
+double micro_magActiveTime;
+double micro_gpsActiveTime;
+double micro_ekgActiveTime;
+
+
+uint64_t templight_groupNum;
+uint64_t acc_groupNum;
+uint64_t mag_groupNum;
+uint64_t gps_groupNum;
+uint64_t ekg_groupNum;
+
+uint32_t temp_sampleNumber;
+uint8_t temp_activeHour;
+double temp_activePower;
+double temp_inactivePower;
+double temp_totalPower;
+
+uint32_t light_sampleNumber;
+uint8_t light_activeHour;
+double light_activePower;
+double light_inactivePower;
+double light_totalPower;
+
+uint8_t acc_tens;
+uint8_t acc_pwrMode;
+uint32_t acc_sampleNumber;
+uint8_t acc_activeHour;
+double acc_activePower;
+double acc_inactivePower;
+double acc_totalPower;
+
+uint8_t mag_ones;
+uint8_t mag_pwrMode;
+uint32_t mag_sampleNumber;
+uint8_t mag_activeHour;
+double mag_activePower;
+double mag_inactivePower;
+double mag_totalPower;
+
+uint32_t ekg_sampleNumber;
+uint8_t ekg_activeHour;
+double ekg_activePower;
+double ekg_inactivePower;
+double ekg_totalPower;
+
+uint32_t gps_sampleNumber;
+uint8_t gps_activeHour;
+double gps_activePower;
+double gps_inactivePower;
+double gps_totalPower;
+
+double memory_totalpower;
+
+
+double micro_totalpower;
+double micro_activehour;
+
 
 /**************************************************************
  * FUNCTION: num_Hours

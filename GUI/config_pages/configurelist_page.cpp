@@ -289,11 +289,11 @@ void maindialog::on_sendConfigsButton_clicked()
     configuration_settings.num_flash_chips = 4;
 
     //Need to fill in config id
-    QDateTime date = QDateTime::currentDateTime();
-    QString year = date.toString("yyyy");
-    QString month = date.toString("M");
-    QString day = date.toString("d");
-    QString time = date.toString("hhmmss");
+    QDateTime date  = QDateTime::currentDateTime();
+    QString   year  = date.toString("yyyy");
+    QString   month = date.toString("M");
+    QString   day   = date.toString("d");
+    QString   time  = date.toString("hhmmss");
 
     configuration_settings.start_year  =  year.toUInt();
     configuration_settings.start_month =  month.toUInt();
