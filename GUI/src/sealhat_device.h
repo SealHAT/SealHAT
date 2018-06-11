@@ -3,15 +3,13 @@
 
 #include <QObject>
 #include <QTimer>
-#include <QVector>
-#include <QDebug>
-#include <QSerialPort>
-#include <QSerialPortInfo>
 #include <QQueue>
 #include <QByteArray>
-
-#include <stdint.h>
+#include <QDataStream>
+#include <QSerialPort>
+#include <QSerialPortInfo>
 #include "seal_Types.h"
+#include "sensorsample.h"
 
 class SealHAT_device : public QObject
 {
@@ -26,6 +24,18 @@ public:
     bool connectToDevice(QString portName);
     // enqueue data to send
     int sendData(QByteArray data);
+
+
+    // check how many sensor samples are ready for consumption
+    int queueSize();
+    // get the next sensor sample
+    SensorSample queuePop();
+
+private:
+    // parses the data in the clean_data array to find data headers
+    void deserializeDataPackets();
+    // takes header info and stream to create sensor packets
+    void parseSensorPackets(QDataStream& stream, quint8 device, quint32 time, quint8 seqNum, quint16 length);
 
 signals:
     // signal emitted to indicate the device has connected
@@ -45,10 +55,12 @@ private slots:
     void handleError(QSerialPort::SerialPortError error);
 
 private:
-     QSerialPort     sealhat;       // serial object for connecting to device
-     QTimer          pollTimer;     // timer to poll for incoming data
-     QQueue<quint8>  out_data;      // queue to send data to device
-     QByteArray      in_data;       // Data from device before processing
+     QSerialPort          sealhat;      // serial object for connecting to device
+     QTimer               pollTimer;    // timer to poll for incoming data
+     QByteArray           in_data;      // Data from device before CRC checks
+     QByteArray           clean_data;   // Data from device after CRC checks
+//     QDataStream*         stream;       // data stream to deserialize the cleaned data
+     QQueue<SensorSample> data_q;       // queue of processed sensor readings
 };
 
 #endif // SEALHAT_DEVICE_H

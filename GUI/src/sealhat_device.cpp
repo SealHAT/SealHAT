@@ -1,10 +1,12 @@
 #include "sealhat_device.h"
-#include <QCoreApplication>
-#include <QByteArrayMatcher>
+#include <QDebug>
+#include <stdint.h>
 
 SealHAT_device::SealHAT_device(QObject *parent) : QObject(parent)
 {
-
+    connect(&sealhat, &QSerialPort::readyRead, this, &SealHAT_device::handleReadyRead);
+    connect(&sealhat, &QSerialPort::errorOccurred, this, &SealHAT_device::handleError);
+    connect(&pollTimer, &QTimer::timeout, this, &SealHAT_device::handleTimeout);
 }
 
 SealHAT_device::~SealHAT_device()
@@ -30,10 +32,6 @@ bool SealHAT_device::connectToDevice(QString portName)
         sealhat.setDataTerminalReady(true);
         sealhat.setRequestToSend(true);
 
-        connect(&sealhat, &QSerialPort::readyRead, this, &SealHAT_device::handleReadyRead);
-        connect(&sealhat, &QSerialPort::errorOccurred, this, &SealHAT_device::handleError);
-        connect(&pollTimer, &QTimer::timeout, this, &SealHAT_device::handleTimeout);
-
         pollTimer.start(5000);
         retval = true;
         emit(sealhat_connected());
@@ -56,11 +54,117 @@ void SealHAT_device::disconnectFromDevice()
             qDebug() << "Failed to disconnect from device!";
         }
     }
+
+    pollTimer.stop();
+    in_data.clear();
 }
 
 int SealHAT_device::sendData(QByteArray data)
 {
     sealhat.write(data);
+}
+
+void SealHAT_device::deserializeDataPackets()
+{
+    quint16       startSym, size;   // size and startSym from data header
+    quint8        devID, seqNum;    // device ID and sequence number from header
+    quint32       timestamp;        // timestamp from header
+
+    int index = clean_data.indexOf(QByteArray(MSG_START_SYM_STR));
+    while(index >= 0) {
+        // remove any partial packets (should only happen in first read of a stream)
+        clean_data.remove(0, index);
+
+        // Attach the data stream to the clean_data array. Set to little endian.
+        QDataStream stream(&clean_data, QIODevice::ReadOnly);
+        stream.setByteOrder(QDataStream::LittleEndian);
+
+        stream >> startSym >> devID >> seqNum >> timestamp >> size;
+
+        parseSensorPackets(stream, device, timestamp, seqNum, length);
+
+        clean_data.remove(0, (size + sizeof(DATA_HEADER_t)));
+        index = clean_data.indexOf(QByteArray(MSG_START_SYM_STR));
+    }
+
+}
+
+void SealHAT_device::parseSensorPackets(QDataStream& stream, quint8 device, quint32 time, quint8 seqNum, quint16 length)
+{
+    switch(devID) {
+        case DEVICE_ID_ENVIRONMENTAL  :
+        case DEVICE_ID_LIGHT          : value = QString::number(data.light, 'f');
+                break;
+        case DEVICE_ID_TEMPERATURE    : value = QString::number(data.temperature, 'f');
+                break;
+        case DEVICE_ID_ACCELEROMETER  : value = QString("%1,%2,%3").arg(data.acceleration.xAxis, 0, 'f', 6).arg(data.acceleration.yAxis, 0, 'f', 6).arg(data.acceleration.zAxis, 0, 'f', 6);
+                break;
+        case DEVICE_ID_MAGNETIC_FIELD : value = QString("%1,%2,%3").arg(data.magnetic.xAxis, 0, 'f', 6).arg(data.magnetic.yAxis, 0, 'f', 6).arg(data.magnetic.zAxis, 0, 'f', 6);
+                break;
+        case DEVICE_ID_GYROSCOPE      : value = QString("Err: no gyro code yet");
+                break;
+        case DEVICE_ID_PRESSURE       : value = QString("Err: no pressure code yet");
+                break;
+        case DEVICE_ID_DEPTH          : value = QString("Err: no depth code yet");
+                break;
+        case DEVICE_ID_GPS            : value = QString("Err: no GPS code yet");
+                break;
+        case DEVICE_ID_EKG            : value = QString("Err: no EKG code yet");
+                break;
+        case DEVICE_ID_SYSTEM         : value = QString("Err: no SYS code yet");
+                break;
+        default : value = QString("Err: invalid sensor (%1) with packet size %2").arg(devID).arg(size);
+    };
+
+}
+
+void SealHAT_device::parseEnvironmental(QDataStream& stream, quint32 time, quint8 seqNum, quint16 length)
+{
+    const float FULL_ACCURACY_CONSTANT = 0.045;
+    const float LOW_ACCURACY_CONSTANT  = 0.720;
+    const float TEMP_STEP_SIZE         = 175.72;
+    const float TEMP_ZERO_OFFSET       = 46.85;
+    const int   TEMP_RANGE             = 65536;
+    const int   MS_PERIOD   = 1000;
+    const int   SAMPLE_SIZE = sizeof(uint16_t);
+
+    QDateTime     timestamp;
+    int           sampleCount = length / (SAMPLE_SIZE*2);
+    quint8        luxMantissa, luxExponent;
+    quint16       tempRAW;
+    SENSOR_DATA_t valueSI;
+
+    // set the time, then subract the period * number of sample for time of first sample in buffer
+    timestamp.setSecsSinceEpoch(time);
+    timestamp.addMSecs((-MS_PERIOD)*sampleCount);
+
+    while(sampleCount > 0) {
+        stream >> luxExponent >> luxMantissa;
+        valueSI.light = (1<<luxExponent) * (float)luxMantissa * FULL_ACCURACY_CONSTANT;
+        data_q.enqueue(SensorSample(DEVICE_ID_LIGHT, timestamp, seqNum, valueSI);
+
+        stream >> tempRAW;
+        valueSI.temperature = ((TEMP_STEP_SIZE*tempRAW) / TEMP_RANGE) - TEMP_ZERO_OFFSET;
+        data_q.enqueue(SensorSample(DEVICE_ID_TEMPERATURE, timestamp, seqNum, valueSI);
+
+        sampleCount--;
+        timestamp.addMSecs(MS_PERIOD);
+    }
+}
+
+void parse_elsm303agr(QDataStream& stream, quint32 time, quint8 seqNum, quint16 length)
+{
+
+}
+
+void parse_samm8q(QDataStream& stream, quint32 time, quint8 seqNum, quint16 length)
+{
+
+}
+
+void parse_max30003(QDataStream& stream, quint32 time, quint8 seqNum, quint16 length)
+{
+
 }
 
 void SealHAT_device::handleReadyRead()
@@ -75,9 +179,8 @@ void SealHAT_device::handleReadyRead()
     }
     else {
         qDebug() << in_data.data();
-        QByteArrayMatcher usbPackerHeader(QByteArray("\xCA\xFE\xD0\x0D"));
 
-        int index = usbPackerHeader.indexIn(in_data);
+        int index = in_data.indexOf(QByteArray(USB_PACKET_START_SYM_STR));
         if(index >= 0) {
             in_data.remove(0, index+4);
         }
@@ -91,7 +194,9 @@ void SealHAT_device::handleReadyRead()
 
             // TODO: perform CRC32, Qt doesnt have an implementation??
             tempArray.chop(4);
-            emit(data_in(tempArray));
+
+            // send the verefied data to the clean array, and chop it off the in_data
+            clean_data.append(tempArray);
             in_data.remove(0, dataAndCRC);
         }
         else {
@@ -100,6 +205,7 @@ void SealHAT_device::handleReadyRead()
     }
 
     pollTimer.start(5000);
+    this->deserializeDataPackets();
 }
 
 void SealHAT_device::handleTimeout()
