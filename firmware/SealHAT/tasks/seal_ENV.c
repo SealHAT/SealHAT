@@ -25,7 +25,8 @@ int32_t ENV_task_init(const int32_t period)
 
 void ENV_task(void* pvParameters)
 {
-    static ENV_MSG_t   msg;             // data buffer for storing sample to send
+    static ENV_MSG_t lightMsg;             // data buffer for storing light samples to send
+    static ENV_MSG_t tempMsg;             // data buffer for storing temperature samples to send
     int32_t     err;                    // for catching API errors
     TickType_t  xPeriod;                // the period of the sampling in seconds
     TickType_t  xLastWakeTime;          // last wake time variable for timing
@@ -38,9 +39,12 @@ void ENV_task(void* pvParameters)
     err = max44009_init(&I2C_ENV, LIGHT_ADD_GND);
 
     // set the header data
-    dataheader_init(&msg.header);
-    msg.header.size     = ENV_LOG_SIZE * sizeof(ENV_DATA_t);
-    msg.header.id       = DEVICE_ID_ENVIRONMENTAL;
+    dataheader_init(&lightMsg.header);
+    dataheader_init(&tempMsg.header);
+    lightMsg.header.size     = ENV_LOG_SIZE * sizeof(uint16_t);
+    tempMsg.header.size      = ENV_LOG_SIZE * sizeof(uint16_t);
+    lightMsg.header.id       = DEVICE_ID_LIGHT;
+    tempMsg.header.id        = DEVICE_ID_TEMPERATURE;
 
     // Initialize the xLastWakeTime variable with the current time.
     xPeriod       = pdMS_TO_TICKS((uint32_t)pvParameters * 1000);
@@ -57,7 +61,8 @@ void ENV_task(void* pvParameters)
             vTaskDelayUntil(&xLastWakeTime, xPeriod);
 
             // reset the message header and set the timestamp
-            timestamp_FillHeader(&msg.header);
+            timestamp_FillHeader(&lightMsg.header);
+            timestamp_FillHeader(&tempMsg.header);
 
             // start an asynchronous temperature reading
             portENTER_CRITICAL();
@@ -66,7 +71,7 @@ void ENV_task(void* pvParameters)
 
             //  read the light level
             portENTER_CRITICAL();
-            err = max44009_read(&msg.data[i].light);
+            err = max44009_read(&lightMsg.data[i]);
             portEXIT_CRITICAL();
 
             // wait for the temperature sensor to finish
@@ -74,16 +79,16 @@ void ENV_task(void* pvParameters)
 
             // get temp
             portENTER_CRITICAL();
-            err = si705x_measure_asyncGet(&msg.data[i].temp, 250, true);
+            err = si705x_measure_asyncGet(&tempMsg.data[i], 250, true);
             portEXIT_CRITICAL();
             if(ERR_BAD_DATA == err) {
-                msg.data[i].temp = -1;
-                msg.header.id   |= DEVICE_ERR_COMMUNICATIONS;
+                tempMsg.data[i] &= 0x8000;
             }
 
         } // for loop filling the packet
 
         // send data to the CTRL task once done
-        err = ctrlLog_write((uint8_t*)&msg, sizeof(ENV_MSG_t));
+        err = ctrlLog_write((uint8_t*)&tempMsg, sizeof(ENV_MSG_t));
+        err = ctrlLog_write((uint8_t*)&lightMsg, sizeof(ENV_MSG_t));
     }
 } 

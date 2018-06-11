@@ -14,7 +14,7 @@
 #define SEALHAT_HARDWARE_VERSION    (10060) // small PCB version for final checkoff
 
 // The year to use as the base year. All timestamps will be in seconds since this date, January 1st midnight.
-#define SEALHAT_BASE_YEAR           (2018)
+#define SEALHAT_BASE_YEAR           (1970)
 
 #define PAGE_SIZE_EXTRA             (2176)  /* Maximum NAND Flash page size (*including* extra space) */
 #define PAGE_SIZE_LESS              (2048)  /* Maximum NAND Flash page size (*excluding* extra space) */
@@ -52,8 +52,19 @@ typedef enum {
     DEVICE_ERR_MASK             = 0x0F
 } DEVICE_ERR_CODES_t;
 
-#define MSG_START_SYM           (0xADDE)
-#define USB_PACKET_START_SYM    (0x0DD0FECA)
+typedef enum {
+    HW_IMU_LSM303AGR            = 0x01,
+    HW_IMU_LSM303C              = 0x02,
+    HW_LIGHT_SI7051             = 0x03,
+    HW_TEMP_MAX44009            = 0x04,
+    HW_GPS_SAM_M8Q              = 0x05,
+    HW_EKG_MAX30003             = 0x06
+} HARDWARE_ID_t;
+
+#define MSG_START_SYM               (0xADDE)
+#define MSG_START_SYM_STR           "\xDE\xAD"
+#define USB_PACKET_START_SYM        (0x0DD0FECA)
+#define USB_PACKET_START_SYM_STR    "\xCA\xFE\xD0\x0D"
 
 /** Packet that gets sent over USB to the host computer **/
 typedef struct __attribute__((__packed__)){
@@ -83,15 +94,10 @@ typedef struct __attribute__((__packed__)){
     uint32_t      data[2];   // size of the GP reg in RTC
 } SYSTEM_ERROR_t;
 
-typedef struct __attribute__((__packed__)){
-    uint16_t light;
-    uint16_t temp;
-} ENV_DATA_t;
-
-#define ENV_LOG_SIZE            (12)
+#define ENV_LOG_SIZE            (15)
 typedef struct __attribute__((__packed__)){
     DATA_HEADER_t header;
-    ENV_DATA_t    data[ENV_LOG_SIZE];
+    uint16_t      data[ENV_LOG_SIZE];
 } ENV_MSG_t;
 
 #define IMU_LOG_SIZE               (25)
