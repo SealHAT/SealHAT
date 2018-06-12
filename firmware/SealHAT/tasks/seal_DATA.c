@@ -114,7 +114,6 @@ void DATA_task(void* pvParameters)
     static DATA_TRANSMISSION_t usbPacket;
     uint32_t pageIndex;         /* Loop control for iterating over flash pages. */
     uint32_t numPagesWritten;   /* Total number of pages currently written to flash. */
-    uint32_t retVal;            /* USB return value for error checking/handling. */
 
     /* Receive and write data forever. */
     for(;;)
@@ -142,7 +141,7 @@ void DATA_task(void* pvParameters)
             while(pageIndex < numPagesWritten)
             {
                 /* Read a page of data from external flash. */
-                retVal = flash_io_read(&seal_flash_descriptor, usbPacket.data, PAGE_SIZE_LESS);
+                flash_io_read(&seal_flash_descriptor, usbPacket.data, PAGE_SIZE_LESS);
                 
                 // setup the packet header and CRC start value, then perform CRC32
                 usbPacket.startSymbol = USB_PACKET_START_SYM;
