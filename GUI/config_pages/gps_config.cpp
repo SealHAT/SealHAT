@@ -10,7 +10,7 @@ void maindialog::gps_setDefault()
 {
     // TODO: Are the rates in seconds?
     on_gps_timeclear_button_clicked();
-    configuration_settings.gps_config = {
+    configuration_settings.gpsConfig = {
         0,                                                         // active hours
         30,                                                        // move rate
         3600                                                       // rest rate
@@ -34,10 +34,10 @@ void maindialog::gps_hour_clicked()
     button->setProperty("clicked", !clicked);
         if(!clicked) {
             button->setStyleSheet("background-color:rgb(253,199,0);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");//background-color: rgb(172, 182, 193);
-            configuration_settings.gps_config.gps_activeHour |= 1 << button->property("button_shift").toInt();
+            configuration_settings.gpsConfig.activeHour |= 1 << button->property("button_shift").toInt();
         } else {
             button->setStyleSheet("background-color:rgb(202, 212, 223);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
-            configuration_settings.gps_config.gps_activeHour &= ~(1 << button->property("button_shift").toInt());
+            configuration_settings.gpsConfig.activeHour &= ~(1 << button->property("button_shift").toInt());
         }
 }
 
@@ -53,7 +53,7 @@ void maindialog::gps_timeTable_control()
 }
 
 void maindialog::gps_checkTimetoEnable(){
-    if(configuration_settings.gps_config.gps_activeHour){
+    if(configuration_settings.gpsConfig.activeHour){
         ui->gps_timeclear_button->setDisabled(false);
     }else{
 
@@ -102,7 +102,7 @@ void maindialog::gps_getloadData(){
         if(button->property("button_shift").isValid()) {
             shift_property = button->property("button_shift").toInt();
             bit_Mask = (0x01 << shift_property);
-            if((configuration_settings.gps_config.gps_activeHour&bit_Mask))
+            if((configuration_settings.gpsConfig.activeHour&bit_Mask))
             {
                       button->setProperty("clicked", true);
                       button->setStyleSheet("background-color:rgb(34,139,34)");
@@ -125,7 +125,7 @@ void maindialog::gps_disable_button(bool disable)
             button->setDisabled(disable);
             if(disable){
 
-                configuration_settings.gps_config = {
+                configuration_settings.gpsConfig = {
                     0,                                                         // active hours
                     30,                                                        // move rate
                     3600};                                                     // rest rate
@@ -144,14 +144,14 @@ void maindialog::on_gps_timeclear_button_clicked()
     {
         if(button->property("button_shift").isValid())
         {
-            configuration_settings.gps_config.gps_activeHour = 0;
+            configuration_settings.gpsConfig.activeHour = 0;
             button->setProperty("clicked", false);
             button->setStyleSheet("background-color:rgb(202, 212, 223);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
         }
     }
     //powerEstimation();
     //storageEstimation();
-    //qDebug << "gps time is :" << configuration_settings.gps_config.gps_activeHour << endl;
+    //qDebug << "gps time is :" << configuration_settings.gpsConfig.activeHour << endl;
 }
 
 

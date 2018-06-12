@@ -15,7 +15,7 @@ void maindialog::ekg_getloadData(){
         if(button->property("button_shift").isValid()) {
             shift_property = button->property("button_shift").toInt();
             bit_Mask = (0x01 << shift_property);
-            if((configuration_settings.ekg_config.ekg_activeHour&bit_Mask))
+            if((configuration_settings.ekgConfig.activeHour&bit_Mask))
             {
                       button->setProperty("clicked", true);
                       button->setStyleSheet("background-color:rgb(34,139,34)");
@@ -27,9 +27,9 @@ void maindialog::ekg_getloadData(){
         }
     }
 
-    uint16_t ekg_spsSelect = 512/(pow(2,(uint8_t)configuration_settings.ekg_config.ekg_sampleRate));
-        uint8_t ekg_gainSelect = configuration_settings.ekg_config.ekg_gain;
-        uint8_t ekg_lpFreqSelect = configuration_settings.ekg_config.ekg_lpFreq;
+    uint16_t ekg_spsSelect = 512/(pow(2,(uint8_t)configuration_settings.ekgConfig.rate));
+        uint8_t ekg_gainSelect = configuration_settings.ekgConfig.gain;
+        uint8_t ekg_lpFreqSelect = configuration_settings.ekgConfig.freq;
 
         if(ekg_spsSelect== 512)
         {
@@ -59,16 +59,16 @@ void maindialog::on_ekg_gainBox_currentIndexChanged(int index)
 {
     switch(index){
     case EKG_20_GAIN:
-        configuration_settings.ekg_config.ekg_gain = ECG_GAIN_20_V;
+        configuration_settings.ekgConfig.gain = ECG_GAIN_20_V;
         break;
     case EKG_40_GAIN:
-        configuration_settings.ekg_config.ekg_gain = ECG_GAIN_40_V;
+        configuration_settings.ekgConfig.gain = ECG_GAIN_40_V;
         break;
     case EKG_80_GAIN:
-        configuration_settings.ekg_config.ekg_gain = ECG_GAIN_80_V;
+        configuration_settings.ekgConfig.gain = ECG_GAIN_80_V;
         break;
     case EKG_160_GAIN:
-        configuration_settings.ekg_config.ekg_gain = ECG_GAIN_160_V;
+        configuration_settings.ekgConfig.gain = ECG_GAIN_160_V;
         break;
     }
 
@@ -93,7 +93,7 @@ void maindialog::on_ekg_SW_clicked()
 }
 
 void maindialog::ekg_checkTimetoEnable(){
-    if(configuration_settings.ekg_config.ekg_activeHour){
+    if(configuration_settings.ekgConfig.activeHour){
         ekg_Disable(false);
     }else{
         ekg_Disable(true);
@@ -111,7 +111,7 @@ void maindialog::ekg_setDefault()
     on_ekg_timeclear_button_clicked();
 
     size = sizeof(ECG_SAMPLE_RATE_t) + sizeof(ECG_GAIN_t) + sizeof(ECG_LOW_PASS_t);
-    configuration_settings.ekg_config = {
+    configuration_settings.ekgConfig = {
         0,                                          // active hours
         ECG_RATE_MIN_SPS,                           // sampling rate
         ECG_GAIN_20_V,                              // gain
@@ -132,10 +132,10 @@ void maindialog::ekg_hour_clicked()
     button->setProperty("clicked", !clicked);
         if(!clicked) {
             button->setStyleSheet("background-color:rgb(253,199,0);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
-            configuration_settings.ekg_config.ekg_activeHour |= 1 << button->property("button_shift").toInt();
+            configuration_settings.ekgConfig.activeHour |= 1 << button->property("button_shift").toInt();
         } else {
             button->setStyleSheet("background-color:rgb(202, 212, 223);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
-            configuration_settings.ekg_config.ekg_activeHour &= ~(1 << button->property("button_shift").toInt());
+            configuration_settings.ekgConfig.activeHour &= ~(1 << button->property("button_shift").toInt());
         }
 }
 
@@ -178,7 +178,7 @@ void maindialog::on_ekg_odr128_clicked()
 {
     int rmIndex1;
     int rmIndex2;
-        configuration_settings.ekg_config.ekg_sampleRate = ECG_RATE_MIN_SPS;
+        configuration_settings.ekgConfig.rate = ECG_RATE_MIN_SPS;
         rmIndex1 = ui->ekg_LPfreqBox->findText("100 Hz");
         if(rmIndex1 >= 0)
         {
@@ -200,7 +200,7 @@ void maindialog::on_ekg_odr256_clicked()
     int addIndex;
     int rmIndex2;
 
-        configuration_settings.ekg_config.ekg_sampleRate = ECG_RATE_MED_SPS;
+        configuration_settings.ekgConfig.rate = ECG_RATE_MED_SPS;
         addIndex = ui->ekg_LPfreqBox->findText("100 Hz");
         if(addIndex < 0)
         {
@@ -220,7 +220,7 @@ void maindialog::on_ekg_odr512_clicked()
     int addIndex1;
     int addIndex2;
 
-        configuration_settings.ekg_config.ekg_sampleRate = ECG_RATE_MAX_SPS;
+        configuration_settings.ekgConfig.rate = ECG_RATE_MAX_SPS;
         addIndex1 = ui->ekg_LPfreqBox->findText("100 Hz");
         addIndex2 = ui->ekg_LPfreqBox->findText("150 Hz");
         if(addIndex1 < 0)
@@ -241,7 +241,7 @@ void maindialog::ekg_disable_button(bool disable)
         {
             button->setDisabled(disable);
             if(disable){
-                configuration_settings.ekg_config.ekg_activeHour = 0;
+                configuration_settings.ekgConfig.activeHour = 0;
                 button->setProperty("clicked", false);
                 button->setStyleSheet("background-color:rgb(142, 152, 163);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
             }else{
@@ -255,16 +255,16 @@ void maindialog::on_ekg_LPfreqBox_currentIndexChanged(int index)
 {
     switch (index) {
     case EKG_LP_FREQ_BYPASS:
-        configuration_settings.ekg_config.ekg_lpFreq= ECG_LP_BYPASS;
+        configuration_settings.ekgConfig.freq= ECG_LP_BYPASS;
         break;
     case EKG_LP_FREQ_40HZ:
-        configuration_settings.ekg_config.ekg_lpFreq= ECG_LP_40_HZ;
+        configuration_settings.ekgConfig.freq= ECG_LP_40_HZ;
         break;
     case EKG_LP_FREQ_100HZ:
-        configuration_settings.ekg_config.ekg_lpFreq= ECG_LP_100_HZ;
+        configuration_settings.ekgConfig.freq= ECG_LP_100_HZ;
         break;
     case EKG_LP_FREQ_150HZ:
-        configuration_settings.ekg_config.ekg_lpFreq= ECG_LP_150_HZ;
+        configuration_settings.ekgConfig.freq= ECG_LP_150_HZ;
         break;
     }
 
@@ -279,7 +279,7 @@ void maindialog::on_ekg_timeclear_button_clicked()
     {
         if(button->property("button_shift").isValid())
         {
-            configuration_settings.ekg_config.ekg_activeHour = 0;
+            configuration_settings.ekgConfig.activeHour = 0;
             button->setProperty("clicked", false);
             button->setStyleSheet("background-color:rgb(202, 212, 223);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
         }

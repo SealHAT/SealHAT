@@ -10,7 +10,7 @@ void maindialog::temp_getloadData(){
         if(button->property("button_shift").isValid()) {
             shift_property = button->property("button_shift").toInt();
             bit_Mask = (0x01 << shift_property);
-            if((configuration_settings.temperature_config.temp_activeHour&bit_Mask))
+            if((configuration_settings.envConfig.activeHour&bit_Mask))
             {
                       button->setProperty("clicked", true);
                       button->setStyleSheet("background-color:rgb(34,139,34)");
@@ -22,7 +22,7 @@ void maindialog::temp_getloadData(){
         }
     }
 
-    QString temp_samplePeriod = QString::number(configuration_settings.temperature_config.temp_samplePeriod);
+    QString temp_samplePeriod = QString::number(configuration_settings.envConfig.period);
     ui->temp_samplePeriod->setText(temp_samplePeriod);
 
 }
@@ -45,10 +45,10 @@ void maindialog::on_temp_SW_clicked()
 
 void maindialog::temp_setDefault()
 {
-    configuration_settings.temperature_config.temp_samplePeriod = 1;
+    configuration_settings.envConfig.period = 1;
    on_temp_timeclear_button_clicked();
    ui->temp_samplePeriod->setText("1");
-   configuration_settings.temperature_config = {
+   configuration_settings.envConfig = {
        0,                                                       // active hours
        1                                                        // sample period
    };
@@ -69,7 +69,7 @@ void maindialog::temp_disable_button(bool disable)
         if(button->property("button_shift").isValid()) {
             button->setDisabled(disable);
             if(disable){
-                configuration_settings.temperature_config = {
+                configuration_settings.envConfig = {
                     0,                                                       // active hours
                     1                                                        // sample period
                 };
@@ -93,10 +93,10 @@ void maindialog::temp_hour_clicked()
     button->setProperty("clicked", !clicked);
         if(!clicked) {
             button->setStyleSheet("background-color:rgb(253,199,0);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
-            configuration_settings.temperature_config.temp_activeHour |= 1 << button->property("button_shift").toInt();
+            configuration_settings.envConfig.activeHour |= 1 << button->property("button_shift").toInt();
         } else {
             button->setStyleSheet("background-color:rgb(202, 212, 223);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
-            configuration_settings.temperature_config.temp_activeHour &= ~(1 << button->property("button_shift").toInt());
+            configuration_settings.envConfig.activeHour &= ~(1 << button->property("button_shift").toInt());
         }
 
 }
@@ -115,7 +115,7 @@ void maindialog::temp_timeTable_control()
 }
 
 void maindialog::temp_checkTimetoEnable(){
-    if(configuration_settings.temperature_config.temp_activeHour){
+    if(configuration_settings.envConfig.activeHour){
         temp_disable(false);
     }else{
         temp_disable(true);
@@ -134,7 +134,7 @@ void maindialog::on_temp_samplePeriod_editingFinished()
         ui->temp_warnLABEL->show();
 
     }else{
-        configuration_settings.temperature_config.temp_samplePeriod = (ui->temp_samplePeriod->text().toUInt());
+        configuration_settings.envConfig.period = (ui->temp_samplePeriod->text().toUInt());
         ui->temp_warnLABEL->hide();
     }
     generalEstimation();
@@ -146,7 +146,7 @@ void maindialog::on_temp_timeclear_button_clicked()
     {
         if(button->property("button_shift").isValid())
         {
-            configuration_settings.temperature_config.temp_activeHour = 0;
+            configuration_settings.envConfig.activeHour = 0;
             button->setProperty("clicked", false);
             button->setStyleSheet("background-color:rgb(202, 212, 223);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
         }

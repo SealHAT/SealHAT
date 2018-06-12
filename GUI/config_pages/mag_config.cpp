@@ -10,7 +10,7 @@ void maindialog::mag_getloadData(){
         if(button->property("button_shift").isValid()) {
             shift_property = button->property("button_shift").toInt();
             bit_Mask = (0x01 << shift_property);
-            if((configuration_settings.magnetometer_config.mag_activeHour&bit_Mask))
+            if((configuration_settings.magConfig.activeHour&bit_Mask))
             {
                       button->setProperty("clicked", true);
                       button->setStyleSheet("background-color:rgb(34,139,34)");
@@ -22,8 +22,8 @@ void maindialog::mag_getloadData(){
         }
     }
 
-    uint8_t mag_freqSelect = (configuration_settings.magnetometer_config.mag_mode%16)/4;
-    uint8_t mag_pwrSelect = (configuration_settings.magnetometer_config.mag_mode/16)%10;
+    uint8_t mag_freqSelect = (configuration_settings.magConfig.opMode%16)/4;
+    uint8_t mag_pwrSelect = (configuration_settings.magConfig.opMode/16)%10;
 
     ui->mag_pwrBox->setCurrentIndex(mag_pwrSelect);
     ui->mag_freqBox->setCurrentIndex(mag_freqSelect);
@@ -31,7 +31,7 @@ void maindialog::mag_getloadData(){
 }
 
 void maindialog::mag_checkTimetoEnable(){
-    if(configuration_settings.magnetometer_config.mag_activeHour){
+    if(configuration_settings.magConfig.activeHour){
         IMUmag_Disable(false);
     }else{
         IMUmag_Disable(true);
@@ -63,36 +63,36 @@ void maindialog::mag_dataCollect()
     {
         switch(freq){
         case MAG_FREQ_10HZ:
-            configuration_settings.magnetometer_config.mag_mode = MAG_LP_10_HZ;
+            configuration_settings.magConfig.opMode = MAG_LP_10_HZ;
         break;
         case MAG_FREQ_20HZ:
-            configuration_settings.magnetometer_config.mag_mode = MAG_LP_20_HZ;
+            configuration_settings.magConfig.opMode = MAG_LP_20_HZ;
         break;
         case MAG_FREQ_50HZ:
-            configuration_settings.magnetometer_config.mag_mode = MAG_LP_50_HZ;
+            configuration_settings.magConfig.opMode = MAG_LP_50_HZ;
         break;
         case MAG_FREQ_100HZ:
-            configuration_settings.magnetometer_config.mag_mode = MAG_LP_100_HZ;
+            configuration_settings.magConfig.opMode = MAG_LP_100_HZ;
         break;
         }
 
     }else if(pwrIndex == MAG_NORMAL){
             switch(freq){
             case MAG_FREQ_10HZ:
-                configuration_settings.magnetometer_config.mag_mode = MAG_NORM_10_HZ;
+                configuration_settings.magConfig.opMode = MAG_NORM_10_HZ;
             break;
             case MAG_FREQ_20HZ:
-                configuration_settings.magnetometer_config.mag_mode = MAG_NORM_20_HZ;
+                configuration_settings.magConfig.opMode = MAG_NORM_20_HZ;
             break;
             case MAG_FREQ_50HZ:
-                configuration_settings.magnetometer_config.mag_mode = MAG_NORM_50_HZ;
+                configuration_settings.magConfig.opMode = MAG_NORM_50_HZ;
             break;
             case MAG_FREQ_100HZ:
-                configuration_settings.magnetometer_config.mag_mode = MAG_NORM_100_HZ;
+                configuration_settings.magConfig.opMode = MAG_NORM_100_HZ;
             break;
             }
     }
-     //qDebug << "mag mode is 0x:" << QString::number(configuration_settings.magnetometer_config.mag_mode, 16) << endl;
+     //qDebug << "mag mode is 0x:" << QString::number(configuration_settings.magConfig.opMode, 16) << endl;
 }
 
 /*
@@ -129,7 +129,7 @@ void maindialog::mag_setDefault()
     ui->mag_pwrBox->setCurrentIndex(MAG_LP);
     ui->mag_freqBox->setCurrentIndex(MAG_FREQ_50HZ);
 
-    configuration_settings.magnetometer_config = {
+    configuration_settings.magConfig = {
               0,                                                                    // active hours
               MAG_LP_50_HZ                                                          // mode
               };
@@ -177,12 +177,12 @@ void maindialog::mag_hour_clicked()
 
         if(!clicked) {
             button->setStyleSheet("background-color:rgb(253,199,0);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
-            configuration_settings.magnetometer_config.mag_activeHour |= 1 << button->property("button_shift").toInt();
+            configuration_settings.magConfig.activeHour |= 1 << button->property("button_shift").toInt();
         } else {
             button->setStyleSheet("background-color:rgb(202, 212, 223);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
-            configuration_settings.magnetometer_config.mag_activeHour &= ~(1 << button->property("button_shift").toInt());
+            configuration_settings.magConfig.activeHour &= ~(1 << button->property("button_shift").toInt());
         }
-        qDebug() << "mag hours are "<< configuration_settings.magnetometer_config.mag_activeHour;
+        qDebug() << "mag hours are "<< configuration_settings.magConfig.activeHour;
 
 }
 
@@ -193,7 +193,7 @@ void maindialog::mag_disable_button(bool disable)
         if(button->property("button_shift").isValid()) {
             button->setDisabled(disable);
             if(disable){
-                configuration_settings.magnetometer_config.mag_activeHour = 0;
+                configuration_settings.magConfig.activeHour = 0;
                 button->setProperty("clicked", false);
                 button->setStyleSheet("background-color:rgb(142, 152, 163);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
             }else{
@@ -209,7 +209,7 @@ void maindialog::on_mag_timeclear_button_clicked()
     {
         if(button->property("button_shift").isValid())
         {
-            configuration_settings.magnetometer_config.mag_activeHour = 0;
+            configuration_settings.magConfig.activeHour = 0;
             button->setProperty("clicked", false);
             button->setStyleSheet("background-color:rgb(202, 212, 223);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
         }

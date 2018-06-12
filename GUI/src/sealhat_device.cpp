@@ -69,10 +69,14 @@ int SealHAT_device::sendData(QByteArray data)
 
 bool SealHAT_device::startStream()
 {
-    QByteArray data;            // for reading out temporary data
-    bool retval = false;        // return value
     const char streamCmd = STREAM_DATA;
+    QByteArray data;            // for reading out temporary data
+    bool            retval;     // return value
 
+    // set default return value
+    retval = false;
+
+    // get the current device configuration, so data is interpreted correctly
     getConfig();
 
     sealhat.setDataTerminalReady(true);
@@ -112,24 +116,24 @@ void SealHAT_device::stopStream() {
 
 bool SealHAT_device::download()
 {
+    const char streamCmd = DOWNLOAD_DATA;
+    bool            retval;     // return value
 
+    // set default return value
+    retval = false;
+
+    return retval;
 }
 
 bool SealHAT_device::getConfig()
 {
-    QByteArray data;            // for reading out temporary data
-    bool retval = false;        // return value
-    const char streamCmd = VERIFY_CONFIG;
+    const char      streamCmd = VERIFY_CONFIG;
+    QByteArray      data;       // for reading bytes out of serial
+    SYSTEM_CONFIG_t config;     // hold the device config packet once received
+    bool            retval;     // return value
 
-    // deserialialzation variables for header
-    quint16       startSym, size;
-    quint8        devID, seqNum;
-    quint32       timestamp;
-
-    // deserialialzation variables for settings
-    quint8  flashChipCnt, startDay, StartMonth, startHour, imuMode, imuScale, ekgRate, ekgGain, ekgLP;
-    quint16 startYear, imuThresh, imuDuration, imuSense, period;
-    quint32 activeHour, slowRate, fastRate;
+    // set default return value
+    retval = false;
 
     sealhat.setDataTerminalReady(true);
     if(sealhat.waitForReadyRead(800)) {
@@ -145,43 +149,12 @@ bool SealHAT_device::getConfig()
 
             // Attach the data stream to the clean_data array. Set to little endian.
             QDataStream stream(&data, QIODevice::ReadOnly);
-            stream.setByteOrder(QDataStream::LittleEndian);
 
-            stream >> startSym >> devID >> seqNum >> timestamp >> size;
-            if((startSym == MSG_START_SYM) && (devID == DEVICE_ID_CONFIG)) {
-                stream >> flashChipCnt >> startDay >> StartMonth >> startYear >> startHour;
-                devCfg.num_flash_chips = flashChipCnt;
-                devCfg.start_day = startDay;
-                devCfg.start_month = StartMonth;
-                devCfg.start_year = startYear;
-                devCfg.start_hour = startHour;
+            stream >> config;
 
-                stream >> activeHour >> imuScale >> imuMode >> imuThresh >> imuDuration >> imuSense;
-                devCfg.accelerometer_config.acc_activeHour = activeHour;
-                devCfg.accelerometer_config.acc_scale = (ACC_FULL_SCALE_t)imuScale;
-                devCfg.accelerometer_config.acc_mode = (ACC_OPMODE_t)imuMode;
-                devCfg.accelerometer_config.threshold = imuThresh;
-                devCfg.accelerometer_config.duration = imuDuration;
-                devCfg.accelerometer_config.sensitivity = imuSense;
-
-                stream >> activeHour >> imuMode;
-                devCfg.magnetometer_config.mag_activeHour = activeHour;
-                devCfg.magnetometer_config.mag_mode = (MAG_OPMODE_t)imuMode;
-
-                stream >> activeHour >> period;
-                devCfg.temperature_config.temp_activeHour = activeHour;
-                devCfg.temperature_config.temp_samplePeriod = period;
-
-                stream >> activeHour >> ekgRate >> ekgGain >> ekgLP;
-                devCfg.ekg_config.ekg_activeHour = activeHour;
-                devCfg.ekg_config.ekg_sampleRate = (ECG_SAMPLE_RATE_t)ekgRate;
-                devCfg.ekg_config.ekg_gain = (ECG_GAIN_t)ekgGain;
-                devCfg.ekg_config.ekg_lpFreq = (ECG_LOW_PASS_t)ekgLP;
-
-                stream >> activeHour >> fastRate >> slowRate;
-                devCfg.gps_config.gps_activeHour = activeHour;
-                devCfg.gps_config.gps_moveRate = fastRate;
-                devCfg.gps_config.gps_restRate = slowRate;
+            if((config.header.startSym == MSG_START_SYM) && (config.header.id == DEVICE_ID_CONFIG)) {
+                // TODO CRC32 check of the data
+                devCfg = config.sensorConfigs;
             }
 
             retval = true;
@@ -465,39 +438,158 @@ void SealHAT_device::handleError(QSerialPort::SerialPortError serialPortError)
     }
 }
 
-QDataStream& operator>>(QDataStream& stream, DATA_HEADER_t& data_header) {
-    quint32 temp_timestamp;
-    quint16 temp_startSym, temp_id, temp_msTime, temp_size;
+QDataStream& operator>>(QDataStream& stream, DATA_HEADER_t& header) {
+    quint32 time;
+    quint16 startSymbol, packetSize;
+    quint8  devID, seqNum;
+    stream.setByteOrder(QDataStream::LittleEndian);
 
-    stream >> temp_startSym
-           >> temp_id
-           >> temp_timestamp
-           >> temp_msTime
-           >> temp_size;
+    stream >> startSymbol >> devID >> seqNum >> time >> packetSize;
 
-    data_header.startSym  = (uint16_t)temp_startSym;
-    data_header.id        = (uint16_t)temp_id;
-    data_header.timestamp = (uint32_t)temp_timestamp;
-    //data_header.msTime    = (uint16_t)temp_msTime;
-    data_header.size    = (uint16_t)temp_size;
+    header.startSym    = (uint16_t)startSymbol;
+    header.id          = (uint8_t)devID;
+    header.packetCount = (uint8_t)seqNum;
+    header.timestamp   = (uint32_t)time;
+    header.size        = (uint16_t)packetSize;
 
     return stream;
 }
 
-QDataStream& operator>>(QDataStream& stream, DATA_TRANSMISSION_t& txData) {
-    quint32 temp_startSymbol;
-    quint32 temp_crc;
+QDataStream& operator>>(QDataStream& stream, ACC_CFG_t& accCfg)
+{
+    quint32 tmpActiveHours;
+    quint8  accScale, accMode, accSense;
+    quint16 accThresh, accDuration;
+    stream.setByteOrder(QDataStream::LittleEndian);
 
-    stream >> temp_startSymbol;
+    stream >> tmpActiveHours >> accScale >> accMode >> accThresh >> accDuration >> accSense;
 
-    for(int i=0;i<PAGE_SIZE_EXTRA; i++){
-        stream >> txData.data[i];
-    }
-
-    stream >> temp_crc;
-
-    txData.startSymbol = (uint32_t)temp_startSymbol;
-    txData.crc = (uint32_t)temp_crc;
+    accCfg.activeHour  = (uint32_t)tmpActiveHours;
+    accCfg.scale       = (ACC_FULL_SCALE_t)accScale;
+    accCfg.opMode      = (ACC_OPMODE_t)accMode;
+    accCfg.threshold   = (int16_t)accThresh;
+    accCfg.duration    = (int16_t)accDuration;
+    accCfg.sensitivity = (uint8_t)accSense;
 
     return stream;
 }
+
+QDataStream& operator>>(QDataStream& stream, MAG_CFG_t& magCfg)
+{
+    quint32 tmpActiveHours;
+    quint8  magMode;
+    stream.setByteOrder(QDataStream::LittleEndian);
+
+    stream >> tmpActiveHours >> magMode;
+
+    magCfg.activeHour = (uint32_t)tmpActiveHours;
+    magCfg.opMode     = (MAG_OPMODE_t)magMode;
+
+    return stream;
+}
+
+QDataStream& operator>>(QDataStream& stream, ENV_CFG_t& envCfg)
+{
+    quint32 tmpActiveHours;
+    quint16 envPeriod;
+    stream.setByteOrder(QDataStream::LittleEndian);
+
+    stream >> tmpActiveHours >> envPeriod;
+
+    envCfg.activeHour = (uint32_t)tmpActiveHours;
+    envCfg.period     = (uint16_t)envPeriod;
+
+    return stream;
+}
+
+QDataStream& operator>>(QDataStream& stream, GPS_CFG_t& gpsCfg)
+{
+    quint32 tmpActiveHours, gpsActiveRate, gpsIdleRate;
+    stream.setByteOrder(QDataStream::LittleEndian);
+
+    stream >> tmpActiveHours >> gpsActiveRate >> gpsIdleRate;
+
+    gpsCfg.activeHour = (uint32_t)tmpActiveHours;
+    gpsCfg.activeRate = (uint32_t)gpsActiveRate;
+    gpsCfg.idleRate   = (uint32_t)gpsIdleRate;
+
+    return stream;
+}
+
+QDataStream& operator>>(QDataStream& stream, MOD_CFG_t& modCfg)
+{
+    quint32 tmpActiveHours;
+    quint8  ekgRate, ekgGain, ekgFreq;
+    stream.setByteOrder(QDataStream::LittleEndian);
+
+    stream >> tmpActiveHours >> ekgRate >> ekgGain >> ekgFreq;
+
+    modCfg.activeHour = (uint32_t)tmpActiveHours;
+    modCfg.rate       = (ECG_SAMPLE_RATE_t)ekgRate;
+    modCfg.gain       = (ECG_GAIN_t)ekgGain;
+    modCfg.freq       = (ECG_LOW_PASS_t)ekgFreq;
+
+    return stream;
+}
+
+QDataStream& operator>>(QDataStream& stream, SENSOR_CONFIGS_t& sensorCfg)
+{
+    quint8    chipCount, startDay, startMonth, startHour;
+    quint16   startYear;
+    ACC_CFG_t tmpAcc;
+    MAG_CFG_t tmpMag;
+    ENV_CFG_t tmpEnv;
+    GPS_CFG_t tmpGPS;
+    MOD_CFG_t tmpEKG;
+    stream.setByteOrder(QDataStream::LittleEndian);
+
+    stream >> chipCount >> startDay >> startMonth >> startYear >> startHour
+           >> tmpAcc >> tmpMag >> tmpEnv >> tmpGPS >> tmpEKG;
+
+    sensorCfg.num_flash_chips = (uint8_t)chipCount;
+    sensorCfg.start_day       = (uint8_t)startDay;
+    sensorCfg.start_month     = (uint8_t)startMonth;
+    sensorCfg.start_year      = (uint16_t)startYear;
+    sensorCfg.start_hour      = (uint8_t)startHour;
+    sensorCfg.accConfig       = tmpAcc;
+    sensorCfg.magConfig       = tmpMag;
+    sensorCfg.envConfig       = tmpEnv;
+    sensorCfg.gpsConfig       = tmpGPS;
+    sensorCfg.ekgConfig       = tmpEKG;
+
+    return stream;
+}
+
+QDataStream& operator>>(QDataStream& stream, SYSTEM_CONFIG_t& sysCfg)
+{
+    DATA_HEADER_t    tempHeader;
+    SENSOR_CONFIGS_t tempSensorCfg;
+    quint32          tempCRC32;
+    stream.setByteOrder(QDataStream::LittleEndian);
+
+    stream >> tempHeader >> tempSensorCfg >> tempCRC32;
+
+    sysCfg.header        = tempHeader;
+    sysCfg.sensorConfigs = tempSensorCfg;
+    sysCfg.crc32         = (uint32_t)tempCRC32;
+
+    return stream;
+}
+
+//QDataStream& operator>>(QDataStream& stream, DATA_TRANSMISSION_t& txData) {
+//    quint32 temp_startSymbol;
+//    quint32 temp_crc;
+
+//    stream >> temp_startSymbol;
+
+//    for(int i=0;i<PAGE_SIZE_EXTRA; i++){
+//        stream >> txData.data[i];
+//    }
+
+//    stream >> temp_crc;
+
+//    txData.startSymbol = (uint32_t)temp_startSymbol;
+//    txData.crc = (uint32_t)temp_crc;
+
+//    return stream;
+//}

@@ -74,11 +74,11 @@ void SERIAL_task(void* pvParameters)
                             dataheader_init(&packet.header);
                             packet.header.id = DEVICE_ID_CONFIG;
                             packet.header.size = sizeof(SENSOR_CONFIGS_t) + sizeof(uint32_t);
-                            packet.config_settings = eeprom_data.config_settings;
+                            packet.sensorConfigs = eeprom_data.sensorConfigs;
 
                             // fill CRC32 of the packet
                             packet.crc32 = 0xFFFFFFFF;
-                            crc_sync_crc32(&CRC_0, (uint32_t*)&packet.config_settings, sizeof(SENSOR_CONFIGS_t)/sizeof(uint32_t), &packet.crc32);
+                            crc_sync_crc32(&CRC_0, (uint32_t*)&packet.sensorConfigs, sizeof(SENSOR_CONFIGS_t)/sizeof(uint32_t), &packet.crc32);
                             packet.crc32 ^= 0xFFFFFFFF;
 
                             timestamp_FillHeader(&packet.header);
@@ -202,7 +202,7 @@ CMD_RETURN_TYPES configure_sealhat_device()
 
     // check the packet with CRC32
     crc32_check = 0xFFFFFFFF;
-    crc_sync_crc32(&CRC_0, (uint32_t*)&tempConfigStruct.config_settings, sizeof(SENSOR_CONFIGS_t)/sizeof(uint32_t), &crc32_check);
+    crc_sync_crc32(&CRC_0, (uint32_t*)&tempConfigStruct.sensorConfigs, sizeof(SENSOR_CONFIGS_t)/sizeof(uint32_t), &crc32_check);
     crc32_check ^= 0xFFFFFFFF;
     packetOK = ((tempConfigStruct.header.id == DEVICE_ID_CONFIG) && (crc32_check == tempConfigStruct.crc32));
 
@@ -211,7 +211,7 @@ CMD_RETURN_TYPES configure_sealhat_device()
         hri_rtcmode0_write_COUNT_reg(RTC, tempConfigStruct.header.timestamp);
 
         /* Temp struct has passed the test and may become the real struct. */
-        eeprom_data.config_settings = tempConfigStruct.config_settings;
+        eeprom_data.sensorConfigs = tempConfigStruct.sensorConfigs;
 
         /* Save new configuration settings. */
         errVal = eeprom_save_configs(&eeprom_data);

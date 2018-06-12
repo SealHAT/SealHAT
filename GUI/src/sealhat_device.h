@@ -75,7 +75,7 @@ private slots:
 
 private:
      QSerialPort          sealhat;      // serial object for connecting to device
-     SENSOR_CONFIGS_t     devCfg; // current devic configuration
+     SENSOR_CONFIGS_t     devCfg;       // current devic configuration
      QTimer               pollTimer;    // timer to poll for incoming data
      QByteArray           in_data;      // Data from device before CRC checks
      QByteArray           clean_data;   // Data from device after CRC checks
@@ -83,7 +83,9 @@ private:
      QFile                rawDataLog;   // file to log raw data from device for debug
 };
 
-QDataStream& operator>>(QDataStream& stream, DATA_TRANSMISSION_t& txData);
-QDataStream& operator>>(QDataStream& stream, DATA_HEADER_t& data_header);
+QDataStream& operator>>(QDataStream& stream, DATA_HEADER_t& header);
+QDataStream& operator>>(QDataStream& stream, SENSOR_CONFIGS_t& sensorCfg);
+QDataStream& operator>>(QDataStream& stream, SYSTEM_CONFIG_t& sysCfg);
+//QDataStream& operator>>(QDataStream& stream, DATA_TRANSMISSION_t& txData);
 
 #endif // SEALHAT_DEVICE_H
