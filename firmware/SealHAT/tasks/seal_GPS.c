@@ -20,8 +20,8 @@ int32_t GPS_task_init(void *profile)
     int32_t err;    /* for catching API errors */
     
     // TODO - remove when EEPROM is configured
-    eeprom_data.config_settings.gps_config.gps_restRate = 75000; 
-    eeprom_data.config_settings.gps_config.gps_moveRate = 30000;
+    eeprom_data.sensorConfigs.gpsConfig.idleRate = 75000; 
+    eeprom_data.sensorConfigs.gpsConfig.activeRate = 30000;
 
     /* initialize the GPS module */
     gpio_set_pin_level(GPS_EXT_INT, false);
@@ -75,17 +75,17 @@ void GPS_task(void *pvParameters)
     
     (void)pvParameters;
     activehours = 0;
-    eeprom_data.config_settings.gps_config.gps_restRate = 75000;    // TODO remove after EEPROM is set
-    eeprom_data.config_settings.gps_config.gps_moveRate = 30000;    // TODO remove after EEPROM is set
+    eeprom_data.sensorConfigs.gpsConfig.idleRate = 75000;    // TODO remove after EEPROM is set
+    eeprom_data.sensorConfigs.gpsConfig.activeRate = 30000;    // TODO remove after EEPROM is set
     
     for(int i = 0; i < 24; i++) {   /* determine the amount of active hours per day */
-        activehours += (eeprom_data.config_settings.gps_config.gps_activeHour >> i) & 1;
+        activehours += (eeprom_data.sensorConfigs.gpsConfig.activeHour >> i) & 1;
     }
     activehours = 24; // TODO remove, testing only
     moveminutes = GPS_MAXMOVE / activehours;   /* determine the high-res time per hour */
     
     /* set the default sample rate */ // TODO: allow flexibility in message rate or fix to sample rate
-    samplerate = eeprom_data.config_settings.gps_config.gps_restRate;
+    samplerate = eeprom_data.sensorConfigs.gpsConfig.idleRate;
 
     /* update the maximum blocking time to current FIFO full time + <max sensor time> */
     xMaxBlockTime = pdMS_TO_TICKS(samplerate);	    // TODO calculate based on registers
@@ -148,7 +148,7 @@ void GPS_task(void *pvParameters)
                 
                 /* decrement the available high-res minutes and set the rate */
                 moveminutes--;
-                samplerate = eeprom_data.config_settings.gps_config.gps_moveRate;
+                samplerate = eeprom_data.sensorConfigs.gpsConfig.activeRate;
                 err = gps_setrate(samplerate) ? ERR_NO_CHANGE : ERR_NONE;
                 
                 /* if failure, try again. else save configurations and start a one minute timer */
@@ -172,7 +172,7 @@ void GPS_task(void *pvParameters)
                 gpio_set_pin_level(GPS_EXT_INT, true);
                 
                 /* revert the rate back to the resting rate */
-                samplerate = eeprom_data.config_settings.gps_config.gps_restRate;
+                samplerate = eeprom_data.sensorConfigs.gpsConfig.idleRate;
                 err = gps_setrate(samplerate) ? ERR_NO_CHANGE : ERR_NONE;
                 
                 /* try again if not successful */
