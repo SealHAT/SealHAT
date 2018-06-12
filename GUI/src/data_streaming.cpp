@@ -78,6 +78,7 @@ void maindialog::samplesReceived(QQueue<SensorSample>* q)
 
         if(streamOut.isOpen()) {
             streamOut.write((sample.get_csv() + "\n").toUtf8());
+            streamOut.flush();
         }
 
         q->removeFirst();

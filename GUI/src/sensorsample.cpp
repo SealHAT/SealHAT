@@ -24,6 +24,7 @@ QString SensorSample::get_csv()
     QString csv("");
     csv += this->get_typeStr();
     csv += QString(",");
+    csv += QString("%1,").arg(this->packetNumber);
     csv += this->timestamp.date().toString("dd.MM.yyyy");
     csv += QString(",");
     csv += this->timestamp.time().toString("hh:mm:ss.zzz");
@@ -100,7 +101,7 @@ QString SensorSample::get_typeStr()
                 break;
         case DEVICE_ID_SYSTEM         : value = QString("Err: invalid sensor type!");
                 break;
-        defualt : value = QString("Err: invalid sensor type!");
+        default : value = QString("Err: invalid sensor type!");
     };
     return value;
 }

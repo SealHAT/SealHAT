@@ -19,12 +19,17 @@ SealHAT_device::~SealHAT_device()
 
 bool SealHAT_device::connectToDevice(QString portName)
 {
-    QList<QSerialPortInfo> portList; // list of ports on the computer
     bool retval = false;
+    QSerialPortInfo portInfo;
 
-    portList = QSerialPortInfo::availablePorts();
+    // TODO: Gross. figure out how to pass in the port info, stored as QVariant in dropdown list
+    foreach(const QSerialPortInfo &serialPortInfo, QSerialPortInfo::availablePorts()) {
+        if(serialPortInfo.portName() == portName) {
+            portInfo = serialPortInfo;
+        }
+    }
 
-    sealhat.setPortName(portName);
+    sealhat.setPort(portInfo);
     if(sealhat.open(QSerialPort::ReadWrite) ) {
         sealhat.setBaudRate(QSerialPort::Baud115200);
         sealhat.setDataBits(QSerialPort::Data8);
@@ -41,7 +46,7 @@ bool SealHAT_device::connectToDevice(QString portName)
         rawDataLog.open(QIODevice::Truncate | QIODevice::WriteOnly);
     }
     else {
-        qDebug() << "Error opening " << portName;
+        qDebug() << "Error opening " << portName << " : " << sealhat.errorString();
     }
 
     return retval;
@@ -50,15 +55,11 @@ bool SealHAT_device::connectToDevice(QString portName)
 void SealHAT_device::disconnectFromDevice()
 {
     if(sealhat.isOpen()) {
-        if(sealhat.disconnect()) {
-            qDebug() << "Disconnected from device";
-            emit(sealhat_disconnected());
-        }
-        else {
-            qDebug() << "Failed to disconnect from device!";
-        }
+        sealhat.close();
+        emit(sealhat_disconnected());
     }
 
+    rawDataLog.close();
     pollTimer.stop();
     in_data.clear();
 }
@@ -75,7 +76,7 @@ void SealHAT_device::deserializeDataPackets()
     quint32       timestamp;        // timestamp from header
 
     int index = clean_data.indexOf(QByteArray(MSG_START_SYM_STR));
-    while((index >= 0) && (clean_data.size() > sizeof(DATA_HEADER_t))) {
+    while((index >= 0) && ((unsigned int)clean_data.size() > sizeof(DATA_HEADER_t))) {
         // remove any partial packets (should only happen in first read of a stream)
         clean_data.remove(0, index);
 
@@ -85,10 +86,16 @@ void SealHAT_device::deserializeDataPackets()
 
         stream >> startSym >> devID >> seqNum >> timestamp >> size;
 
-        parseSensorPackets(stream, devID, timestamp, seqNum, size);
+        if((unsigned int)clean_data.size() > (sizeof(DATA_HEADER_t) + size)) {
+            parseSensorPackets(stream, devID, timestamp, seqNum, size);
 
-        clean_data.remove(0, (size + sizeof(DATA_HEADER_t)));
-        index = clean_data.indexOf(QByteArray(MSG_START_SYM_STR));
+            clean_data.remove(0, (size + sizeof(DATA_HEADER_t)));
+            index = clean_data.indexOf(QByteArray(MSG_START_SYM_STR));
+        }
+        else {
+            qDebug() << "incomplete packet, leaving till next time";
+            index = -1;
+        }
     }
 
 }
@@ -300,7 +307,11 @@ void SealHAT_device::handleReadyRead()
         }
     }
 
+    // write raw data to the logging file
     rawDataLog.write(clean_data.data(), clean_data.size());
+    rawDataLog.flush();
+
+    // call the deserialize function
     this->deserializeDataPackets();
     emit(samplesReady(&data_q));
     pollTimer.start(5000);
