@@ -125,6 +125,7 @@ void GPS_task(void *pvParameters)
             if (GPS_NOTIFY_TXRDY & ulNotifyValue) {
                 /* keep the GPS awake until the interrupt is handled */
                 gpio_set_pin_level(GPS_EXT_INT, true);
+                os_sleep(pdMS_TO_TICKS(5));
 
                 /* copy the GPS FIFO over I2C */
                 err = gps_readfifo() ? ERR_TIMEOUT : ERR_NONE;
@@ -190,8 +191,8 @@ void GPS_task(void *pvParameters)
             }
         } else { /* there was no interrupt and the GPS has slept for one period */
             gpio_set_pin_level(GPS_EXT_INT, true);
-            os_sleep(5);
-            
+            os_sleep(pdMS_TO_TICKS(5));
+                 
             /* if it is the first wakeup */
             if (xMaxBlockTime == samplerate) {   
                 /* load fix settings and wait for a fix/FIFO interrupt */
@@ -256,14 +257,12 @@ int32_t GPS_log(GPS_MSG_t *msg, const int32_t ERR, const DEVICE_ERR_CODES_t ERR_
     if (ERR < 0) {
         /* if an error occurred with the FIFO, log the error */
         msg->header.id  |= ERR_CODES;
-        msg->header.size = 0;
-        logsize = sizeof(DATA_HEADER_t);
-    } else {
-        /* otherwise, extract the GPS data and log it */
-        logcount = gps_parsefifo(msg->log, GPS_LOG_SIZE);
-        msg->header.size = logcount * sizeof(gps_log_t);
-        logsize = sizeof(DATA_HEADER_t) + msg->header.size;
     }
+    
+    /* otherwise, extract the GPS data and log it */
+    logcount = gps_parsefifo(msg->log, GPS_LOG_SIZE);
+    msg->header.size = logcount * sizeof(gps_log_t);
+    logsize = sizeof(DATA_HEADER_t) + msg->header.size;
 
     /* write the message to flash */
     return ctrlLog_write((uint8_t*)msg, logsize);
