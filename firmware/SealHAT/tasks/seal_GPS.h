@@ -16,6 +16,7 @@
 #define GPS_TASK_PRI    (tskIDLE_PRIORITY + 3)
 #define GPS_MOVINGTIME  ()
 #define GPS_MAXMOVE     (120) /* maximum time in seconds to permit high resolution movement per day  */
+#define GPS_WAIT_TIME   (10000) /* time to wait in ms for a fix */
 
 typedef enum GPS_NOTIFY_VALS {
     GPS_NOTIFY_NONE     = 0x00000000,
