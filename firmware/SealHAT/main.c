@@ -41,13 +41,13 @@ int main(void)
 
     // start the ECG
     if(ECG_task_init() != ERR_NONE) {
-        while(1) {;}
+        gpio_set_pin_level(LED_RED, true);  // will never work if there is no device, shouldn't go into a while(1)
     }
 
     // GPS task init
-//     if(GPS_task_init(0) != ERR_NONE) {
-//         while(1) {;}
-//     }
+    if(GPS_task_init(0) != ERR_NONE) {
+        while(1) {;}
+    }
 
     // IMU task init.
     if(IMU_task_init(ACC_SCALE_2G, ACC_HR_50_HZ, MAG_LP_20_HZ) != ERR_NONE) {
