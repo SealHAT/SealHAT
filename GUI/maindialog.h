@@ -11,6 +11,7 @@
 #include <QDataStream>
 #include <QFile>
 #include <QByteArray>
+#include <QTextEdit>
 
 #include <QThread>
 #include <QSemaphore>
@@ -45,18 +46,6 @@ class maindialog : public QDialog
     //Time button mask and setting
     uint8_t shift_property;
     uint32_t bit_Mask;
-
-
-    typedef enum {
-        INVERSE_INVERSE_DEVICE_ID_ENVIRONMENTAL     = 0x1000,
-        INVERSE_DEVICE_ID_LIGHT                     = 0x2000,
-        INVERSE_DEVICE_ID_TEMPERATURE               = 0x3000,
-        INVERSE_DEVICE_ID_ACCELEROMETER             = 0x4000,
-        INVERSE_DEVICE_ID_MAGNETIC_FIELD            = 0x5000,
-        INVERSE_DEVICE_ID_GPS               = 0x9000,
-        INVERSE_DEVICE_ID_EKG               = 0xA000,
-    } INVERSE_DEVICE_ID_t;
-
 
     /*************
      * GUI PAGES *
@@ -152,8 +141,12 @@ public:
     void centerDialog();
     ~maindialog();
 
+private:
+    // helper function to write to stream boxes
+    void writeToStreamBox(QTextEdit* textBox, QString str);
+
 private slots:
-    void serialReceived(QByteArray data);
+    void samplesReceived(QQueue<SensorSample>* q);
 
 //Page switch
     void on_ekgButton_clicked();
@@ -310,20 +303,13 @@ private slots:
 
 //RX side of GUI
     void on_RXstream_ReScanButton_clicked();
-    void data_deserialize(QByteArray& byteArray);
 
 //Data Sample Stream
     void on_captureDatatoFile_button_clicked();
     void on_startStream_button_clicked();
-    void recognizeData(DATA_HEADER_t *header);
-    void searchingHeader();
-    void recognizeData_fromBuffer();
-    void header_deserialize(QByteArray& byteArray);
-    void headerAnalyze_display();
 
     void on_sendConfigsButton_clicked();
     void on_configureHomeButton_clicked();
-    void closeFile_saving();
 
     //void on_batterySizeText_returnPressed();
 
@@ -350,15 +336,6 @@ private slots:
         QString gps_DataBuffer;
         QString ekg_DataBuffer;
 
-        QFile acc_file;
-        QFile mag_file;
-        QFile ekg_file;
-        QFile temp_file;
-        QFile light_file;
-        QFile gps_file;
-
-        //bool data_to_file_available;
-
         QString microSerial_port_name;
         int pos;
         bool microSerial_is_available;
@@ -371,7 +348,5 @@ private slots:
 };
 
 QDataStream& operator<<(QDataStream& stream, const SENSOR_CONFIGS& configs);
-QDataStream& operator>>(QDataStream& stream, DATA_TRANSMISSION_t& txData);
-QDataStream& operator>>(QDataStream& stream, DATA_HEADER_t& data_header);
 
 #endif // MAINDIALOG_H

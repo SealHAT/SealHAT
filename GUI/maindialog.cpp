@@ -99,7 +99,7 @@ void maindialog::labels_hide()
  **/
 maindialog::~maindialog()
 {
-    closeFile_saving();
+    streamOut.close();
     delete microSerial;
     delete ui;
 }
@@ -144,35 +144,6 @@ void maindialog::on_streamDataButton_clicked()
     on_RXstream_ReScanButton_clicked();
     this->centerDialog();
 }
-
-void maindialog::closeFile_saving()
-{
-    acc_file.close();
-    mag_file.close();
-    gps_file.close();
-    ekg_file.close();
-    temp_file.close();
-    light_file.close();
-}
-
-
-/*qDebug() << "Number of availabel ports: " << QSerialPortInfo::availablePorts().
- *
- * length();
-foreach(const QSerialPortInfo &serialPortInfo, QSerialPortInfo::availablePorts()){
-    qDebug() << "Has Vender ID: " << serialPortInfo.hasVendorIdentifier();
-    if(serialPortInfo.hasVendorIdentifier()){
-        qDebug() << "Vender ID: " << serialPortInfo.vendorIdentifier();
-    }
-    qDebug() << "Has Product ID: " << serialPortInfo.hasProductIdentifier();
-    if(serialPortInfo.hasVendorIdentifier()){
-        qDebug() << "Product ID: " << serialPortInfo.productIdentifier();
-    }
-     * Has Vender ID:  true
-     *  Vender ID:  1003
-     * Has Product ID:  true
-     * Product ID:  9220
-}*/
 
 void maindialog::on_batterySizeText_selectionChanged()
 {

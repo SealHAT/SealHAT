@@ -8,6 +8,7 @@
 #include <QDataStream>
 #include <QSerialPort>
 #include <QSerialPortInfo>
+#include <QFile>
 #include "seal_Types.h"
 #include "sensorsample.h"
 
@@ -37,13 +38,21 @@ private:
     // takes header info and stream to create sensor packets
     void parseSensorPackets(QDataStream& stream, quint8 device, quint32 time, quint8 seqNum, quint16 length);
 
+    /**** Harware specific parsing functions ****/
+    void parse_si7051(QDataStream& stream, quint32 time, quint8 seqNum, quint16 length);
+    void parse_max44009(QDataStream& stream, quint32 time, quint8 seqNum, quint16 length);
+    void parse_lsm303agr_acc(QDataStream& stream, quint32 time, quint8 seqNum, quint16 length);
+    void parse_lsm303agr_mag(QDataStream& stream, quint32 time, quint8 seqNum, quint16 length);
+    void parse_samm8q(QDataStream& stream, quint32 time, quint8 seqNum, quint16 length);
+    void parse_max30003(QDataStream& stream, quint32 time, quint8 seqNum, quint16 length);
+
 signals:
     // signal emitted to indicate the device has connected
     void sealhat_connected();
     // signal emitted to indicate the device has disconnected
     void sealhat_disconnected();
     // signal emitted with data from the device
-    void data_in(QByteArray data);
+    void samplesReady(QQueue<SensorSample>* q);
 
 public slots:
     // disconnect from the device
@@ -59,8 +68,11 @@ private:
      QTimer               pollTimer;    // timer to poll for incoming data
      QByteArray           in_data;      // Data from device before CRC checks
      QByteArray           clean_data;   // Data from device after CRC checks
-//     QDataStream*         stream;       // data stream to deserialize the cleaned data
      QQueue<SensorSample> data_q;       // queue of processed sensor readings
+     QFile                rawDataLog;   // file to log raw data from device for debug
 };
+
+QDataStream& operator>>(QDataStream& stream, DATA_TRANSMISSION_t& txData);
+QDataStream& operator>>(QDataStream& stream, DATA_HEADER_t& data_header);
 
 #endif // SEALHAT_DEVICE_H

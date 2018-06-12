@@ -33,51 +33,64 @@ void maindialog::on_startStream_button_clicked()
 
                 ui->startStream_button->setText("STOP STREAMING");
                 device.sendData("so");
-                connect(&device, &SealHAT_device::data_in, this, &maindialog::serialReceived);
+                connect(&device, &SealHAT_device::samplesReady, this, &maindialog::samplesReceived);
             }
         }
         else {
             qDebug() << "No ports available!";
         }
     }else{
+        disconnect(&device, &SealHAT_device::samplesReady, this, &maindialog::samplesReceived);
         device.disconnectFromDevice();
         ui->startStream_button->setText("START STREAMING");
     }
 }
 
-// Slot to receive data from the serial device asyncronously
-void maindialog::serialReceived(QByteArray data)
+void maindialog::writeToStreamBox(QTextEdit* textBox, QString str)
 {
-    dataBuffer.append(data);
+    if(textBox->toPlainText().size() > 1000) {
+        textBox->clear();
+    }
 
-    recognizeData_fromBuffer();
+    textBox->moveCursor(QTextCursor::End);
+    textBox->insertPlainText(str);
+}
 
-    headerAnalyze_display();
+// Slot to receive data from the serial device asyncronously
+void maindialog::samplesReceived(QQueue<SensorSample>* q)
+{
+    while(!q->empty()) {
+        SensorSample sample = q->first();
 
-    if(streamOut.isOpen()) {
-        streamOut.write(data);
-        qDebug() << "size of the stream output file is "<< streamOut.size();
+        switch(sample.get_type()) {
+            case DEVICE_ID_LIGHT          : writeToStreamBox(ui->light_streamText, sample.get_csv()+"\n"); break;
+            case DEVICE_ID_TEMPERATURE    : writeToStreamBox(ui->temp_streamText, sample.get_csv()+"\n"); break;
+            case DEVICE_ID_ACCELEROMETER  : writeToStreamBox(ui->xcel_streamText, sample.get_csv()+"\n"); break;
+            case DEVICE_ID_MAGNETIC_FIELD : writeToStreamBox(ui->mag_streamText, sample.get_csv()+"\n"); break;
+            case DEVICE_ID_GPS            : writeToStreamBox(ui->gps_streamText, sample.get_csv()+"\n"); break;
+            case DEVICE_ID_EKG            : writeToStreamBox(ui->ekg_streamText, sample.get_csv()+"\n"); break;
+            case DEVICE_ID_GYROSCOPE      : qDebug() << "Err: no gyro sensor available"; break;
+            case DEVICE_ID_PRESSURE       : qDebug() << "Err: no pressure sensor available"; break;
+            case DEVICE_ID_DEPTH          : qDebug() << "Err: no depth sensor available"; break;
+            case DEVICE_ID_SYSTEM         : qDebug() << "Err: no SYS code yet"; break;
+            default : qDebug() << QString("Err: invalid sensor (%1)").arg(sample.get_type());
+        };
+
+        if(streamOut.isOpen()) {
+            streamOut.write((sample.get_csv() + "\n").toUtf8());
+        }
+
+        q->removeFirst();
     }
 }
 
-/**************************************************************
- * FUNCTION: on_captureDatatoFile_button_clicked
- * ------------------------------------------------------------
- *  This function gets called whenever the "Capture to File"
- *  button is clicked. It will open a new file and store the data
- *  the same time data streaming from microcontroller.
- *
- *  Parameters: None
- *
- *  Returns: void
- **************************************************************/
 void maindialog::on_captureDatatoFile_button_clicked()
 {
 
     QString filename = QFileDialog::getSaveFileName(this,
                                                     tr("Choose a file to save data to"),
-                                                    QDir::homePath(),
-                                                    tr("CSV (*.csv);;Data File (*.dat);;Text (*.txt);;All (*.*)")
+                                                    QDir::currentPath(),
+                                                    tr("All (*.*);;CSV (*.csv);;Data File (*.dat);;Text (*.txt)")
                                                     );
 
     streamOut.setFileName(filename);

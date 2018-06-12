@@ -24,7 +24,6 @@ SOURCES += main.cpp\
     config_pages/mag_config.cpp \
     config_pages/temp_config.cpp \
     config_pages/xcel_config.cpp \
-    src/usb_receiving_serialization.cpp \
     src/usb_sending_serialization.cpp \
     src/usb_serial_port_setup.cpp \
     src/sealhat_device.cpp \
