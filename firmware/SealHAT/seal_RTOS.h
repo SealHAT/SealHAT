@@ -69,7 +69,7 @@ typedef enum {
 } SYSTEM_EVENT_FLAGS_t;
 
 typedef struct __attribute__((__packed__)){
-    SENSOR_CONFIGS config_settings;
+    SENSOR_CONFIGS_t config_settings;
     uint32_t       current_flash_addr;
     uint8_t        current_flash_chip;
 } EEPROM_STORAGE_t;
@@ -82,7 +82,7 @@ typedef struct __attribute__((__packed__)){
 
 extern EventGroupHandle_t   xSYSEVENTS_handle;  // event group
 extern EEPROM_STORAGE_t     eeprom_data;        //struct containing sensor and SealHAT configurations
- 
+
 void vApplicationIdleHook(void);
 
 void vApplicationStackOverflowHook(TaskHandle_t xTask, signed char *pcTaskName);

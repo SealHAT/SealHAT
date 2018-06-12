@@ -22,8 +22,6 @@ typedef enum {
     NO_ERROR        = 0,
 } CMD_RETURN_TYPES;
 
-extern char READY_TO_RECEIVE;
-
 /*************************************************************
  * FUNCTION: configure_device_state()
  * -----------------------------------------------------------
