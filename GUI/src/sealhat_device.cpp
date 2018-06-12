@@ -181,7 +181,7 @@ void SealHAT_device::parse_lsm303agr_acc(QDataStream& stream, quint32 time, quin
     QDateTime     timestamp;
     unsigned int  i, j, shift, msPeriod;
     int           sampleCount = length / SAMPLE_SIZE;
-    quint16       accX, accY, accZ;
+    qint16        accX, accY, accZ;
     SENSOR_DATA_t valSI;
 
     switch(CURRENT_MODE & ACC_POWER_MODE_MASK) {
@@ -235,7 +235,7 @@ void SealHAT_device::parse_lsm303agr_mag(QDataStream& stream, quint32 time, quin
     QDateTime     timestamp;
     unsigned int  msPeriod;
     int           sampleCount = length / SAMPLE_SIZE;
-    quint16       magX, magY, magZ;
+    qint16        magX, magY, magZ;
     SENSOR_DATA_t valSI;
 
     switch(MAG_RATE & MAG_RATE_MASK) {
