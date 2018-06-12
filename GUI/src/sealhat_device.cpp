@@ -5,9 +5,7 @@
 
 SealHAT_device::SealHAT_device(QObject *parent) : QObject(parent)
 {
-    connect(&sealhat, &QSerialPort::readyRead, this, &SealHAT_device::handleReadyRead);
-    connect(&sealhat, &QSerialPort::errorOccurred, this, &SealHAT_device::handleError);
-    connect(&pollTimer, &QTimer::timeout, this, &SealHAT_device::handleTimeout);
+    connect(&sealhat, &QSerialPort::errorOccurred, this, &SealHAT_device::handleError);    
 }
 
 SealHAT_device::~SealHAT_device()
@@ -35,8 +33,8 @@ bool SealHAT_device::connectToDevice(QString portName)
         sealhat.setDataBits(QSerialPort::Data8);
         sealhat.setParity(QSerialPort::NoParity);
         sealhat.setStopBits(QSerialPort::OneStop);
-        sealhat.setDataTerminalReady(true);
-        sealhat.setRequestToSend(true);
+        sealhat.setDataTerminalReady(false);
+        sealhat.setRequestToSend(false);
 
         pollTimer.start(5000);
         retval = true;
@@ -67,6 +65,144 @@ void SealHAT_device::disconnectFromDevice()
 int SealHAT_device::sendData(QByteArray data)
 {
     return sealhat.write(data);
+}
+
+bool SealHAT_device::startStream()
+{
+    QByteArray data;            // for reading out temporary data
+    bool retval = false;        // return value
+    const char streamCmd = STREAM_DATA;
+
+    getConfig();
+
+    sealhat.setDataTerminalReady(true);
+    if(sealhat.waitForReadyRead(800)) {
+        data += sealhat.readAll();
+        if(data.contains(USB_TEXT_ADVENTURE_MENU)) {
+            qDebug() << "received menu, starting stream";
+            sealhat.write(&streamCmd);
+            connect(&pollTimer, &QTimer::timeout, this, &SealHAT_device::handleTimeout);
+            connect(&sealhat, &QSerialPort::readyRead, this, &SealHAT_device::handleReadyRead);
+            retval = true;
+        }
+        else {
+            qDebug() << "No Menu Received";
+        }
+    }
+    else {
+        qDebug() << "No data received from " << sealhat.portName();
+    }
+
+    return retval;
+}
+
+void SealHAT_device::stopStream() {
+    const char streamCmd = STREAM_DATA;
+
+    if(sealhat.isOpen()) {
+        sealhat.write(&streamCmd);
+        disconnect(&pollTimer, &QTimer::timeout, this, &SealHAT_device::handleTimeout);
+        disconnect(&sealhat, &QSerialPort::readyRead, this, &SealHAT_device::handleReadyRead);
+    }
+    in_data.clear();
+    clean_data.clear();
+    sealhat.clear();
+    sealhat.setDataTerminalReady(false);
+}
+
+bool SealHAT_device::download()
+{
+
+}
+
+bool SealHAT_device::getConfig()
+{
+    QByteArray data;            // for reading out temporary data
+    bool retval = false;        // return value
+    const char streamCmd = VERIFY_CONFIG;
+
+    // deserialialzation variables for header
+    quint16       startSym, size;
+    quint8        devID, seqNum;
+    quint32       timestamp;
+
+    // deserialialzation variables for settings
+    quint8  flashChipCnt, startDay, StartMonth, startHour, imuMode, imuScale, ekgRate, ekgGain, ekgLP;
+    quint16 startYear, imuThresh, imuDuration, imuSense, period;
+    quint32 activeHour, slowRate, fastRate;
+
+    sealhat.setDataTerminalReady(true);
+    if(sealhat.waitForReadyRead(800)) {
+        data += sealhat.readAll();
+        if(data.contains(USB_TEXT_ADVENTURE_MENU)) {
+            qDebug() << "received menu, getting config";
+
+            // clear data and send the verify settings command
+            data.clear();
+            sealhat.write(&streamCmd);
+            sealhat.waitForReadyRead(1000);
+            data = sealhat.readAll();
+
+            // Attach the data stream to the clean_data array. Set to little endian.
+            QDataStream stream(&data, QIODevice::ReadOnly);
+            stream.setByteOrder(QDataStream::LittleEndian);
+
+            stream >> startSym >> devID >> seqNum >> timestamp >> size;
+            if((startSym == MSG_START_SYM) && (devID == DEVICE_ID_CONFIG)) {
+                stream >> flashChipCnt >> startDay >> StartMonth >> startYear >> startHour;
+                devCfg.num_flash_chips = flashChipCnt;
+                devCfg.start_day = startDay;
+                devCfg.start_month = StartMonth;
+                devCfg.start_year = startYear;
+                devCfg.start_hour = startHour;
+
+                stream >> activeHour >> imuScale >> imuMode >> imuThresh >> imuDuration >> imuSense;
+                devCfg.accelerometer_config.acc_activeHour = activeHour;
+                devCfg.accelerometer_config.acc_scale = (ACC_FULL_SCALE_t)imuScale;
+                devCfg.accelerometer_config.acc_mode = (ACC_OPMODE_t)imuMode;
+                devCfg.accelerometer_config.threshold = imuThresh;
+                devCfg.accelerometer_config.duration = imuDuration;
+                devCfg.accelerometer_config.sensitivity = imuSense;
+
+                stream >> activeHour >> imuMode;
+                devCfg.magnetometer_config.mag_activeHour = activeHour;
+                devCfg.magnetometer_config.mag_mode = (MAG_OPMODE_t)imuMode;
+
+                stream >> activeHour >> period;
+                devCfg.temperature_config.temp_activeHour = activeHour;
+                devCfg.temperature_config.temp_samplePeriod = period;
+
+                stream >> activeHour >> ekgRate >> ekgGain >> ekgLP;
+                devCfg.ekg_config.ekg_activeHour = activeHour;
+                devCfg.ekg_config.ekg_sampleRate = (ECG_SAMPLE_RATE_t)ekgRate;
+                devCfg.ekg_config.ekg_gain = (ECG_GAIN_t)ekgGain;
+                devCfg.ekg_config.ekg_lpFreq = (ECG_LOW_PASS_t)ekgLP;
+
+                stream >> activeHour >> fastRate >> slowRate;
+                devCfg.gps_config.gps_activeHour = activeHour;
+                devCfg.gps_config.gps_moveRate = fastRate;
+                devCfg.gps_config.gps_restRate = slowRate;
+            }
+
+            retval = true;
+        }
+        else {
+            qDebug() << "No Menu Received";
+        }
+    }
+    else {
+        qDebug() << "No data received from " << sealhat.portName();
+    }
+
+    sealhat.setDataTerminalReady(true);
+    sealhat.clear();
+
+    return retval;
+}
+
+bool SealHAT_device::sendConfig()
+{
+
 }
 
 void SealHAT_device::deserializeDataPackets()
@@ -277,8 +413,7 @@ void SealHAT_device::handleReadyRead()
     static const int dataAndCRC = (PAGE_SIZE_LESS + sizeof(int32_t));
     in_data.append(sealhat.readAll());
 
-    if(in_data.contains("(c)onfigure, (r)etrieve data, (s)tream data")
-            || in_data.contains("stream (o)nly, (l)og to flash only, (b)oth") ) {
+    if(in_data.contains(USB_TEXT_ADVENTURE_MENU)) {
         qDebug() << "recieved menu: " << in_data.data();
         in_data.clear();
     }

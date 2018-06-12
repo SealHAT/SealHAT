@@ -11,7 +11,6 @@ void maindialog::gps_setDefault()
     // TODO: Are the rates in seconds?
     on_gps_timeclear_button_clicked();
     configuration_settings.gps_config = {
-        {MSG_START_SYM, DEVICE_ID_GPS, 0, 0, sizeof(uint32_t)*3},  // header
         0,                                                         // active hours
         30,                                                        // move rate
         3600                                                       // rest rate
@@ -127,7 +126,6 @@ void maindialog::gps_disable_button(bool disable)
             if(disable){
 
                 configuration_settings.gps_config = {
-                    {MSG_START_SYM, DEVICE_ID_GPS, 0, 0, sizeof(uint32_t)*3},  // header
                     0,                                                         // active hours
                     30,                                                        // move rate
                     3600};                                                     // rest rate

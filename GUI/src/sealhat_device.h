@@ -25,6 +25,16 @@ public:
     bool connectToDevice(QString portName);
     // enqueue data to send
     int sendData(QByteArray data);
+    // start streaming data over USB
+    bool startStream();
+    // Stop USB streaming
+    void stopStream();
+    // start a flash download over USB
+    bool download();
+    // get the current device configuration
+    bool getConfig();
+    // send configuration to the device
+    bool sendConfig();
 
 
     // check how many sensor samples are ready for consumption
@@ -36,15 +46,15 @@ private:
     // parses the data in the clean_data array to find data headers
     void deserializeDataPackets();
     // takes header info and stream to create sensor packets
-    void parseSensorPackets(QDataStream& stream, quint8 device, quint32 time, quint8 seqNum, quint16 length);
+    void parseSensorPackets(QDataStream& startStream, quint8 device, quint32 time, quint8 seqNum, quint16 length);
 
     /**** Harware specific parsing functions ****/
-    void parse_si7051(QDataStream& stream, quint32 time, quint8 seqNum, quint16 length);
-    void parse_max44009(QDataStream& stream, quint32 time, quint8 seqNum, quint16 length);
-    void parse_lsm303agr_acc(QDataStream& stream, quint32 time, quint8 seqNum, quint16 length);
-    void parse_lsm303agr_mag(QDataStream& stream, quint32 time, quint8 seqNum, quint16 length);
-    void parse_samm8q(QDataStream& stream, quint32 time, quint8 seqNum, quint16 length);
-    void parse_max30003(QDataStream& stream, quint32 time, quint8 seqNum, quint16 length);
+    void parse_si7051(QDataStream& startStream, quint32 time, quint8 seqNum, quint16 length);
+    void parse_max44009(QDataStream& startStream, quint32 time, quint8 seqNum, quint16 length);
+    void parse_lsm303agr_acc(QDataStream& startStream, quint32 time, quint8 seqNum, quint16 length);
+    void parse_lsm303agr_mag(QDataStream& startStream, quint32 time, quint8 seqNum, quint16 length);
+    void parse_samm8q(QDataStream& startStream, quint32 time, quint8 seqNum, quint16 length);
+    void parse_max30003(QDataStream& startStream, quint32 time, quint8 seqNum, quint16 length);
 
 signals:
     // signal emitted to indicate the device has connected
@@ -65,6 +75,7 @@ private slots:
 
 private:
      QSerialPort          sealhat;      // serial object for connecting to device
+     SENSOR_CONFIGS_t     devCfg; // current devic configuration
      QTimer               pollTimer;    // timer to poll for incoming data
      QByteArray           in_data;      // Data from device before CRC checks
      QByteArray           clean_data;   // Data from device after CRC checks

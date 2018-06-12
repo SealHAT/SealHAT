@@ -49,7 +49,6 @@ void maindialog::temp_setDefault()
    on_temp_timeclear_button_clicked();
    ui->temp_samplePeriod->setText("1");
    configuration_settings.temperature_config = {
-       {MSG_START_SYM, DEVICE_ID_LIGHT, 0, 0, sizeof(uint16_t)},// header data
        0,                                                       // active hours
        1                                                        // sample period
    };
@@ -71,7 +70,6 @@ void maindialog::temp_disable_button(bool disable)
             button->setDisabled(disable);
             if(disable){
                 configuration_settings.temperature_config = {
-                    {MSG_START_SYM, DEVICE_ID_LIGHT, 0, 0, sizeof(uint16_t)},// header data
                     0,                                                       // active hours
                     1                                                        // sample period
                 };

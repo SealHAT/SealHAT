@@ -130,7 +130,6 @@ void maindialog::mag_setDefault()
     ui->mag_freqBox->setCurrentIndex(MAG_FREQ_50HZ);
 
     configuration_settings.magnetometer_config = {
-              {MSG_START_SYM, DEVICE_ID_MAGNETIC_FIELD, 0, 0, sizeof(MAG_OPMODE_t)},// header
               0,                                                                    // active hours
               MAG_LP_50_HZ                                                          // mode
               };

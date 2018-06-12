@@ -171,7 +171,6 @@ void maindialog::xcel_setDefault()
     uint16_t size = sizeof(ACC_FULL_SCALE_t) + sizeof(ACC_OPMODE_t) + 2*sizeof(uint8_t) + sizeof(uint16_t);
 
     configuration_settings.accelerometer_config = {
-        {MSG_START_SYM, DEVICE_ID_ACCELEROMETER, 0, 0, size},   // header
         0,                                                      // active hours
         ACC_SCALE_2G,                                           // scale
         ACC_HR_50_HZ,                                           // mode

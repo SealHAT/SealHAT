@@ -112,7 +112,6 @@ void maindialog::ekg_setDefault()
 
     size = sizeof(ECG_SAMPLE_RATE_t) + sizeof(ECG_GAIN_t) + sizeof(ECG_LOW_PASS_t);
     configuration_settings.ekg_config = {
-        {MSG_START_SYM,DEVICE_ID_EKG, 0, 0, size},  // header
         0,                                          // active hours
         ECG_RATE_MIN_SPS,                           // sampling rate
         ECG_GAIN_20_V,                              // gain
