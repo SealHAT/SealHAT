@@ -161,7 +161,6 @@ typedef struct{
 
 typedef struct __attribute__((__packed__)){
     uint8_t              num_flash_chips;      // number of flash chips installed on device
-    uint32_t             StartDateTime;        // Start time in seconds since epoch (1970)
 
     // day the device should begin data collection
     uint8_t              start_day;            // range from 1 to 28/29/30/31
