@@ -80,10 +80,10 @@ int32_t CTRL_task_init(void)
     time.sec  = 50;
 
     // TODO enforce start date beyond current date
-    RTC_ALARM.cal_alarm.datetime.date.year  = eeprom_data.config_settings.start_year;
-    RTC_ALARM.cal_alarm.datetime.date.month = eeprom_data.config_settings.start_month;
-    RTC_ALARM.cal_alarm.datetime.date.day   = eeprom_data.config_settings.start_day;
-    RTC_ALARM.cal_alarm.datetime.time.hour  = eeprom_data.config_settings.start_hour;
+    RTC_ALARM.cal_alarm.datetime.date.year  = eeprom_data.sensorConfigs.start_year;
+    RTC_ALARM.cal_alarm.datetime.date.month = eeprom_data.sensorConfigs.start_month;
+    RTC_ALARM.cal_alarm.datetime.date.day   = eeprom_data.sensorConfigs.start_day;
+    RTC_ALARM.cal_alarm.datetime.time.hour  = eeprom_data.sensorConfigs.start_hour;
     RTC_ALARM.cal_alarm.datetime.time.min   = 0;
     RTC_ALARM.cal_alarm.datetime.time.sec   = 0;
     RTC_ALARM.cal_alarm.option              = CALENDAR_ALARM_MATCH_YEAR;
@@ -141,7 +141,7 @@ void CTRL_task(void* pvParameters)
     for(;;) {
         /* feed the mangy dog */
         #ifdef SEAL_DEBUG
-            gpio_toggle_pin_level(LED_GREEN);
+ //           gpio_toggle_pin_level(LED_GREEN);
         #endif
 
         wdt_feed(&WATCHDOG);
@@ -208,35 +208,35 @@ void CTRL_hourly_update()
     }
 
     /* check the active hours for each sensor */
-    sensor = eeprom_data.config_settings.accelerometer_config.acc_activeHour;
+    sensor = eeprom_data.sensorConfigs.accConfig.activeHour;
     if ((sensor & (hour|prev)) == hour) {
         /* wakeup */
     } else if ((sensor & (hour|prev)) == prev) {
         /* sleep */
     }
 
-    sensor = eeprom_data.config_settings.ekg_config.ekg_activeHour;
+    sensor = eeprom_data.sensorConfigs.ekgConfig.activeHour;
     if ((sensor & (hour|prev)) == hour) {
         /* wakeup */
     } else if ((sensor & (hour|prev)) == prev) {
         /* sleep */
     }
 
-    sensor = eeprom_data.config_settings.gps_config.gps_activeHour;
+    sensor = eeprom_data.sensorConfigs.gpsConfig.activeHour;
     if ((sensor & (hour|prev)) == hour) {
         /* wakeup */
     } else if ((sensor & (hour|prev)) == prev) {
         /* sleep */
     }
 
-    sensor = eeprom_data.config_settings.magnetometer_config.mag_activeHour;
+    sensor = eeprom_data.sensorConfigs.magConfig.activeHour;
     if ((sensor & (hour|prev)) == hour) {
         /* wakeup */
     } else if ((sensor & (hour|prev)) == prev) {
         /* sleep */
     }
 
-    sensor = eeprom_data.config_settings.temperature_config.temp_activeHour;
+    sensor = eeprom_data.sensorConfigs.envConfig.activeHour;
     if ((sensor & (hour|prev)) == hour) {
         /* wakeup */
     } else if ((sensor & (hour|prev)) == prev) {

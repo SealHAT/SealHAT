@@ -146,7 +146,7 @@ private:
     void writeToStreamBox(QTextEdit* textBox, QString str);
 
 private slots:
-    void samplesReceived(QQueue<SensorSample>* q);
+    void samplesReceived_stream(QQueue<SensorSample>* q);
 
 //Page switch
     void on_ekgButton_clicked();
@@ -316,7 +316,7 @@ private slots:
     private:
         Ui::maindialog *ui;
         QMap<QString, uint32_t> config;
-        SENSOR_CONFIGS configuration_settings;
+        SENSOR_CONFIGS_t configuration_settings;
 
         QSerialPort *microSerial;
         static const quint16 microSerial_vendor_id = 1003;
@@ -347,6 +347,6 @@ private slots:
 
 };
 
-QDataStream& operator<<(QDataStream& stream, const SENSOR_CONFIGS& configs);
+QDataStream& operator<<(QDataStream& stream, const SENSOR_CONFIGS_t& configs);
 
 #endif // MAINDIALOG_H

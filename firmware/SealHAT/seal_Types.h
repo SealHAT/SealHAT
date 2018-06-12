@@ -127,41 +127,40 @@ typedef struct __attribute__((__packed__)) {
 
 /***********************GUI------------->MICROCONTROLLER*****************/
 typedef struct{
-   uint32_t         acc_activeHour;
-   ACC_FULL_SCALE_t acc_scale;
-   ACC_OPMODE_t     acc_mode;
+   uint32_t         activeHour;     // active hours: the hours this sensor is active
+   ACC_FULL_SCALE_t scale;          // full scale reading level (2G, 4G, etc)
+   ACC_OPMODE_t     opMode;           // accelerometer mode, sets the power mode and sample rate
    int16_t          threshold;      // threshold of motion to detect in milligravity
    int16_t          duration;       // Duration of movement to detect. not used.
    uint8_t          sensitivity;    // axis to check for motion as defined by ACC_MOTION_AXIS_t
-} Xcel_TX;
+} ACC_CFG_t;
 
 typedef struct{
-   uint32_t         mag_activeHour;
-   MAG_OPMODE_t     mag_mode;
-} Mag_TX;
+   uint32_t         activeHour;     // active hours: the hours this sensor is active
+   MAG_OPMODE_t     opMode;           // magnetometer mode. sets the rate and power levels
+} MAG_CFG_t;
 
 
 typedef struct{
-   uint32_t         temp_activeHour;
-   uint16_t         temp_samplePeriod;
-} Temp_TX;
+   uint32_t         activeHour;     // active hours: the hours this sensor is active
+   uint16_t         period;         // period of sampling in seconds
+} ENV_CFG_t;
 
 typedef struct{
-   uint32_t           ekg_activeHour;
-   ECG_SAMPLE_RATE_t  ekg_sampleRate;
-   ECG_GAIN_t         ekg_gain;
-   ECG_LOW_PASS_t     ekg_lpFreq;
-} Ekg_TX;
+   uint32_t           activeHour;   // active hours: the hours this sensor is active
+   uint32_t           activeRate;   // period of sampling while animal is moving in seconds
+   uint32_t           idleRate;     // period of sampling while animal is idle in seconds
+} GPS_CFG_t;
 
 typedef struct{
-   uint32_t           gps_activeHour;
-   uint32_t           gps_moveRate;
-   uint32_t           gps_restRate;
-} GPS_TX;
+   uint32_t           activeHour;   // active hours: the hours this sensor is active
+   ECG_SAMPLE_RATE_t  rate;         // sample rate of the ekg
+   ECG_GAIN_t         gain;         // gain setting of the ekg
+   ECG_LOW_PASS_t     freq;         // low pass cutoff frequency of the ekg
+} MOD_CFG_t;
 
 typedef struct __attribute__((__packed__)){
     uint8_t              num_flash_chips;      // number of flash chips installed on device
-    uint32_t             StartDateTime;        // Start time in seconds since epoch (1970)
 
     // day the device should begin data collection
     uint8_t              start_day;            // range from 1 to 28/29/30/31
@@ -169,17 +168,17 @@ typedef struct __attribute__((__packed__)){
     uint16_t             start_year;           // absolute year >= 1970
     uint8_t              start_hour;           // hour of the day the device will start logging. range 0-23
 
-    Xcel_TX              accelerometer_config; // configuration data for the accelerometer
-    Mag_TX               magnetometer_config;  // configuration data for the magnetometer
-    Temp_TX              temperature_config;   // configuration data for the temperature sensor
-    Ekg_TX               ekg_config;           // configuration data for the EKG
-    GPS_TX               gps_config;           // configuration data for the GPS
+    ACC_CFG_t            accConfig;           // configuration data for the accelerometer
+    MAG_CFG_t            magConfig;           // configuration data for the magnetometer
+    ENV_CFG_t            envConfig;           // configuration data for the temperature sensor
+    GPS_CFG_t            gpsConfig;           // configuration data for the GPS
+    MOD_CFG_t            ekgConfig;           // configuration data for the EKG
 } SENSOR_CONFIGS_t;
 
 typedef struct __attribute__((__packed__)){
-    DATA_HEADER_t  header;            // packet header
-    SENSOR_CONFIGS_t config_settings; // system configs
-    uint32_t       crc32;             // crc32 checksum
+    DATA_HEADER_t    header;            // packet header
+    SENSOR_CONFIGS_t sensorConfigs;     // system configs
+    uint32_t         crc32;             // crc32 checksum
 } SYSTEM_CONFIG_t;
 
 #endif /* SEAL_TYPES_H_ */

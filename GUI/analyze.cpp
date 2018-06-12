@@ -117,27 +117,27 @@ uint8_t maindialog::num_Hours(uint32_t x) {
  **************************************************************/
 void maindialog::generalEstimation(){
 
-    temp_activeHour = num_Hours(configuration_settings.temperature_config.temp_activeHour);
-    temp_sampleNumber = temp_activeHour*3600/(configuration_settings.temperature_config.temp_samplePeriod);
+    temp_activeHour = num_Hours(configuration_settings.envConfig.activeHour);
+    temp_sampleNumber = temp_activeHour*3600/(configuration_settings.envConfig.period);
 
 
-    light_activeHour = num_Hours(configuration_settings.temperature_config.temp_activeHour);
-    light_sampleNumber = light_activeHour*3600/(configuration_settings.temperature_config.temp_samplePeriod);
+    light_activeHour = num_Hours(configuration_settings.envConfig.activeHour);
+    light_sampleNumber = light_activeHour*3600/(configuration_settings.envConfig.period);
 
-    ekg_activeHour = num_Hours(configuration_settings.ekg_config.ekg_activeHour);
-    ekg_sampleNumber = ekg_activeHour*3600*(512/(pow(2,(uint8_t)configuration_settings.ekg_config.ekg_sampleRate)));
+    ekg_activeHour = num_Hours(configuration_settings.ekgConfig.activeHour);
+    ekg_sampleNumber = ekg_activeHour*3600*(512/(pow(2,(uint8_t)configuration_settings.ekgConfig.rate)));
 
-    acc_tens = (configuration_settings.accelerometer_config.acc_mode/16)%10 - 1; //logic Rethink
-    acc_pwrMode = (configuration_settings.accelerometer_config.acc_mode%16)/4;
-    acc_activeHour = num_Hours(configuration_settings.accelerometer_config.acc_activeHour);
+    acc_tens = (configuration_settings.accConfig.opMode/16)%10 - 1; //logic Rethink
+    acc_pwrMode = (configuration_settings.accConfig.opMode%16)/4;
+    acc_activeHour = num_Hours(configuration_settings.accConfig.activeHour);
     acc_sampleNumber = acc_activeHour*(3600)*(accFrequency[acc_tens]);
 
-    mag_ones = (configuration_settings.magnetometer_config.mag_mode%16)/4;
-    mag_pwrMode = (configuration_settings.magnetometer_config.mag_mode/16)%10;
-    mag_activeHour = num_Hours(configuration_settings.magnetometer_config.mag_activeHour);
+    mag_ones = (configuration_settings.magConfig.opMode%16)/4;
+    mag_pwrMode = (configuration_settings.magConfig.opMode/16)%10;
+    mag_activeHour = num_Hours(configuration_settings.magConfig.activeHour);
     mag_sampleNumber = mag_activeHour*3600*(magFrequency[mag_ones]);
 
-    gps_activeHour = num_Hours(configuration_settings.gps_config.gps_activeHour);
+    gps_activeHour = num_Hours(configuration_settings.gpsConfig.activeHour);
     if(gps_activeHour <= 2){
         gps_sampleNumber = (gps_activeHour*3600)/(30);
     }else{

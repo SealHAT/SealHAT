@@ -48,7 +48,7 @@ QByteArray maindialog::config_serialize(){
     return byteArray;
 }
 
-QDataStream& operator<<(QDataStream& stream, const SENSOR_CONFIGS& configs) {
+QDataStream& operator<<(QDataStream& stream, const SENSOR_CONFIGS_t& configs) {
 
     stream << (uint8_t*)&configs;
     return stream;
