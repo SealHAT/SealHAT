@@ -38,8 +38,8 @@ typedef enum {
     DEVICE_ID_EKG               = 0xA0,
     DEVICE_ID_UNUSED            = 0xB0,
     DEVICE_ID_UNUSED1           = 0xC0,
-    DEVICE_ID_UNUSED2           = 0xD0,
-    DEVICE_ID_SYSTEM            = 0xE0,
+    DEVICE_ID_SYSTEM            = 0xD0,
+    DEVICE_ID_CONFIG            = 0xE0,
     DEVICE_ID_MASK              = 0xF0
 } DEVICE_ID_t;
 
@@ -65,19 +65,26 @@ typedef enum {
 #define MSG_START_SYM_STR           "\xDE\xAD"
 #define USB_PACKET_START_SYM        (0x0DD0FECA)
 #define USB_PACKET_START_SYM_STR    "\xCA\xFE\xD0\x0D"
+#define USB_TEXT_ADVENTURE_MENU     "\n(c)onfigure, (v)erify config, (d)ownload data, (s)tream data, (f)orce Logging, (r)eset\n"
 
 /** Packet that gets sent over USB to the host computer **/
 typedef struct __attribute__((__packed__)){
     uint32_t startSymbol;           // start symbol for the data transmission
-    uint8_t  data[PAGE_SIZE_LESS]; // one page of data from flash
+    uint8_t  data[PAGE_SIZE_LESS];  // one page of data from flash
     uint32_t crc;                   // crc32 of the DATA (not the start symbol) using IEEE CRC32 polynomial
 } DATA_TRANSMISSION_t;
 
 typedef enum {
-    NO_COMMAND      = 0,
-    CONFIGURE_DEV   = 'c',
-    RETRIEVE_DATA   = 'r',
-    STREAM_DATA     = 's',
+    NO_COMMAND        = 0,
+    CONFIGURE_DEV     = 'c',
+    VERIFY_CONFIG     = 'v',
+    DOWNLOAD_DATA     = 'd',
+    STREAM_DATA       = 's',
+    FORCE_FLASH       = 'f',
+    RESET_SYSTEM      = 'r',
+    READY_TO_RECEIVE  = 'a',
+    OPERATION_SUCCESS = 'g',
+    OPERATION_ERROR   = 'e'
 } SYSTEM_COMMANDS;
 
 /** Header for data packets from the device **/
@@ -120,7 +127,6 @@ typedef struct __attribute__((__packed__)) {
 
 /***********************GUI------------->MICROCONTROLLER*****************/
 typedef struct{
-   DATA_HEADER_t    acc_headerData;
    uint32_t         acc_activeHour;
    ACC_FULL_SCALE_t acc_scale;
    ACC_OPMODE_t     acc_mode;
@@ -130,20 +136,17 @@ typedef struct{
 } Xcel_TX;
 
 typedef struct{
-   DATA_HEADER_t    mag_headerData;
    uint32_t         mag_activeHour;
    MAG_OPMODE_t     mag_mode;
 } Mag_TX;
 
 
 typedef struct{
-   DATA_HEADER_t    temp_headerData;
    uint32_t         temp_activeHour;
    uint16_t         temp_samplePeriod;
 } Temp_TX;
 
 typedef struct{
-   DATA_HEADER_t      ekg_headerData;
    uint32_t           ekg_activeHour;
    ECG_SAMPLE_RATE_t  ekg_sampleRate;
    ECG_GAIN_t         ekg_gain;
@@ -151,15 +154,14 @@ typedef struct{
 } Ekg_TX;
 
 typedef struct{
-   DATA_HEADER_t    gps_headerData;
-   uint32_t         gps_activeHour;
-   uint32_t         gps_moveRate;
-   uint32_t         gps_restRate;
+   uint32_t           gps_activeHour;
+   uint32_t           gps_moveRate;
+   uint32_t           gps_restRate;
 } GPS_TX;
 
 typedef struct __attribute__((__packed__)){
-    DATA_HEADER_t        config_header;        // packet header for all configuration data
     uint8_t              num_flash_chips;      // number of flash chips installed on device
+    uint32_t             StartDateTime;        // Start time in seconds since epoch (1970)
 
     // day the device should begin data collection
     uint8_t              start_day;            // range from 1 to 28/29/30/31
@@ -172,6 +174,12 @@ typedef struct __attribute__((__packed__)){
     Temp_TX              temperature_config;   // configuration data for the temperature sensor
     Ekg_TX               ekg_config;           // configuration data for the EKG
     GPS_TX               gps_config;           // configuration data for the GPS
-} SENSOR_CONFIGS;
+} SENSOR_CONFIGS_t;
+
+typedef struct __attribute__((__packed__)){
+    DATA_HEADER_t  header;            // packet header
+    SENSOR_CONFIGS_t config_settings; // system configs
+    uint32_t       crc32;             // crc32 checksum
+} SYSTEM_CONFIG_t;
 
 #endif /* SEAL_TYPES_H_ */
