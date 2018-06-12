@@ -45,16 +45,14 @@ public:
 private:
     // parses the data in the clean_data array to find data headers
     void deserializeDataPackets();
-    // takes header info and stream to create sensor packets
-    void parseSensorPackets(QDataStream& startStream, quint8 device, quint32 time, quint8 seqNum, quint16 length);
 
     /**** Harware specific parsing functions ****/
-    void parse_si7051(QDataStream& startStream, quint32 time, quint8 seqNum, quint16 length);
-    void parse_max44009(QDataStream& startStream, quint32 time, quint8 seqNum, quint16 length);
-    void parse_lsm303agr_acc(QDataStream& startStream, quint32 time, quint8 seqNum, quint16 length);
-    void parse_lsm303agr_mag(QDataStream& startStream, quint32 time, quint8 seqNum, quint16 length);
-    void parse_samm8q(QDataStream& startStream, quint32 time, quint8 seqNum, quint16 length);
-    void parse_max30003(QDataStream& startStream, quint32 time, quint8 seqNum, quint16 length);
+    void parse_si7051(QDataStream& startStream, DATA_HEADER_t header);
+    void parse_max44009(QDataStream& startStream, DATA_HEADER_t header);
+    void parse_lsm303agr_acc(QDataStream& startStream, DATA_HEADER_t header);
+    void parse_lsm303agr_mag(QDataStream& startStream, DATA_HEADER_t header);
+    void parse_samm8q(QDataStream& startStream, DATA_HEADER_t header);
+    void parse_max30003(QDataStream& startStream, DATA_HEADER_t header);
 
 signals:
     // signal emitted to indicate the device has connected
@@ -69,9 +67,9 @@ public slots:
     void disconnectFromDevice();
 
 private slots:
-    void handleReadyRead();
-    void handleTimeout();
-    void handleError(QSerialPort::SerialPortError error);
+    void StreamingReadyRead_cb();
+    void SerialTimerTimout_cb();
+    void SerialError_cb(QSerialPort::SerialPortError error);
 
 private:
      QSerialPort          sealhat;      // serial object for connecting to device
@@ -81,6 +79,7 @@ private:
      QByteArray           clean_data;   // Data from device after CRC checks
      QQueue<SensorSample> data_q;       // queue of processed sensor readings
      QFile                rawDataLog;   // file to log raw data from device for debug
+     QFile                preCRCfile;   // file to log raw data prior to CRC check
 };
 
 QDataStream& operator>>(QDataStream& stream, DATA_HEADER_t& header);

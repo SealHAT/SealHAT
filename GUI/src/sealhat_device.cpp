@@ -5,7 +5,7 @@
 
 SealHAT_device::SealHAT_device(QObject *parent) : QObject(parent)
 {
-    connect(&sealhat, &QSerialPort::errorOccurred, this, &SealHAT_device::handleError);    
+    connect(&sealhat, &QSerialPort::errorOccurred, this, &SealHAT_device::SerialError_cb);
 }
 
 SealHAT_device::~SealHAT_device()
@@ -42,6 +42,9 @@ bool SealHAT_device::connectToDevice(QString portName)
 
         rawDataLog.setFileName(QString("rawOutput.txt"));
         rawDataLog.open(QIODevice::Truncate | QIODevice::WriteOnly);
+
+        preCRCfile.setFileName(QString("preCRCOutput.txt"));
+        preCRCfile.open(QIODevice::Truncate | QIODevice::WriteOnly);
     }
     else {
         qDebug() << "Error opening " << portName << " : " << sealhat.errorString();
@@ -85,8 +88,8 @@ bool SealHAT_device::startStream()
         if(data.contains(USB_TEXT_ADVENTURE_MENU)) {
             qDebug() << "received menu, starting stream";
             sealhat.write(&streamCmd);
-            connect(&pollTimer, &QTimer::timeout, this, &SealHAT_device::handleTimeout);
-            connect(&sealhat, &QSerialPort::readyRead, this, &SealHAT_device::handleReadyRead);
+            connect(&pollTimer, &QTimer::timeout, this, &SealHAT_device::SerialTimerTimout_cb);
+            connect(&sealhat, &QSerialPort::readyRead, this, &SealHAT_device::StreamingReadyRead_cb);
             retval = true;
         }
         else {
@@ -105,8 +108,8 @@ void SealHAT_device::stopStream() {
 
     if(sealhat.isOpen()) {
         sealhat.write(&streamCmd);
-        disconnect(&pollTimer, &QTimer::timeout, this, &SealHAT_device::handleTimeout);
-        disconnect(&sealhat, &QSerialPort::readyRead, this, &SealHAT_device::handleReadyRead);
+        disconnect(&pollTimer, &QTimer::timeout, this, &SealHAT_device::SerialTimerTimout_cb);
+        disconnect(&sealhat, &QSerialPort::readyRead, this, &SealHAT_device::StreamingReadyRead_cb);
     }
     in_data.clear();
     clean_data.clear();
@@ -116,7 +119,7 @@ void SealHAT_device::stopStream() {
 
 bool SealHAT_device::download()
 {
-    const char streamCmd = DOWNLOAD_DATA;
+    const char verifyCmd = DOWNLOAD_DATA;
     bool            retval;     // return value
 
     // set default return value
@@ -154,7 +157,7 @@ bool SealHAT_device::getConfig()
 
             if((config.header.startSym == MSG_START_SYM) && (config.header.id == DEVICE_ID_CONFIG)) {
                 // TODO CRC32 check of the data
-                devCfg = config.sensorConfigs;
+                this->devCfg = config.sensorConfigs;
             }
 
             retval = true;
@@ -175,31 +178,52 @@ bool SealHAT_device::getConfig()
 
 bool SealHAT_device::sendConfig()
 {
+    const char configCmd = CONFIGURE_DEV;
+    bool            retval;     // return value
 
+    // set default return value
+    retval = false;
+
+    return retval;
 }
 
 void SealHAT_device::deserializeDataPackets()
 {
-    quint16       startSym, size;   // size and startSym from data header
-    quint8        devID, seqNum;    // device ID and sequence number from header
-    quint32       timestamp;        // timestamp from header
+    DATA_HEADER_t tmpHeader;        // temporary header to read stream into
 
     int index = clean_data.indexOf(QByteArray(MSG_START_SYM_STR));
     while((index >= 0) && ((unsigned int)clean_data.size() > sizeof(DATA_HEADER_t))) {
         // remove any partial packets (should only happen in first read of a stream)
         clean_data.remove(0, index);
 
-        // Attach the data stream to the clean_data array. Set to little endian.
+        // Attach the data stream to the clean_data array and grab the header
         QDataStream stream(&clean_data, QIODevice::ReadOnly);
-        stream.setByteOrder(QDataStream::LittleEndian);
+        stream >> tmpHeader;
 
-        stream >> startSym >> devID >> seqNum >> timestamp >> size;
+        // ONLY IF the entire packet is in the clean_data queu do we continue to parse and remove it
+        if((unsigned int)clean_data.size() > (sizeof(DATA_HEADER_t) + tmpHeader.size)) {
 
-        if((unsigned int)clean_data.size() > (sizeof(DATA_HEADER_t) + size)) {
-            parseSensorPackets(stream, devID, timestamp, seqNum, size);
+            switch(tmpHeader.id) {
+                case DEVICE_ID_LIGHT          : parse_max44009(stream, tmpHeader); break;
+                case DEVICE_ID_TEMPERATURE    : parse_si7051(stream, tmpHeader); break;
+                case DEVICE_ID_ACCELEROMETER  : parse_lsm303agr_acc(stream, tmpHeader); break;
+                case DEVICE_ID_MAGNETIC_FIELD : parse_lsm303agr_mag(stream, tmpHeader); break;
+                case DEVICE_ID_GPS            : parse_samm8q(stream, tmpHeader); break;
+                case DEVICE_ID_EKG            : parse_max30003(stream, tmpHeader); break;
+                case DEVICE_ID_GYROSCOPE      : qDebug() << "Err: no gyro sensor available"; break;
+                case DEVICE_ID_PRESSURE       : qDebug() << "Err: no pressure sensor available"; break;
+                case DEVICE_ID_DEPTH          : qDebug() << "Err: no depth sensor available"; break;
+                case DEVICE_ID_SYSTEM         : qDebug() << "Err: no SYS code yet"; break;
+                default : qDebug() << QString("Err: invalid sensor (%1) with packet size %2").arg(tmpHeader.id).arg(tmpHeader.size);
+            };
 
-            clean_data.remove(0, (size + sizeof(DATA_HEADER_t)));
-            index = clean_data.indexOf(QByteArray(MSG_START_SYM_STR));
+            index = clean_data.indexOf(QByteArray(MSG_START_SYM_STR), sizeof(DATA_HEADER_t));
+            if(index > (tmpHeader.size + sizeof(DATA_HEADER_t))) {
+                qDebug() << "warning: index of next header not immediatly after the last! index:" << index << "  arrSize:" << clean_data.size();
+            }
+            clean_data.remove(0, (tmpHeader.size + sizeof(DATA_HEADER_t)));
+            clean_data.shrink_to_fit();
+            qDebug() << "size of clean_data: " << clean_data.size();
         }
         else {
             qDebug() << "incomplete packet, leaving till next time";
@@ -209,25 +233,11 @@ void SealHAT_device::deserializeDataPackets()
 
 }
 
-void SealHAT_device::parseSensorPackets(QDataStream& stream, quint8 device, quint32 time, quint8 seqNum, quint16 length)
-{
-    switch(device) {
-        case DEVICE_ID_LIGHT          : parse_max44009(stream, time, seqNum, length); break;
-        case DEVICE_ID_TEMPERATURE    : parse_si7051(stream, time, seqNum, length); break;
-        case DEVICE_ID_ACCELEROMETER  : parse_lsm303agr_acc(stream, time, seqNum, length); break;
-        case DEVICE_ID_MAGNETIC_FIELD : parse_lsm303agr_mag(stream, time, seqNum, length); break;
-        case DEVICE_ID_GPS            : parse_samm8q(stream, time, seqNum, length); break;
-        case DEVICE_ID_EKG            : parse_max30003(stream, time, seqNum, length); break;
-        case DEVICE_ID_GYROSCOPE      : qDebug() << "Err: no gyro sensor available"; break;
-        case DEVICE_ID_PRESSURE       : qDebug() << "Err: no pressure sensor available"; break;
-        case DEVICE_ID_DEPTH          : qDebug() << "Err: no depth sensor available"; break;
-        case DEVICE_ID_SYSTEM         : qDebug() << "Err: no SYS code yet"; break;
-        default : qDebug() << QString("Err: invalid sensor (%1) with packet size %2").arg(device).arg(length);
-    };
+/***********************************************************************************************/
+/***********************  HARDWARE SPECIFIC DATA PARSERS ***************************************/
+/***********************************************************************************************/
 
-}
-
-void SealHAT_device::parse_si7051(QDataStream& stream, quint32 time, quint8 seqNum, quint16 length)
+void SealHAT_device::parse_si7051(QDataStream& stream, DATA_HEADER_t header)
 {
     const float TEMP_STEP_SIZE   = 175.72;
     const float TEMP_ZERO_OFFSET = 46.85;
@@ -236,50 +246,50 @@ void SealHAT_device::parse_si7051(QDataStream& stream, quint32 time, quint8 seqN
     const int   SAMPLE_SIZE      = sizeof(uint16_t);
 
     QDateTime     timestamp;
-    int           sampleCount = length / SAMPLE_SIZE;
+    int           sampleCount = header.size / SAMPLE_SIZE;
     quint16       tempRAW;
     SENSOR_DATA_t valueSI;
 
     // set the time, then subract the period * number of sample for time of first sample in buffer
-    timestamp.setSecsSinceEpoch(time);
+    timestamp.setSecsSinceEpoch(header.timestamp);
     timestamp = timestamp.addMSecs((-MS_PERIOD)*sampleCount);
 
     while(sampleCount > 0) {
         stream >> tempRAW;
         valueSI.temperature = ((TEMP_STEP_SIZE*tempRAW) / TEMP_RANGE) - TEMP_ZERO_OFFSET;
-        data_q.enqueue(SensorSample(DEVICE_ID_TEMPERATURE, timestamp, seqNum, valueSI));
+        data_q.enqueue(SensorSample(DEVICE_ID_TEMPERATURE, timestamp, header.packetCount, valueSI));
 
         sampleCount--;
         timestamp = timestamp.addMSecs(MS_PERIOD);
     }
 }
 
-void SealHAT_device::parse_max44009(QDataStream& stream, quint32 time, quint8 seqNum, quint16 length)
+void SealHAT_device::parse_max44009(QDataStream& stream, DATA_HEADER_t header)
 {
     const float FULL_ACCURACY_CONSTANT = 0.045;
     const int   MS_PERIOD              = 1000;
     const int   SAMPLE_SIZE            = sizeof(uint16_t);
 
     QDateTime     timestamp;
-    int           sampleCount = length / SAMPLE_SIZE;
+    int           sampleCount = header.size / SAMPLE_SIZE;
     quint8        luxMantissa, luxExponent;
     SENSOR_DATA_t valueSI;
 
     // set the time, then subract the period * number of sample for time of first sample in buffer
-    timestamp.setSecsSinceEpoch(time);
+    timestamp.setSecsSinceEpoch(header.timestamp);
     timestamp = timestamp.addMSecs((-MS_PERIOD)*sampleCount);
 
     while(sampleCount > 0) {
         stream >> luxMantissa >> luxExponent;
         valueSI.light = (1<<luxExponent) * (float)luxMantissa * FULL_ACCURACY_CONSTANT;
-        data_q.enqueue(SensorSample(DEVICE_ID_LIGHT, timestamp, seqNum, valueSI));
+        data_q.enqueue(SensorSample(DEVICE_ID_LIGHT, timestamp, header.packetCount, valueSI));
 
         sampleCount--;
         timestamp = timestamp.addMSecs(MS_PERIOD);
     }
 }
 
-void SealHAT_device::parse_lsm303agr_acc(QDataStream& stream, quint32 time, quint8 seqNum, quint16 length)
+void SealHAT_device::parse_lsm303agr_acc(QDataStream& stream, DATA_HEADER_t header)
 {
     // different Scales, there are 3 modes and 4 full scale settings. these are mg/LSB values from data sheet page 13. these are rounded ints from the STM API
     static const uint8_t   intScale[3][4] = {{1,   2,  4,  12}, {4,   8, 16,  48}, {16, 32, 64, 192}};
@@ -289,7 +299,7 @@ void SealHAT_device::parse_lsm303agr_acc(QDataStream& stream, quint32 time, quin
 
     QDateTime     timestamp;
     unsigned int  i, j, shift, msPeriod;
-    int           sampleCount = length / SAMPLE_SIZE;
+    int           sampleCount = header.size / SAMPLE_SIZE;
     qint16        accX, accY, accZ;
     SENSOR_DATA_t valSI;
 
@@ -320,7 +330,7 @@ void SealHAT_device::parse_lsm303agr_acc(QDataStream& stream, quint32 time, quin
     };
 
     // set the time, then subract the period * number of sample for time of first sample in buffer
-    timestamp.setSecsSinceEpoch(time);
+    timestamp.setSecsSinceEpoch(header.timestamp);
     timestamp = timestamp.addMSecs((-msPeriod)*sampleCount);
 
     while(sampleCount > 0) {
@@ -328,14 +338,14 @@ void SealHAT_device::parse_lsm303agr_acc(QDataStream& stream, quint32 time, quin
         valSI.acceleration.xAxis = ( (accX >> shift) * intScale[i][j] / 1000.0);
         valSI.acceleration.yAxis = ( (accY >> shift) * intScale[i][j] / 1000.0);
         valSI.acceleration.zAxis = ( (accZ >> shift) * intScale[i][j] / 1000.0);
-        data_q.enqueue(SensorSample(DEVICE_ID_ACCELEROMETER, timestamp, seqNum, valSI));
+        data_q.enqueue(SensorSample(DEVICE_ID_ACCELEROMETER, timestamp, header.packetCount, valSI));
 
         sampleCount--;
         timestamp = timestamp.addMSecs(msPeriod);
     }
 }
 
-void SealHAT_device::parse_lsm303agr_mag(QDataStream& stream, quint32 time, quint8 seqNum, quint16 length)
+void SealHAT_device::parse_lsm303agr_mag(QDataStream& stream, DATA_HEADER_t header)
 {
     const MAG_OPMODE_t MAG_RATE    = MAG_LP_50_HZ;
     const float        MAG_CONST   = 1.5;
@@ -343,7 +353,7 @@ void SealHAT_device::parse_lsm303agr_mag(QDataStream& stream, quint32 time, quin
 
     QDateTime     timestamp;
     unsigned int  msPeriod;
-    int           sampleCount = length / SAMPLE_SIZE;
+    int           sampleCount = header.size / SAMPLE_SIZE;
     qint16        magX, magY, magZ;
     SENSOR_DATA_t valSI;
 
@@ -356,7 +366,7 @@ void SealHAT_device::parse_lsm303agr_mag(QDataStream& stream, quint32 time, quin
     };
 
     // set the time, then subract the period * number of sample for time of first sample in buffer
-    timestamp.setSecsSinceEpoch(time);
+    timestamp.setSecsSinceEpoch(header.timestamp);
     timestamp = timestamp.addMSecs((-msPeriod)*sampleCount);
 
     while(sampleCount > 0) {
@@ -364,27 +374,37 @@ void SealHAT_device::parse_lsm303agr_mag(QDataStream& stream, quint32 time, quin
         valSI.magnetic.xAxis = ((magX * MAG_CONST) / 1000.0);
         valSI.magnetic.yAxis = ((magY * MAG_CONST) / 1000.0);
         valSI.magnetic.zAxis = ((magZ * MAG_CONST) / 1000.0);
-        data_q.enqueue(SensorSample(DEVICE_ID_MAGNETIC_FIELD, timestamp, seqNum, valSI));
+        data_q.enqueue(SensorSample(DEVICE_ID_MAGNETIC_FIELD, timestamp, header.packetCount, valSI));
 
         sampleCount--;
         timestamp = timestamp.addMSecs(msPeriod);
     }
 }
 
-void SealHAT_device::parse_samm8q(QDataStream& stream, quint32 time, quint8 seqNum, quint16 length)
+void SealHAT_device::parse_samm8q(QDataStream& stream, DATA_HEADER_t header)
 {
     qDebug() << "GPS??? What GPS??????";
 }
 
-void SealHAT_device::parse_max30003(QDataStream& stream, quint32 time, quint8 seqNum, quint16 length)
+void SealHAT_device::parse_max30003(QDataStream& stream, DATA_HEADER_t header)
 {
     qDebug() << "EKG??? What EKG??????";
 }
 
-void SealHAT_device::handleReadyRead()
+/***********************************************************************************************/
+/***********************  SIGNAL HANDLERS FOR SERIAL PORT / USB DEVICE  *** ********************/
+/***********************************************************************************************/
+
+void SealHAT_device::StreamingReadyRead_cb()
 {
     static const int dataAndCRC = (PAGE_SIZE_LESS + sizeof(int32_t));
-    in_data.append(sealhat.readAll());
+
+    // write data to file before CRC, mainly for debug
+    QByteArray dataFromDevice = sealhat.readAll();
+    preCRCfile.write(dataFromDevice);
+    preCRCfile.flush();
+
+    in_data.append(dataFromDevice);
 
     if(in_data.contains(USB_TEXT_ADVENTURE_MENU)) {
         qDebug() << "recieved menu: " << in_data.data();
@@ -425,18 +445,22 @@ void SealHAT_device::handleReadyRead()
     pollTimer.start(5000);
 }
 
-void SealHAT_device::handleTimeout()
+void SealHAT_device::SerialTimerTimout_cb()
 {
     qDebug() << "No data from port " << sealhat.portName()
              << " For 5 seconds...";
 }
 
-void SealHAT_device::handleError(QSerialPort::SerialPortError serialPortError)
+void SealHAT_device::SerialError_cb(QSerialPort::SerialPortError serialPortError)
 {
     if (!serialPortError) {
         qDebug() << "Serial Port Error: " << sealhat.errorString();
     }
 }
+
+/***********************************************************************************************/
+/***********************  OVERLOADED STREAM INSERTION OPERATORS FOR STRUCTS ********************/
+/***********************************************************************************************/
 
 QDataStream& operator>>(QDataStream& stream, DATA_HEADER_t& header) {
     quint32 time;
