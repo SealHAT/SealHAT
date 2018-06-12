@@ -40,9 +40,9 @@ int main(void)
     }
 
     // start the ECG
-    if(ECG_task_init() != ERR_NONE) {
-        while(1) {;}
-    }
+    //if(ECG_task_init() != ERR_NONE) {
+    //    while(1) {;}
+    //}
 
     // GPS task init
 //     if(GPS_task_init(0) != ERR_NONE) {
