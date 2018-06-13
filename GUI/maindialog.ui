@@ -386,7 +386,7 @@ background-color: qconicalgradient(cx:0.352, cy:0.613636, angle:0, stop:0.954545
       <string notr="true">background-color: rgb(152, 162, 173);</string>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>5</number>
      </property>
      <widget class="QWidget" name="ConfigureHomePage">
       <widget class="QLabel" name="welcomeHeadingLabel">
@@ -6648,10 +6648,10 @@ color:rgb(253, 199, 0);</string>
     <widget class="QGraphicsView" name="adminTopHeadingBackground">
      <property name="geometry">
       <rect>
-       <x>0</x>
+       <x>-70</x>
        <y>0</y>
        <width>981</width>
-       <height>51</height>
+       <height>31</height>
       </rect>
      </property>
      <property name="styleSheet">
@@ -6664,47 +6664,17 @@ color:rgb(253, 199, 0);</string>
       <enum>QFrame::Plain</enum>
      </property>
     </widget>
-    <widget class="QLabel" name="sealName">
-     <property name="geometry">
-      <rect>
-       <x>30</x>
-       <y>70</y>
-       <width>131</width>
-       <height>41</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Futura</family>
-       <pointsize>21</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="focusPolicy">
-      <enum>Qt::WheelFocus</enum>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">color: rgb(241, 181, 33)</string>
-     </property>
-     <property name="text">
-      <string>SealHAT</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
     <widget class="QPushButton" name="backButton_retrieveData">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>10</y>
+       <y>0</y>
        <width>41</width>
        <height>32</height>
       </rect>
      </property>
      <property name="styleSheet">
-      <string notr="true">color: rgb(255, 255, 255);
+      <string notr="true">color:rgb(172, 182, 193);
 border: none;</string>
      </property>
      <property name="text">
@@ -6717,10 +6687,10 @@ border: none;</string>
     <widget class="QStackedWidget" name="DataRetrievalPages">
      <property name="geometry">
       <rect>
-       <x>200</x>
-       <y>50</y>
+       <x>210</x>
+       <y>30</y>
        <width>651</width>
-       <height>511</height>
+       <height>471</height>
       </rect>
      </property>
      <property name="styleSheet">
@@ -6733,35 +6703,36 @@ border: none;</string>
       <widget class="QLabel" name="dataRetrievalHeading">
        <property name="geometry">
         <rect>
-         <x>0</x>
+         <x>10</x>
          <y>10</y>
-         <width>621</width>
-         <height>61</height>
+         <width>240</width>
+         <height>31</height>
         </rect>
        </property>
        <property name="font">
         <font>
          <family>Shree Devanagari 714</family>
          <pointsize>30</pointsize>
+         <kerning>true</kerning>
         </font>
        </property>
        <property name="styleSheet">
         <string notr="true">color:black</string>
        </property>
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:36pt;&quot;&gt;Retrieve Data&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:36pt; font-weight:600; color:#003c6c; vertical-align:super;&quot;&gt;Retrieve Data&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignCenter</set>
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
        </property>
       </widget>
       <widget class="QLabel" name="dataRetrievalLabel">
        <property name="geometry">
         <rect>
-         <x>120</x>
-         <y>90</y>
-         <width>431</width>
-         <height>31</height>
+         <x>10</x>
+         <y>50</y>
+         <width>401</width>
+         <height>16</height>
         </rect>
        </property>
        <property name="font">
@@ -6773,7 +6744,7 @@ border: none;</string>
         <string notr="true">color:rgb(0, 0, 0)</string>
        </property>
        <property name="text">
-        <string>This page will be used to retrieve data off of a SealHAT device. </string>
+        <string>This page is used to retrieve data off of a SealHAT device. </string>
        </property>
        <property name="wordWrap">
         <bool>true</bool>
@@ -6782,15 +6753,17 @@ border: none;</string>
       <widget class="QLabel" name="dataRetrievalLabel_2">
        <property name="geometry">
         <rect>
-         <x>110</x>
-         <y>240</y>
-         <width>301</width>
-         <height>20</height>
+         <x>100</x>
+         <y>140</y>
+         <width>431</width>
+         <height>21</height>
         </rect>
        </property>
        <property name="font">
         <font>
-         <pointsize>10</pointsize>
+         <pointsize>12</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
         </font>
        </property>
        <property name="styleSheet">
@@ -6806,27 +6779,37 @@ border: none;</string>
       <widget class="QLineEdit" name="storeData_destinationEdit">
        <property name="geometry">
         <rect>
-         <x>110</x>
-         <y>260</y>
-         <width>291</width>
+         <x>100</x>
+         <y>180</y>
+         <width>341</width>
          <height>20</height>
         </rect>
        </property>
        <property name="text">
         <string/>
        </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
       </widget>
       <widget class="QPushButton" name="chooseDestButton">
        <property name="geometry">
         <rect>
-         <x>410</x>
-         <y>260</y>
+         <x>450</x>
+         <y>180</y>
          <width>75</width>
          <height>23</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
        <property name="styleSheet">
-        <string notr="true">background-color: rgb(11, 21, 255);</string>
+        <string notr="true">background-color:rgb(202,212,223);
+color:black;</string>
        </property>
        <property name="text">
         <string>Select</string>
@@ -6835,14 +6818,22 @@ border: none;</string>
       <widget class="QPushButton" name="getDataButton">
        <property name="geometry">
         <rect>
-         <x>210</x>
-         <y>412</y>
+         <x>260</x>
+         <y>300</y>
          <width>111</width>
          <height>41</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
        <property name="styleSheet">
-        <string notr="true">background-color: rgb(255, 255, 0);</string>
+        <string notr="true">background-color: rgb(253, 199, 0);
+color:black;</string>
        </property>
        <property name="text">
         <string>GET DATA</string>
@@ -6853,14 +6844,14 @@ border: none;</string>
     <widget class="QGraphicsView" name="retrieveSideBarBackground">
      <property name="geometry">
       <rect>
-       <x>-70</x>
+       <x>-60</x>
        <y>10</y>
        <width>271</width>
        <height>621</height>
       </rect>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: rgb(0, 69, 140);</string>
+      <string notr="true">background-color: rgb(0, 60, 108);</string>
      </property>
      <property name="frameShape">
       <enum>QFrame::NoFrame</enum>
@@ -6872,11 +6863,98 @@ border: none;</string>
       <number>0</number>
      </property>
     </widget>
+    <widget class="QLabel" name="SensorHeadingLabel_3">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>40</y>
+       <width>111</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Futura</family>
+       <pointsize>21</pointsize>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::WheelFocus</enum>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(253, 199, 0)</string>
+     </property>
+     <property name="text">
+      <string>SealHAT</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="button_rescanDataRetrievalCOM">
+     <property name="geometry">
+      <rect>
+       <x>780</x>
+       <y>520</y>
+       <width>31</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(202,212,223);</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normalon>:/refresh.png</normalon>
+      </iconset>
+     </property>
+    </widget>
+    <widget class="QGraphicsView" name="statsFooterBackground_2">
+     <property name="geometry">
+      <rect>
+       <x>210</x>
+       <y>500</y>
+       <width>691</width>
+       <height>61</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(60, 60, 60);</string>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="comboBox_retrieveData">
+     <property name="geometry">
+      <rect>
+       <x>680</x>
+       <y>520</y>
+       <width>81</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border:none;
+background-color:rgb(202,212,223);</string>
+     </property>
+    </widget>
+    <zorder>statsFooterBackground_2</zorder>
     <zorder>retrieveSideBarBackground</zorder>
-    <zorder>adminTopHeadingBackground</zorder>
-    <zorder>sealName</zorder>
-    <zorder>backButton_retrieveData</zorder>
     <zorder>DataRetrievalPages</zorder>
+    <zorder>SensorHeadingLabel_3</zorder>
+    <zorder>adminTopHeadingBackground</zorder>
+    <zorder>backButton_retrieveData</zorder>
+    <zorder>button_rescanDataRetrievalCOM</zorder>
+    <zorder>comboBox_retrieveData</zorder>
    </widget>
    <widget class="QWidget" name="DataStream">
     <widget class="QGraphicsView" name="streamSideBarBackground">

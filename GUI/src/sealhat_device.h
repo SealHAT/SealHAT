@@ -87,5 +87,8 @@ QDataStream& operator>>(QDataStream& stream, DATA_HEADER_t& header);
 QDataStream& operator>>(QDataStream& stream, SENSOR_CONFIGS_t& sensorCfg);
 QDataStream& operator>>(QDataStream& stream, SYSTEM_CONFIG_t& sysCfg);
 QDataStream& operator>>(QDataStream& stream, DATA_TRANSMISSION_t& txData);
+QDataStream& operator>>(QDataStream& stream, gps_log_t& gpsLog);
+QDataStream& operator>>(QDataStream& stream, min_pvt_t& gpsPosition);
+QDataStream& operator>>(QDataStream& stream, utc_time_t& gpsTime);
 
 #endif // SEALHAT_DEVICE_H

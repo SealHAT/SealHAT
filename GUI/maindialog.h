@@ -313,7 +313,9 @@ private slots:
 
     //void on_batterySizeText_returnPressed();
 
-    private:
+    void on_retrieveDataButton_clicked();
+
+private:
         Ui::maindialog *ui;
         QMap<QString, uint32_t> config;
         SENSOR_CONFIGS_t configuration_settings;
