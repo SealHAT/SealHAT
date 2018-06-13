@@ -30,39 +30,15 @@ int32_t ctrlLog_write(uint8_t* buff, const uint32_t LEN)
 {
     uint32_t err;
 
-    if(xSemaphoreTake(DATA_mutex, ~0)) {
+    if(xSemaphoreTake(DATA_mutex, portMAX_DELAY)) {
 
         // bail early if there isn't enough space
         portENTER_CRITICAL();
         if(xStreamBufferSpacesAvailable(xDATA_sb) >= LEN) {
             err = xStreamBufferSend(xDATA_sb, buff, LEN, 0);
-        }
-        else {
-            err = ERR_NO_RESOURCE;
-            gpio_set_pin_level(LED_RED, false);
-        }
-        portEXIT_CRITICAL();
-
-        xSemaphoreGive(DATA_mutex);
-    }
-    else {
-        err = ERR_FAILURE;
-        gpio_set_pin_level(LED_RED, false);
-    }
-
-    return err;
-}
-
-int32_t ctrlLog_writeISR(uint8_t* buff, const uint32_t LEN)
-{
-    uint32_t err;
-
-    if(xSemaphoreTake(DATA_mutex, ~0)) {
-
-        // bail early if there isn't enough space
-        portENTER_CRITICAL();
-        if(xStreamBufferSpacesAvailable(xDATA_sb) >= LEN) {
-            err = xStreamBufferSendFromISR(xDATA_sb, buff, LEN, 0);
+            if(err < LEN) {
+                gpio_set_pin_level(LED_RED, false);
+            }
         }
         else {
             err = ERR_NO_RESOURCE;
@@ -113,12 +89,19 @@ void DATA_task(void* pvParameters)
     int32_t err;
     (void)pvParameters;
     static DATA_TRANSMISSION_t usbPacket;
+    static uint32_t idx;
+
+    err = xStreamBufferSetTriggerLevel(xDATA_sb, PAGE_SIZE_LESS);
 
     /* Receive and write data forever. */
     for(;;)
     {
         /* Receive a page worth of data. */
-        xStreamBufferReceive(xDATA_sb, usbPacket.data, PAGE_SIZE_LESS, portMAX_DELAY);
+        idx = 0;
+        while(idx < PAGE_SIZE_LESS) {
+            err = xStreamBufferReceive(xDATA_sb, (usbPacket.data + idx), (PAGE_SIZE_LESS - idx), portMAX_DELAY);
+            idx += err;
+        }
 
         /* Write data to USB if the appropriate flag is set. */
         if((xEventGroupGetBits(xSYSEVENTS_handle) & EVENT_LOGTOUSB) != 0)
@@ -144,12 +127,12 @@ void DATA_task(void* pvParameters)
                 }
             }
          }
-         
+
          /* Log data to flash if the appropriate flag is set. */
          if((xEventGroupGetBits(xSYSEVENTS_handle) & EVENT_LOGTOFLASH) != 0)
          {
              /* Write data to external flash device. */
              //flash_io_write(&seal_flash_descriptor, usbPacket.data, PAGE_SIZE_LESS);
-         }       
+         }
     }
 }
