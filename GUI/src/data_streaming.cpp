@@ -32,15 +32,16 @@ void maindialog::on_startStream_button_clicked()
             if(device.connectToDevice(ui->RXstream_serialPort_comboBox->currentText())) {
 
                 ui->startStream_button->setText("STOP STREAMING");
-                device.sendData("so");
-                connect(&device, &SealHAT_device::samplesReady, this, &maindialog::samplesReceived);
+                device.startStream();
+                connect(&device, &SealHAT_device::samplesReady, this, &maindialog::samplesReceived_stream);
             }
         }
         else {
             qDebug() << "No ports available!";
         }
     }else{
-        disconnect(&device, &SealHAT_device::samplesReady, this, &maindialog::samplesReceived);
+        device.stopStream();
+        disconnect(&device, &SealHAT_device::samplesReady, this, &maindialog::samplesReceived_stream);
         device.disconnectFromDevice();
         ui->startStream_button->setText("START STREAMING");
     }
@@ -57,7 +58,7 @@ void maindialog::writeToStreamBox(QTextEdit* textBox, QString str)
 }
 
 // Slot to receive data from the serial device asyncronously
-void maindialog::samplesReceived(QQueue<SensorSample>* q)
+void maindialog::samplesReceived_stream(QQueue<SensorSample>* q)
 {
     while(!q->empty()) {
         SensorSample sample = q->first();

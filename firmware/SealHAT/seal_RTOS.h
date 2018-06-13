@@ -69,7 +69,7 @@ typedef enum {
 } SYSTEM_EVENT_FLAGS_t;
 
 typedef struct __attribute__((__packed__)){
-    SENSOR_CONFIGS_t config_settings;
+    SENSOR_CONFIGS_t sensorConfigs;
     uint32_t       current_flash_addr;
     uint8_t        current_flash_chip;
 } EEPROM_STORAGE_t;
