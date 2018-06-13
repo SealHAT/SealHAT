@@ -30,39 +30,15 @@ int32_t ctrlLog_write(uint8_t* buff, const uint32_t LEN)
 {
     uint32_t err;
 
-    if(xSemaphoreTake(DATA_mutex, ~0)) {
+    if(xSemaphoreTake(DATA_mutex, portMAX_DELAY)) {
 
         // bail early if there isn't enough space
         portENTER_CRITICAL();
         if(xStreamBufferSpacesAvailable(xDATA_sb) >= LEN) {
             err = xStreamBufferSend(xDATA_sb, buff, LEN, 0);
-        }
-        else {
-            err = ERR_NO_RESOURCE;
-            gpio_set_pin_level(LED_RED, false);
-        }
-        portEXIT_CRITICAL();
-
-        xSemaphoreGive(DATA_mutex);
-    }
-    else {
-        err = ERR_FAILURE;
-        gpio_set_pin_level(LED_RED, false);
-    }
-
-    return err;
-}
-
-int32_t ctrlLog_writeISR(uint8_t* buff, const uint32_t LEN)
-{
-    uint32_t err;
-
-    if(xSemaphoreTake(DATA_mutex, ~0)) {
-
-        // bail early if there isn't enough space
-        portENTER_CRITICAL();
-        if(xStreamBufferSpacesAvailable(xDATA_sb) >= LEN) {
-            err = xStreamBufferSendFromISR(xDATA_sb, buff, LEN, 0);
+            if(err < LEN) {
+                gpio_set_pin_level(LED_RED, false);
+            }
         }
         else {
             err = ERR_NO_RESOURCE;
@@ -144,12 +120,12 @@ void DATA_task(void* pvParameters)
                 }
             }
          }
-         
+
          /* Log data to flash if the appropriate flag is set. */
          if((xEventGroupGetBits(xSYSEVENTS_handle) & EVENT_LOGTOFLASH) != 0)
          {
              /* Write data to external flash device. */
              //flash_io_write(&seal_flash_descriptor, usbPacket.data, PAGE_SIZE_LESS);
-         }       
+         }
     }
 }

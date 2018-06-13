@@ -41,7 +41,10 @@ int main(void)
 
     // start the ECG
     if(ECG_task_init() != ERR_NONE) {
-        gpio_set_pin_level(LED_RED, true);  // will never work if there is no device, shouldn't go into a while(1)
+        // will never work if there is no device, shouldn't go into a while(1)
+        gpio_set_pin_level(LED_RED, false);
+        delay_ms(100);
+        gpio_set_pin_level(LED_RED, true);
     }
 
     // GPS task init

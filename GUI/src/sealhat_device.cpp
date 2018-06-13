@@ -61,6 +61,7 @@ void SealHAT_device::disconnectFromDevice()
     }
 
     rawDataLog.close();
+    preCRCfile.close();
     pollTimer.stop();
     in_data.clear();
 }
@@ -155,8 +156,9 @@ bool SealHAT_device::getConfig()
 
             stream >> config;
 
+            // TODO CRC32 check of the data
+
             if((config.header.startSym == MSG_START_SYM) && (config.header.id == DEVICE_ID_CONFIG)) {
-                // TODO CRC32 check of the data
                 this->devCfg = config.sensorConfigs;
             }
 
@@ -217,13 +219,11 @@ void SealHAT_device::deserializeDataPackets()
                 default : qDebug() << QString("Err: invalid sensor (%1) with packet size %2").arg(tmpHeader.id).arg(tmpHeader.size);
             };
 
-            index = clean_data.indexOf(QByteArray(MSG_START_SYM_STR), sizeof(DATA_HEADER_t));
-            if(index > (tmpHeader.size + sizeof(DATA_HEADER_t))) {
+            clean_data.remove(0, (tmpHeader.size + sizeof(DATA_HEADER_t)));
+            index = clean_data.indexOf(QByteArray(MSG_START_SYM_STR));
+            if(index > int(tmpHeader.size + sizeof(DATA_HEADER_t))) {
                 qDebug() << "warning: index of next header not immediatly after the last! index:" << index << "  arrSize:" << clean_data.size();
             }
-            clean_data.remove(0, (tmpHeader.size + sizeof(DATA_HEADER_t)));
-            clean_data.shrink_to_fit();
-            qDebug() << "size of clean_data: " << clean_data.size();
         }
         else {
             qDebug() << "incomplete packet, leaving till next time";
@@ -242,17 +242,19 @@ void SealHAT_device::parse_si7051(QDataStream& stream, DATA_HEADER_t header)
     const float TEMP_STEP_SIZE   = 175.72;
     const float TEMP_ZERO_OFFSET = 46.85;
     const int   TEMP_RANGE       = 65536;
-    const int   MS_PERIOD        = 1000;
     const int   SAMPLE_SIZE      = sizeof(uint16_t);
 
     QDateTime     timestamp;
+    int           msPeriod;
     int           sampleCount = header.size / SAMPLE_SIZE;
     quint16       tempRAW;
     SENSOR_DATA_t valueSI;
 
+    msPeriod = devCfg.envConfig.period * 1000;
+
     // set the time, then subract the period * number of sample for time of first sample in buffer
     timestamp.setSecsSinceEpoch(header.timestamp);
-    timestamp = timestamp.addMSecs((-MS_PERIOD)*sampleCount);
+    timestamp = timestamp.addMSecs((-msPeriod)*sampleCount);
 
     while(sampleCount > 0) {
         stream >> tempRAW;
@@ -260,7 +262,7 @@ void SealHAT_device::parse_si7051(QDataStream& stream, DATA_HEADER_t header)
         data_q.enqueue(SensorSample(DEVICE_ID_TEMPERATURE, timestamp, header.packetCount, valueSI));
 
         sampleCount--;
-        timestamp = timestamp.addMSecs(MS_PERIOD);
+        timestamp = timestamp.addMSecs(msPeriod);
     }
 }
 
@@ -271,9 +273,12 @@ void SealHAT_device::parse_max44009(QDataStream& stream, DATA_HEADER_t header)
     const int   SAMPLE_SIZE            = sizeof(uint16_t);
 
     QDateTime     timestamp;
+    int           msPeriod;
     int           sampleCount = header.size / SAMPLE_SIZE;
     quint8        luxMantissa, luxExponent;
     SENSOR_DATA_t valueSI;
+
+    msPeriod = devCfg.envConfig.period * 1000;
 
     // set the time, then subract the period * number of sample for time of first sample in buffer
     timestamp.setSecsSinceEpoch(header.timestamp);
@@ -293,24 +298,27 @@ void SealHAT_device::parse_lsm303agr_acc(QDataStream& stream, DATA_HEADER_t head
 {
     // different Scales, there are 3 modes and 4 full scale settings. these are mg/LSB values from data sheet page 13. these are rounded ints from the STM API
     static const uint8_t   intScale[3][4] = {{1,   2,  4,  12}, {4,   8, 16,  48}, {16, 32, 64, 192}};
-    const ACC_OPMODE_t     CURRENT_MODE  = ACC_HR_50_HZ;
-    const ACC_FULL_SCALE_t CURRENT_SCALE = ACC_SCALE_2G;
     const int              SAMPLE_SIZE   = sizeof(AxesRaw_t);
 
-    QDateTime     timestamp;
-    unsigned int  i, j, shift, msPeriod;
-    int           sampleCount = header.size / SAMPLE_SIZE;
-    qint16        accX, accY, accZ;
-    SENSOR_DATA_t valSI;
+    QDateTime        timestamp;
+    ACC_OPMODE_t     accMode;
+    ACC_FULL_SCALE_t accScale;
+    unsigned int     i, j, shift, msPeriod;
+    int              sampleCount = header.size / SAMPLE_SIZE;
+    qint16           accX, accY, accZ;
+    SENSOR_DATA_t    valSI;
 
-    switch(CURRENT_MODE & ACC_POWER_MODE_MASK) {
+    accMode  = devCfg.accConfig.opMode;
+    accScale = devCfg.accConfig.scale;
+
+    switch(accMode & ACC_POWER_MODE_MASK) {
         case ACC_NORMAL_POWER : i = 1; shift = 6; break;
         case ACC_LOW_POWER : i = 2; shift = 8; break;
         case ACC_HIGH_RESOLUTION :
         default :           i = 0; shift = 4;
     };
 
-    switch(CURRENT_MODE & ACC_RATE_MASK) {
+    switch(accMode & ACC_RATE_MASK) {
         case ACC_1_HZ   : msPeriod = 1000; break;
         case ACC_10_HZ  : msPeriod = 100; break;
         case ACC_25_HZ  : msPeriod = 40; break;
@@ -321,7 +329,7 @@ void SealHAT_device::parse_lsm303agr_acc(QDataStream& stream, DATA_HEADER_t head
         default    : msPeriod = 20;
     };
 
-    switch(CURRENT_SCALE) {
+    switch(accScale) {
         case ACC_SCALE_4G:  j = 1; break;
         case ACC_SCALE_8G:  j = 2; break;
         case ACC_SCALE_16G: j = 3; break;
@@ -347,17 +355,19 @@ void SealHAT_device::parse_lsm303agr_acc(QDataStream& stream, DATA_HEADER_t head
 
 void SealHAT_device::parse_lsm303agr_mag(QDataStream& stream, DATA_HEADER_t header)
 {
-    const MAG_OPMODE_t MAG_RATE    = MAG_LP_50_HZ;
     const float        MAG_CONST   = 1.5;
     const int          SAMPLE_SIZE = sizeof(AxesRaw_t);
 
     QDateTime     timestamp;
+    MAG_OPMODE_t  magRate;
     unsigned int  msPeriod;
     int           sampleCount = header.size / SAMPLE_SIZE;
     qint16        magX, magY, magZ;
     SENSOR_DATA_t valSI;
 
-    switch(MAG_RATE & MAG_RATE_MASK) {
+    magRate = devCfg.magConfig.opMode;
+
+    switch(magRate & MAG_RATE_MASK) {
         case MAG_10_HZ  : msPeriod = 100; break;
         case MAG_20_HZ  : msPeriod = 50; break;
         case MAG_50_HZ  : msPeriod = 20; break;
@@ -413,22 +423,32 @@ void SealHAT_device::StreamingReadyRead_cb()
     else {
         int index = in_data.indexOf(QByteArray(USB_PACKET_START_SYM_STR));
         if(index >= 0) {
-            in_data.remove(0, index+4);
+            in_data.remove(0, index);
         }
         else {
             qDebug() << "Pattern Not Found: \"CAFED00D\"";
         }
 
         if(in_data.size() >= dataAndCRC) {
-            QByteArray tempArray = in_data;
-            tempArray.chop(tempArray.size()-dataAndCRC);
+            QDataStream stream(&in_data, QIODevice::ReadOnly);
+            DATA_TRANSMISSION_t usbPacket;
+            quint32 crcCalculated;
 
-            // TODO: perform CRC32, Qt doesnt have an implementation??
-            tempArray.chop(4);
+            stream >> usbPacket;
 
-            // send the verefied data to the clean array, and chop it off the in_data
-            clean_data.append(tempArray);
-            in_data.remove(0, dataAndCRC);
+//            crc32.initInstance(1);
+//            crc32.pushData(1, (char*)usbPacket.data, PAGE_SIZE_LESS);
+//            crcCalculated = crc32.releaseInstance(1);
+
+            // append to the clean buffer if header and CRC match
+            if((usbPacket.startSymbol == USB_PACKET_START_SYM)) {
+                clean_data.append((const char*)usbPacket.data, PAGE_SIZE_LESS);
+            }
+            else {
+                qDebug() << "packet failed integrity check";
+            }
+
+            in_data.remove(0, sizeof(DATA_TRANSMISSION_t));
         }
         else {
             qDebug() << "Not a full USB packet, saving data for next round.";
@@ -600,20 +620,20 @@ QDataStream& operator>>(QDataStream& stream, SYSTEM_CONFIG_t& sysCfg)
     return stream;
 }
 
-//QDataStream& operator>>(QDataStream& stream, DATA_TRANSMISSION_t& txData) {
-//    quint32 temp_startSymbol;
-//    quint32 temp_crc;
+QDataStream& operator>>(QDataStream& stream, DATA_TRANSMISSION_t& txData) {
+    quint32 temp_startSymbol;
+    quint32 temp_crc;
+    stream.setByteOrder(QDataStream::LittleEndian);
 
-//    stream >> temp_startSymbol;
+    stream >> temp_startSymbol;
+    txData.startSymbol = temp_startSymbol;
 
-//    for(int i=0;i<PAGE_SIZE_EXTRA; i++){
-//        stream >> txData.data[i];
-//    }
+    for(int i=0;i<PAGE_SIZE_LESS; i++){
+        stream >> txData.data[i];
+    }
 
-//    stream >> temp_crc;
+    stream >> temp_crc;
+    txData.crc = (uint32_t)temp_crc;
 
-//    txData.startSymbol = (uint32_t)temp_startSymbol;
-//    txData.crc = (uint32_t)temp_crc;
-
-//    return stream;
-//}
+    return stream;
+}

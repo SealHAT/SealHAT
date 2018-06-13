@@ -11,6 +11,7 @@
 #include <QFile>
 #include "seal_Types.h"
 #include "sensorsample.h"
+#include "crc32.h"
 
 class SealHAT_device : public QObject
 {
@@ -35,7 +36,6 @@ public:
     bool getConfig();
     // send configuration to the device
     bool sendConfig();
-
 
     // check how many sensor samples are ready for consumption
     int queueSize();
@@ -80,11 +80,12 @@ private:
      QQueue<SensorSample> data_q;       // queue of processed sensor readings
      QFile                rawDataLog;   // file to log raw data from device for debug
      QFile                preCRCfile;   // file to log raw data prior to CRC check
+     Crc32                crc32;        // crc32 class
 };
 
 QDataStream& operator>>(QDataStream& stream, DATA_HEADER_t& header);
 QDataStream& operator>>(QDataStream& stream, SENSOR_CONFIGS_t& sensorCfg);
 QDataStream& operator>>(QDataStream& stream, SYSTEM_CONFIG_t& sysCfg);
-//QDataStream& operator>>(QDataStream& stream, DATA_TRANSMISSION_t& txData);
+QDataStream& operator>>(QDataStream& stream, DATA_TRANSMISSION_t& txData);
 
 #endif // SEALHAT_DEVICE_H
