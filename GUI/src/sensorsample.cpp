@@ -66,7 +66,7 @@ QString SensorSample::get_SI()
                                                 QString::number(data.geeps.time.hour) + ":" + QString::number(data.geeps.time.minute) + ":" + QString::number(data.geeps.time.second) + "," +
                                                 QString::number(data.geeps.position.lon) + " " + QString::number(data.geeps.position.lat);    //TODO: format time and position to taste
                 break;
-        case DEVICE_ID_EKG            : value = QString("Err: no EKG code yet");
+    case DEVICE_ID_EKG                : value = QString::number(data.voltage, 'f');
                 break;
         case DEVICE_ID_SYSTEM         : value = QString("Err: no SYS code yet");
                 break;
