@@ -33,8 +33,6 @@ void ECG_isr_dataready(void)
 
  int32_t ECG_task_init(void)
  {
-    int32_t retval;
-
     if (ERR_NONE != ecg_spi_init()) {
         return ERR_NOT_INITIALIZED;
     }
@@ -42,7 +40,8 @@ void ECG_isr_dataready(void)
     if (ERR_NONE != ecg_init()) {
         return ERR_NOT_INITIALIZED;
     }
-
+    ecg_synch();
+    
     xECG_th = xTaskCreateStatic(ECG_task, "ECG", ECG_STACK_SIZE, NULL, ECG_TASK_PRI, xECG_stack, &xECG_taskbuf);
     configASSERT(xECG_th);
     return ERR_NONE;
@@ -50,7 +49,6 @@ void ECG_isr_dataready(void)
 
  void ECG_task(void *pvParameters)
  {
-    int32_t     err = 0;                // for catching API errors
     int32_t     count = 0;              /* track the number of samples read from FIFO */
     uint32_t    ulNotifyValue;          // notification value from ISRs
     BaseType_t  xResult;                // holds return value of blocking function
@@ -85,7 +83,9 @@ void ECG_isr_dataready(void)
         if (pdPASS == xResult) {
             /* if the watermark was hit */
             if (ECG_DATA_READY) {
+                portENTER_CRITICAL();
                 count = ecg_get_sample_burst(ecg_msg.log, ECG_LOG_SIZE);
+                portEXIT_CRITICAL();
 
                 timestamp_FillHeader(&ecg_msg.header);
                 if (0 < count) {
