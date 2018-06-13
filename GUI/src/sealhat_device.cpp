@@ -75,7 +75,7 @@ bool SealHAT_device::startStream()
 {
     const char streamCmd = STREAM_DATA;
     QByteArray data;            // for reading out temporary data
-    bool            retval;     // return value
+    bool       retval;          // return value
 
     // set default return value
     retval = false;
@@ -88,9 +88,9 @@ bool SealHAT_device::startStream()
         data += sealhat.readAll();
         if(data.contains(USB_TEXT_ADVENTURE_MENU)) {
             qDebug() << "received menu, starting stream";
-            sealhat.write(&streamCmd);
             connect(&pollTimer, &QTimer::timeout, this, &SealHAT_device::SerialTimerTimout_cb);
             connect(&sealhat, &QSerialPort::readyRead, this, &SealHAT_device::StreamingReadyRead_cb);
+            sealhat.write(&streamCmd);
             retval = true;
         }
         else {
@@ -120,11 +120,33 @@ void SealHAT_device::stopStream() {
 
 bool SealHAT_device::download()
 {
-    const char verifyCmd = DOWNLOAD_DATA;
-    bool            retval;     // return value
+    const char downloadCmd = DOWNLOAD_DATA;
+    QByteArray data;       // for reading bytes out of serial
+    bool       retval;     // return value
 
     // set default return value
     retval = false;
+
+    // get the current device configuration, so data is interpreted correctly
+    getConfig();
+
+    sealhat.setDataTerminalReady(true);
+    if(sealhat.waitForReadyRead(800)) {
+        data += sealhat.readAll();
+        if(data.contains(USB_TEXT_ADVENTURE_MENU)) {
+            qDebug() << "received menu, starting download";
+            connect(&pollTimer, &QTimer::timeout, this, &SealHAT_device::SerialTimerTimout_cb);
+            connect(&sealhat, &QSerialPort::readyRead, this, &SealHAT_device::StreamingReadyRead_cb);
+            sealhat.write(&downloadCmd);
+            retval = true;
+        }
+        else {
+            qDebug() << "No Menu Received";
+        }
+    }
+    else {
+        qDebug() << "No data received from " << sealhat.portName();
+    }
 
     return retval;
 }
@@ -178,15 +200,55 @@ bool SealHAT_device::getConfig()
     return retval;
 }
 
-bool SealHAT_device::sendConfig()
+bool SealHAT_device::sendConfig(SYSTEM_CONFIG_t newConfigs)
 {
     const char configCmd = CONFIGURE_DEV;
-    bool            retval;     // return value
+    QByteArray data;            // for reading bytes out of serial
+    bool       sendSuccess;     // sent successfuly
 
     // set default return value
-    retval = false;
+    sendSuccess = false;
 
-    return retval;
+    sealhat.setDataTerminalReady(true);
+    if(sealhat.waitForReadyRead(800)) {
+        data += sealhat.readAll();
+        if(data.contains(USB_TEXT_ADVENTURE_MENU)) {
+            qDebug() << "received menu, starting download";
+            data.clear();
+            sealhat.write(&configCmd);
+
+            // wait for and confirm the read response
+            sealhat.waitForReadyRead(100);
+            data = sealhat.readAll();
+            if(data.at(0) == READY_TO_RECEIVE) {
+                QByteArray config2send((const char*)&newConfigs);
+                sealhat.write(config2send, sizeof(SYSTEM_CONFIG_t));
+                sealhat.waitForReadyRead(500);
+                data = sealhat.readAll();
+
+                if(data.at(0) == OPERATION_SUCCESS) {
+                    sendSuccess = true;
+                }
+                else {
+                    qDebug() << "Config sent, but no confirmation received";
+                }
+            }
+            else {
+                qDebug() << "No ready to receive signal, aborting";
+            }
+        }
+        else {
+            qDebug() << "No Menu Received";
+        }
+    }
+    else {
+        qDebug() << "No data received from " << sealhat.portName();
+    }
+
+    // get the current device configuration, so data is interpreted correctly
+    getConfig();
+
+    return sendSuccess;
 }
 
 void SealHAT_device::deserializeDataPackets()
