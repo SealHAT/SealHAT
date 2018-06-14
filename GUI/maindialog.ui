@@ -386,7 +386,7 @@ background-color: qconicalgradient(cx:0.352, cy:0.613636, angle:0, stop:0.954545
       <string notr="true">background-color: rgb(152, 162, 173);</string>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="ConfigureHomePage">
       <widget class="QLabel" name="welcomeHeadingLabel">
@@ -639,35 +639,11 @@ color:black;</string>
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
-      <widget class="QPushButton" name="cButton">
-       <property name="geometry">
-        <rect>
-         <x>440</x>
-         <y>20</y>
-         <width>101</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">background-color: rgb(202, 212, 223);
-color:black;</string>
-       </property>
-       <property name="text">
-        <string>&quot;c&quot;</string>
-       </property>
-      </widget>
       <widget class="QPushButton" name="sendConfigsButton">
        <property name="geometry">
         <rect>
          <x>440</x>
-         <y>60</y>
+         <y>20</y>
          <width>101</width>
          <height>31</height>
         </rect>

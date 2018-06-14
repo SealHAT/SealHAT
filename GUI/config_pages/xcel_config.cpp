@@ -7,6 +7,7 @@
 
 void maindialog::xcel_changeMode()
 {
+    ACC_CFG_t temp = guiConfig.getAccelConfig();
     uint8_t pwrIndex = 0;
     uint8_t freq;
 
@@ -17,92 +18,95 @@ void maindialog::xcel_changeMode()
     {
         switch(freq){
         case ACC_FREQ_1HZ:
-            configuration_settings.accConfig.opMode = ACC_LP_1_HZ;
+            temp.opMode = ACC_LP_1_HZ;
         break;
         case ACC_FREQ_10HZ:
-            configuration_settings.accConfig.opMode = ACC_LP_10_HZ;
+            temp.opMode = ACC_LP_10_HZ;
         break;
         case ACC_FREQ_25HZ:
-            configuration_settings.accConfig.opMode = ACC_LP_25_HZ;
+            temp.opMode = ACC_LP_25_HZ;
         break;
         case ACC_FREQ_50HZ:
-            configuration_settings.accConfig.opMode = ACC_LP_50_HZ;
+            temp.opMode = ACC_LP_50_HZ;
         break;
         case ACC_FREQ_100HZ:
-            configuration_settings.accConfig.opMode = ACC_LP_100_HZ;
+            temp.opMode = ACC_LP_100_HZ;
         break;
         case ACC_FREQ_200HZ:
-            configuration_settings.accConfig.opMode = ACC_LP_200_HZ;
+            temp.opMode = ACC_LP_200_HZ;
         break;
         case ACC_FREQ_400HZ:
-            configuration_settings.accConfig.opMode = ACC_LP_400_HZ;
+            temp.opMode = ACC_LP_400_HZ;
         break;
         }
 
     }else if(pwrIndex == ACC_NORMAL){
         switch(freq){
         case ACC_FREQ_1HZ:
-            configuration_settings.accConfig.opMode = ACC_NORM_1_HZ;
+            temp.opMode = ACC_NORM_1_HZ;
         break;
         case ACC_FREQ_10HZ:
-            configuration_settings.accConfig.opMode = ACC_NORM_10_HZ;
+            temp.opMode = ACC_NORM_10_HZ;
         break;
         case ACC_FREQ_25HZ:
-            configuration_settings.accConfig.opMode = ACC_NORM_25_HZ;
+            temp.opMode = ACC_NORM_25_HZ;
         break;
         case ACC_FREQ_50HZ:
-            configuration_settings.accConfig.opMode = ACC_NORM_50_HZ;
+            temp.opMode = ACC_NORM_50_HZ;
         break;
         case ACC_FREQ_100HZ:
-            configuration_settings.accConfig.opMode = ACC_NORM_100_HZ;
+            temp.opMode = ACC_NORM_100_HZ;
         break;
         case ACC_FREQ_200HZ:
-            configuration_settings.accConfig.opMode = ACC_NORM_200_HZ;
+            temp.opMode = ACC_NORM_200_HZ;
         break;
         case ACC_FREQ_400HZ:
-            configuration_settings.accConfig.opMode = ACC_NORM_400_HZ;
+            temp.opMode = ACC_NORM_400_HZ;
         break;
         }
 
     }else if(pwrIndex == ACC_HR){
         switch(freq){
         case ACC_FREQ_1HZ:
-            configuration_settings.accConfig.opMode = ACC_HR_1_HZ;
+            temp.opMode = ACC_HR_1_HZ;
         break;
         case ACC_FREQ_10HZ:
-            configuration_settings.accConfig.opMode = ACC_HR_10_HZ;
+            temp.opMode = ACC_HR_10_HZ;
         break;
         case ACC_FREQ_25HZ:
-            configuration_settings.accConfig.opMode = ACC_HR_25_HZ;
+            temp.opMode = ACC_HR_25_HZ;
         break;
         case ACC_FREQ_50HZ:
-            configuration_settings.accConfig.opMode = ACC_HR_50_HZ;
+            temp.opMode = ACC_HR_50_HZ;
         break;
         case ACC_FREQ_100HZ:
-            configuration_settings.accConfig.opMode = ACC_HR_100_HZ;
+            temp.opMode = ACC_HR_100_HZ;
         break;
         case ACC_FREQ_200HZ:
-            configuration_settings.accConfig.opMode = ACC_HR_200_HZ;
+            temp.opMode = ACC_HR_200_HZ;
         break;
         case ACC_FREQ_400HZ:
-            configuration_settings.accConfig.opMode = ACC_HR_400_HZ;
+            temp.opMode = ACC_HR_400_HZ;
         break;
         }
     }
+    guiConfig.setAcceleration(temp);
 }
 
 void maindialog::on_xcel_scaleBox_currentIndexChanged(int index)
 {
+    ACC_CFG_t temp = guiConfig.getAccelConfig();
     switch(index){
-    case ACC_2G:    configuration_settings.accConfig.scale = ACC_SCALE_2G;
+    case ACC_2G:    temp.scale = ACC_SCALE_2G;
         break;
-    case ACC_4G:    configuration_settings.accConfig.scale = ACC_SCALE_4G;
+    case ACC_4G:    temp.scale = ACC_SCALE_4G;
         break;
-    case ACC_8G:    configuration_settings.accConfig.scale = ACC_SCALE_8G;
+    case ACC_8G:    temp.scale = ACC_SCALE_8G;
         break;
-    case ACC_16G:    configuration_settings.accConfig.scale = ACC_SCALE_16G;
+    case ACC_16G:    temp.scale = ACC_SCALE_16G;
         break;
     }
+    guiConfig.setAcceleration(temp);
 }
 
 void maindialog::on_xcel_pwrBox_currentIndexChanged(int)
@@ -117,30 +121,35 @@ void maindialog::on_xcel_freqBox_currentIndexChanged(int)
 
 void maindialog::on_xcel_sway_checkBox_clicked(bool checked)
 {
+    ACC_CFG_t temp = guiConfig.getAccelConfig();
     if(checked){
-        configuration_settings.accConfig.sensitivity |= (MOTION_INT_X_LOW|MOTION_INT_X_HIGH);
+        temp.sensitivity |= (MOTION_INT_X_LOW|MOTION_INT_X_HIGH);
     }else{
-        configuration_settings.accConfig.sensitivity &= (~(MOTION_INT_X_LOW|MOTION_INT_X_HIGH));
+        temp.sensitivity &= (~(MOTION_INT_X_LOW|MOTION_INT_X_HIGH));
     }
-
+    guiConfig.setAcceleration(temp);
 }
 
 void maindialog::on_xcel_surge_checkBox_clicked(bool checked)
 {
+    ACC_CFG_t temp = guiConfig.getAccelConfig();
     if(checked){
-        configuration_settings.accConfig.sensitivity |= (MOTION_INT_Y_LOW|MOTION_INT_Y_HIGH);
+        temp.sensitivity |= (MOTION_INT_Y_LOW|MOTION_INT_Y_HIGH);
     }else{
-        configuration_settings.accConfig.sensitivity &= (~(MOTION_INT_Y_LOW|MOTION_INT_Y_HIGH));
+        temp.sensitivity &= (~(MOTION_INT_Y_LOW|MOTION_INT_Y_HIGH));
     }
+    guiConfig.setAcceleration(temp);
 }
 
 void maindialog::on_xcel_heave_checkBox_clicked(bool checked)
 {
+    ACC_CFG_t temp = guiConfig.getAccelConfig();
     if(checked){
-        configuration_settings.accConfig.sensitivity |= (MOTION_INT_Z_LOW|MOTION_INT_Z_HIGH);
+        temp.sensitivity |= (MOTION_INT_Z_LOW|MOTION_INT_Z_HIGH);
     }else{
-        configuration_settings.accConfig.sensitivity &= (~(MOTION_INT_Z_LOW|MOTION_INT_Z_HIGH));
+        temp.sensitivity &= (~(MOTION_INT_Z_LOW|MOTION_INT_Z_HIGH));
     }
+    guiConfig.setAcceleration(temp);
 }
 
 /* Enable/Disable xcel sensor.
@@ -170,12 +179,13 @@ void maindialog::xcel_setDefault()
     ui->xcel_thres->setText("0.3");
     uint16_t size = sizeof(ACC_FULL_SCALE_t) + sizeof(ACC_OPMODE_t) + 2*sizeof(uint8_t) + sizeof(uint16_t);
 
-    configuration_settings.accConfig = {
-        0,                                                      // active hours
-        ACC_SCALE_2G,                                           // scale
-        ACC_HR_50_HZ,                                           // mode
-        0x00,                                                  // sensitivity
-        300                                                    // threshold
+    ACC_CFG_t temp = {
+        0,              // active hours
+        ACC_SCALE_2G,   // scale
+        ACC_HR_50_HZ,   // mode
+        300,            // threshold
+        0,              // duration
+        0x00            // sensitivity
     };
     xcel_checkTimetoEnable();
 }
@@ -201,13 +211,15 @@ void maindialog::on_xcel_SW_clicked()
 */
 void maindialog::on_xcel_timeclear_button_clicked()
 {
+    ACC_CFG_t temp = guiConfig.getAccelConfig();
     for(QPushButton* button : ui->xcelConfigPage->findChildren<QPushButton*>()) {
         if(button->property("button_shift").isValid()) {
-            configuration_settings.accConfig.activeHour = 0;
+            temp.activeHour = 0;
             button->setProperty("clicked", false);
             button->setStyleSheet("background-color:rgb(202, 212, 223);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
-            }
         }
+    }
+    guiConfig.setAcceleration(temp);
 }
 
 void maindialog::xcel_estimation_control()
@@ -230,6 +242,7 @@ void maindialog::on_xcel_thres_editingFinished()
 {
     QPalette sample_palette;
     sample_palette.setColor(QPalette::WindowText, Qt::red);
+    ACC_CFG_t temp = guiConfig.getAccelConfig();
 
     int valid = INVALID;
     int pos;
@@ -267,33 +280,34 @@ void maindialog::on_xcel_thres_editingFinished()
         ui->thres_warnLABEL->show();
     }else{
         ui->thres_warnLABEL->hide();
-        configuration_settings.accConfig.threshold = (ui->xcel_thres->text().toDouble())*1000;
-        //qDebug() << configuration_settings.accConfig.acc_threshold << endl;
+        temp.threshold = (ui->xcel_thres->text().toDouble())*1000;
+        //qDebug() << temp.accConfig.acc_threshold << endl;
     }
-
+    guiConfig.setAcceleration(temp);
 }
 
 
 void maindialog::xcel_hour_clicked()
 {
-
+    ACC_CFG_t temp = guiConfig.getAccelConfig();
     QPushButton* button = qobject_cast<QPushButton*>(sender());
     if(!button->property("clicked").isValid()) {
         button->setProperty("clicked", false);
     }
     bool clicked = button->property("clicked").toBool();
     button->setProperty("clicked", !clicked);
-        if(!clicked) {
-            button->setStyleSheet("background-color:rgb(253,199,0);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");//background-color: rgb(172, 182, 193);
-            configuration_settings.accConfig.activeHour |= 1 << button->property("button_shift").toInt();
-        } else {
-            button->setStyleSheet("background-color:rgb(202, 212, 223);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
-            configuration_settings.accConfig.activeHour &= ~(1 << button->property("button_shift").toInt());
-        }
+    if(!clicked) {
+        button->setStyleSheet("background-color:rgb(253,199,0);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");//background-color: rgb(172, 182, 193);
+        temp.activeHour |= 1 << button->property("button_shift").toInt();
+    } else {
+        button->setStyleSheet("background-color:rgb(202, 212, 223);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
+        temp.activeHour &= ~(1 << button->property("button_shift").toInt());
+    }
+    guiConfig.setAcceleration(temp);
 }
 
 void maindialog::xcel_checkTimetoEnable(){
-    if(configuration_settings.accConfig.activeHour){
+    if(guiConfig.getAccelConfig().activeHour){
         IMUxcel_Disable(false);
     }else{
         IMUxcel_Disable(true);
@@ -317,7 +331,7 @@ void maindialog::xcel_getloadData(){
         if(button->property("button_shift").isValid()) {
             shift_property = button->property("button_shift").toInt();
             bit_Mask = (0x01 << shift_property);
-            if((configuration_settings.accConfig.activeHour&bit_Mask))
+            if((guiConfig.getAccelConfig().activeHour&bit_Mask))
             {
                       button->setProperty("clicked", true);
                       button->setStyleSheet("background-color:rgb(34,139,34)");
@@ -329,11 +343,11 @@ void maindialog::xcel_getloadData(){
         }
     }
 
-    uint8_t acc_scaleSelect =  (configuration_settings.accConfig.scale/16)%10 ;
-    uint8_t acc_freqSelect = (configuration_settings.accConfig.opMode/16)%10 - 1;
-    uint8_t xcel_pwrSelect = (configuration_settings.accConfig.opMode%16)/4;
-    uint8_t xcel_sensitivity = configuration_settings.accConfig.sensitivity;
-    QString xcel_threshold = QString::number((double)configuration_settings.accConfig.threshold/1000,'f',2);
+    uint8_t acc_scaleSelect =  (guiConfig.getAccelConfig().scale/16)%10 ;
+    uint8_t acc_freqSelect = (guiConfig.getAccelConfig().opMode/16)%10 - 1;
+    uint8_t xcel_pwrSelect = (guiConfig.getAccelConfig().opMode%16)/4;
+    uint8_t xcel_sensitivity = guiConfig.getAccelConfig().sensitivity;
+    QString xcel_threshold = QString::number((double)guiConfig.getAccelConfig().threshold/1000,'f',2);
 
     ui->xcel_scaleBox->setCurrentIndex(acc_scaleSelect);
     ui->xcel_pwrBox->setCurrentIndex(xcel_pwrSelect);
@@ -370,11 +384,12 @@ void maindialog::xcel_getloadData(){
 
 void maindialog::xcel_disable_button(bool disable)
 {
+    ACC_CFG_t temp = guiConfig.getAccelConfig();
     for(QPushButton* button : ui->xcelConfigPage->findChildren<QPushButton*>()) {
         if(button->property("button_shift").isValid()) {
             button->setDisabled(disable);
             if(disable){
-                configuration_settings.accConfig.activeHour = 0;
+                temp.activeHour = 0;
                 button->setProperty("clicked", false);
                 button->setStyleSheet("background-color:rgb(142, 152, 163);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
             }else{
@@ -382,4 +397,5 @@ void maindialog::xcel_disable_button(bool disable)
             }
         }
     }
+    guiConfig.setAcceleration(temp);
 }
