@@ -13,6 +13,11 @@
 #define IMU_STACK_SIZE                  (700 / sizeof(portSTACK_TYPE))  // high water mark of 96 on 26MAY18
 #define IMU_TASK_PRI                    (tskIDLE_PRIORITY + 2)
 
+// bit masks for direct to task notifications
+#define ACC_DATA_READY      (0x01)
+#define MAG_DATA_READY      (0x02)
+#define MOTION_DETECT       (0x04)
+
 extern TaskHandle_t xIMU_th;        // IMU task handle
 
 /**

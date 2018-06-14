@@ -24,7 +24,7 @@
 #include "seal_Types.h"
 #include "seal_UTIL.h"
 
-#define RTC_PERIODIC_INTERRUPT_SYSTICK  RTC_MODE0_INTFLAG_PER3  // 16 Hz periodic RTC interrupt
+#define RTC_PERIODIC_INTERRUPT_SYSTICK  RTC_MODE0_INTFLAG_PER2  // 16 Hz periodic RTC interrupt
 
 #define CONFIG_BLOCK_BASE_ADDR          (0x3F840)   /* First writable page address of on-chip EEPROM. */
 

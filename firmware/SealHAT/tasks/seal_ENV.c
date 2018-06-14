@@ -60,10 +60,6 @@ void ENV_task(void* pvParameters)
             }
             vTaskDelayUntil(&xLastWakeTime, xPeriod);
 
-            // reset the message header and set the timestamp
-            timestamp_FillHeader(&lightMsg.header);
-            timestamp_FillHeader(&tempMsg.header);
-
             // start an asynchronous temperature reading
             portENTER_CRITICAL();
             err = si705x_measure_asyncStart();
@@ -87,6 +83,9 @@ void ENV_task(void* pvParameters)
 
         } // for loop filling the packet
 
+        // reset the message header and set the timestamp
+        timestamp_FillHeader(&lightMsg.header);
+        timestamp_FillHeader(&tempMsg.header);
         // send data to the CTRL task once done
         err = ctrlLog_write((uint8_t*)&tempMsg, sizeof(ENV_MSG_t));
         err = ctrlLog_write((uint8_t*)&lightMsg, sizeof(ENV_MSG_t));

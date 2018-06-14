@@ -9,11 +9,6 @@
 #include "seal_DATA.h"
 #include "LSM303AGR.h"
 
-// bit masks for direct to task notifications
-#define ACC_DATA_READY      (0x01)
-#define MAG_DATA_READY      (0x02)
-#define MOTION_DETECT       (0x04)
-
 TaskHandle_t xIMU_th;                       // IMU task handle
 StaticTask_t xIMU_taskbuf;                  // task buffer for the IMU task
 StackType_t  xIMU_stack[IMU_STACK_SIZE];    // static stack allocation for IMU task

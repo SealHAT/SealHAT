@@ -91,7 +91,7 @@ static const struct _eic_map _map[] = {CONFIG_EIC_EXTINT_MAP};
  */
 static void (*callback)(const uint32_t pin);
 
-static void _ext_irq_handler(void);
+//static void _ext_irq_handler(void);
 
 /**
  * \brief Initialize external interrupt module
@@ -224,57 +224,100 @@ int32_t _ext_irq_enable(const uint32_t pin, const bool enable)
 }
 
 
-#include "seal_IMU.h"
 /**
  * \brief Inter EIC interrupt handler
  */
-static void _ext_irq_handler(void)
-{
-	volatile uint32_t flags = hri_eic_read_INTFLAG_reg(EIC);
-	int8_t            pos;
-	uint32_t          pin = INVALID_PIN_NUMBER;
+// static void _ext_irq_handler(void)
+// {
+// 	volatile uint32_t flags = hri_eic_read_INTFLAG_reg(EIC);
+// 	int8_t            pos;
+// 	uint32_t          pin = INVALID_PIN_NUMBER;
+// 
+// 	hri_eic_clear_INTFLAG_reg(EIC, flags);
+// 
+// 	ASSERT(callback);
+// 
+// 	while (flags) {
+// 		pos = ffs(flags) - 1;
+// 		while (-1 != pos) {
+// 			uint8_t lower = 0, middle, upper = EXT_IRQ_AMOUNT;
+// 
+// 			while (upper >= lower) {
+// 				middle = (upper + lower) >> 1;
+// 				if (_map[middle].extint == pos) {
+// 					pin = _map[middle].pin;
+// 					break;
+// 				}
+// 				if (_map[middle].extint < pos) {
+// 					lower = middle + 1;
+// 				} else {
+// 					upper = middle - 1;
+// 				}
+// 			}
+// 
+// 			if (INVALID_PIN_NUMBER != pin) {
+// 				callback(pin);
+// 			}
+// 			flags &= ~(1ul << pos);
+// 			pos = ffs(flags) - 1;
+// 		}
+// 		flags = hri_eic_read_INTFLAG_reg(EIC);
+// 		hri_eic_clear_INTFLAG_reg(EIC, flags);
+// 	}
+// }
 
-	hri_eic_clear_INTFLAG_reg(EIC, flags);
+#define EIC_NUM_VBUS        (2)
+#define EIC_NUM_GPS         (3)
+#define EIC_NUM_ACC         (4)
+#define EIC_NUM_MAG         (15)
+#define EIC_NUM_MOTION      (5)
+#define EIC_NUM_EKG         (8)
 
-    if(flags & 0x8000){
-        MagnetometerDataReadyISR();
-    }
-
-	ASSERT(callback);
-
-	while (flags) {
-		pos = ffs(flags) - 1;
-		while (-1 != pos) {
-			uint8_t lower = 0, middle, upper = EXT_IRQ_AMOUNT;
-
-			while (upper >= lower) {
-				middle = (upper + lower) >> 1;
-				if (_map[middle].extint == pos) {
-					pin = _map[middle].pin;
-					break;
-				}
-				if (_map[middle].extint < pos) {
-					lower = middle + 1;
-				} else {
-					upper = middle - 1;
-				}
-			}
-
-			if (INVALID_PIN_NUMBER != pin) {
-				callback(pin);
-			}
-			flags &= ~(1ul << pos);
-			pos = ffs(flags) - 1;
-		}
-		flags = hri_eic_read_INTFLAG_reg(EIC);
-		hri_eic_clear_INTFLAG_reg(EIC, flags);
-	}
-}
-
+#include "seal_IMU.h"
+#include "seal_GPS.h"
+#include "seal_ECG.h"
+#include "seal_USB.h"
 /**
 * \brief EIC interrupt handler
 */
 void EIC_Handler(void)
 {
-	_ext_irq_handler();
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;  // will be set to true by notify if we are awakening a higher priority task
+    volatile uint32_t flags = hri_eic_read_INTFLAG_reg(EIC);
+    hri_eic_clear_INTFLAG_reg(EIC, flags);
+
+    if(flags & (1 << EIC_NUM_VBUS)) {
+        if( gpio_get_pin_level(VBUS_DETECT) ) {
+            usb_start();
+            xEventGroupSetBitsFromISR(xSYSEVENTS_handle, EVENT_VBUS, &xHigherPriorityTaskWoken);
+        }
+        else {
+            usb_stop();
+            xEventGroupClearBitsFromISR(xSYSEVENTS_handle, EVENT_VBUS);
+        }
+    }
+    
+    if(flags & (1 << EIC_NUM_GPS)) {
+        xTaskNotifyFromISR(xGPS_th, GPS_NOTIFY_TXRDY, eSetBits, &xHigherPriorityTaskWoken);
+    }
+    
+    if(flags & (1 << EIC_NUM_ACC)) {
+        xTaskNotifyFromISR(xIMU_th, ACC_DATA_READY, eSetBits, &xHigherPriorityTaskWoken);
+    }
+    
+    if(flags & (1 << EIC_NUM_MAG)) {
+        xTaskNotifyFromISR(xIMU_th, MAG_DATA_READY, eSetBits, &xHigherPriorityTaskWoken);
+    }
+    
+    if(flags & (1 << EIC_NUM_MOTION)) {
+        xTaskNotifyFromISR(xIMU_th, MOTION_DETECT, eSetBits, &xHigherPriorityTaskWoken);
+    }
+    
+    if(flags & (1 << EIC_NUM_EKG)) {
+        vTaskNotifyGiveFromISR(xECG_th, &xHigherPriorityTaskWoken);
+    }
+
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+
+//	_ext_irq_handler();
 }
