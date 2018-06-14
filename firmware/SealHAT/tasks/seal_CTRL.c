@@ -47,7 +47,11 @@ void vbus_detection_cb(void)
 
 void alarm_startsensors_cb(struct calendar_descriptor *const calendar)
 {
-    // TODO add code to wake up all sensors here (maybe force all tasks to self-suspend during init)
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    
+    vTaskNotifyGiveFromISR(xCTRL_th, &xHigherPriorityTaskWoken);
+    
+    portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
 }
 
 void vHourlyTimerCallback( TimerHandle_t xTimer )
@@ -76,13 +80,18 @@ int32_t CTRL_task_init(void)
     /* set calendar to a default time and set alarm for some time after */
     date.year  = 2018;
     date.month = 5;
-    date.day   = 4;
+    date.day   = 13;
 
     time.hour = 15;
     time.min  = 59;
-    time.sec  = 50;
+    time.sec  = 30;
 
     // TODO enforce start date beyond current date
+    eeprom_data.sensorConfigs.start_year    = 2018; 
+    eeprom_data.sensorConfigs.start_month   = 5;
+    eeprom_data.sensorConfigs.start_day     = 13;
+    eeprom_data.sensorConfigs.start_hour    = 16;
+    
     RTC_ALARM.cal_alarm.datetime.date.year  = eeprom_data.sensorConfigs.start_year;
     RTC_ALARM.cal_alarm.datetime.date.month = eeprom_data.sensorConfigs.start_month;
     RTC_ALARM.cal_alarm.datetime.date.day   = eeprom_data.sensorConfigs.start_day;
@@ -98,6 +107,7 @@ int32_t CTRL_task_init(void)
     calendar_set_time(&RTC_CALENDAR, &time);
 
     calendar_set_alarm(&RTC_CALENDAR, &RTC_ALARM, alarm_startsensors_cb);
+/*    CTRL_suspend_all();*/
     xEventGroupSetBits(xSYSEVENTS_handle, EVENT_TIME_CHANGE);
 
     /* create a timer with a one hour period for controlling sensors */
@@ -138,7 +148,33 @@ void CTRL_task(void* pvParameters)
     gpio_toggle_pin_level(LED_GREEN);
 
     // enable watchdog timer
-     wdt_enable(&WATCHDOG);
+    wdt_enable(&WATCHDOG);
+    
+    /* before sensors are started, just feed the dog and listen to USB */
+    while( pdFALSE == ulTaskNotifyTake(pdFALSE, pdMS_TO_TICKS(2000)) ) {
+        wdt_feed(&WATCHDOG);
+        
+        if (xEventGroupGetBits(xSYSEVENTS_handle) & EVENT_VBUS) {
+            vTaskResume(xSERIAL_th);
+            
+            /* if the device is to be configured */
+            if(xEventGroupGetBits(xSYSEVENTS_handle) & EVENT_CONFIG_START) {
+                /* continue */
+                xEventGroupClearBits(xSYSEVENTS_handle, EVENT_CONFIG_START);
+                xTaskNotifyGive(xSERIAL_th);
+            }
+            
+            /* if the device is done being configured */
+            if(xEventGroupGetBits(xSYSEVENTS_handle) & EVENT_CONFIG_STOP) {
+                /* reset */
+                xEventGroupClearBits(xSYSEVENTS_handle, EVENT_CONFIG_STOP);
+                _reset_mcu(); for(;;){;}
+            }
+        }
+    }
+    
+    /* allow all sensors to start up */
+    CTRL_resume_all();
 
     /* Receive and write data forever. */
     for(;;) {
@@ -156,15 +192,15 @@ void CTRL_task(void* pvParameters)
             /* if the device is to be configured */
             if(xEventGroupGetBits(xSYSEVENTS_handle) & EVENT_CONFIG_START) {
                 /* shutdown the devices */
-                CTRL_config_start();
                 xEventGroupClearBits(xSYSEVENTS_handle, EVENT_CONFIG_START);
+                CTRL_suspend_all();
                 xTaskNotifyGive(xSERIAL_th);
             }
             
             /* if the device is done being configured */
             if(xEventGroupGetBits(xSYSEVENTS_handle) & EVENT_CONFIG_STOP) {
-                CTRL_config_stop();
                 xEventGroupClearBits(xSYSEVENTS_handle, EVENT_CONFIG_STOP);
+                CTRL_config_stop();
             }                
         }
 
@@ -263,32 +299,55 @@ void CTRL_hourly_update()
 
 }
 
-void CTRL_config_start()
+void CTRL_suspend_all()
 {
     // TODO - replace task shutdowns with notify to individual task and allow them to shut themselves down.
     // TODO - replace the task handles with calls to xTaskGetHandle and use universal sleep notify, then remove includes
     
     /* ECG */
-    while (xECG_th && eSuspended != eTaskGetState(xECG_th)) {
-        xTaskNotify(xECG_th, ECG_NOTIFY_SHUTDOWN, eSetBits);
+    if (xECG_th && eSuspended != eTaskGetState(xECG_th)) {
+       // xTaskNotify(xECG_th, ECG_NOTIFY_SHUTDOWN, eSetBits);
+       vTaskSuspend(xECG_th);
     }
 
     /* ENV */
-    while (xENV_th && eSuspended != eTaskGetState(xENV_th)) {
+    if (xENV_th && eSuspended != eTaskGetState(xENV_th)) {
         vTaskSuspend(xENV_th);
     }
 
     /* GPS */
-    while (xGPS_th && eSuspended != eTaskGetState(xGPS_th)) {
-        xTaskNotify(xGPS_th, ECG_NOTIFY_SHUTDOWN, eSetBits);
+    if (xGPS_th && eSuspended != eTaskGetState(xGPS_th)) {
+        // xTaskNotify(xGPS_th, ECG_NOTIFY_SHUTDOWN, eSetBits);
+        vTaskSuspend(xGPS_th);
     }
     
     /* IMU */
-    while (xIMU_th && eSuspended != eTaskGetState(xIMU_th)) {
+    if (xIMU_th && eSuspended != eTaskGetState(xIMU_th)) {
         vTaskSuspend(xIMU_th);
     }
     
     gpio_set_pin_level(LED_RED, true);
+}
+
+void CTRL_resume_all()
+{
+    // TODO - replace task shutdowns with notify to individual task and allow them to shut themselves down.
+    // TODO - replace the task handles with calls to xTaskGetHandle and use universal sleep notify, then remove includes
+    
+    /* ECG */
+    if (xECG_th) { vTaskResume(xECG_th); }
+    wdt_feed(&WATCHDOG);
+    /* ENV */
+    if (xENV_th) { vTaskResume(xENV_th); }
+    wdt_feed(&WATCHDOG);
+    /* GPS */
+    if (xGPS_th) { vTaskResume(xGPS_th); }
+    wdt_feed(&WATCHDOG);
+    /* IMU */
+    if (xIMU_th) { vTaskResume(xIMU_th); }
+    wdt_feed(&WATCHDOG);
+    
+    gpio_set_pin_level(LED_RED, false);
 }
 
 void CTRL_config_stop()

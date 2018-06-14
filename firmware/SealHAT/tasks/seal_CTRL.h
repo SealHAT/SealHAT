@@ -51,7 +51,12 @@ void CTRL_hourly_update(void);
 /**
  *  Suspend or shutdown all sensors for configuration
  */
-void CTRL_config_start();
+void CTRL_suspend_all();
+
+/**
+ *  Resume all suspended tasks
+ */
+void CTRL_resume_all();
 
 /**
  * Resume or restart all sensors after configuration

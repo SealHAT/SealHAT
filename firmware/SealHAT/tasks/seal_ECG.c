@@ -31,17 +31,24 @@ void ECG_isr_dataready(void)
 
  int32_t ECG_task_init(void)
  {
+    /* initialize spi */
     if (ERR_NONE != ecg_spi_init()) {
         return ERR_NOT_INITIALIZED;
     }
 
+    /* set default settings and update device */
     if (ERR_NONE != ecg_init()) {
         return ERR_NOT_INITIALIZED;
     }
     ecg_synch();
     
+//     /* disable ecg sampling for now */
+//     ecg_sleep();
+    
+    /* create task */
     xECG_th = xTaskCreateStatic(ECG_task, "ECG", ECG_STACK_SIZE, NULL, ECG_TASK_PRI, xECG_stack, &xECG_taskbuf);
     configASSERT(xECG_th);
+    
     return ERR_NONE;
  }
 
@@ -67,6 +74,9 @@ void ECG_isr_dataready(void)
     dataheader_init(&ecg_msg.header);
     ecg_msg.header.id   = DEVICE_ID_EKG;
     ecg_msg.header.size = sizeof(ECG_SAMPLE_t)*ECG_LOG_SIZE;
+    
+//     /* enable the ecg sampling */
+//     ecg_wake();
 
     /* clear the fifo */
     ecg_fifo_reset();

@@ -59,6 +59,10 @@ int32_t GPS_task_init(void *profile)
         configASSERT(xGPS_th);
     }
     
+//     /* tell it to go into low power mode indefinitely */
+//     gpio_set_pin_level(GPS_EXT_INT, false);
+//     gps_nap(0);
+    
     return err;
 }
 
@@ -72,6 +76,9 @@ void GPS_task(void *pvParameters)
     BaseType_t  xResult;            /* holds return value of blocking function  */
     TickType_t  xMaxBlockTime;      /* max time to wait for the task to resume  */
     static GPS_MSG_t gps_msg;	    /* holds the GPS message to store in flash  */
+    
+    /* ensure the device is awake while setting up task */
+    gpio_set_pin_level(GPS_EXT_INT, true);
     
     (void)pvParameters;
     activehours = 0;
@@ -94,18 +101,19 @@ void GPS_task(void *pvParameters)
     dataheader_init(&gps_msg.header);
     gps_msg.header.id  = DEVICE_ID_GPS;
 
-    /* ensure the TX_RDY interrupt is deactivated */
-    gpio_set_pin_level(GPS_TXD, true);
-    
+    /* load settings to ensure the device is ready for the task */
+    gps_loadcfg(0xFFFF);
+
     /* clear the GPS FIFO before enabling interrupt */
     gps_readfifo();
-    
-    /* enable the data ready interrupt (TxReady) */
-    ext_irq_register(GPS_TXD, GPS_isr_dataready);
     
     /* put the device to sleep until its period is up */
     gpio_set_pin_level(GPS_EXT_INT, false);
     gps_nap(samplerate);
+    
+    /* enable the data ready interrupt (TxReady) */
+    ext_irq_register(GPS_TXD, GPS_isr_dataready);
+    
     for (;;) {
         /* wait for notification from ISR, returns `pdTRUE` if task, else `pdFALSE` */
         xResult = xTaskNotifyWait( GPS_NOTIFY_NONE, /* bits to clear on entry       */
