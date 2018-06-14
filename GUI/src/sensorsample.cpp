@@ -1,9 +1,7 @@
 #include "sensorsample.h"
 
 SensorSample::SensorSample()
-{
-
-}
+{ /* EMPTY */ }
 
 SensorSample::SensorSample(DEVICE_ID_t newType, QDateTime newTime, unsigned int seqNum, SENSOR_DATA_t newData)
 {
@@ -31,11 +29,15 @@ QString SensorSample::get_csv()
     csv += QString(",");
     csv += this->get_SI();
 
-    // add blank fields for single data point sensors
+    // add blank field(s) for single and double data point sensors
     if(!(this->sensorType == DEVICE_ID_ACCELEROMETER
          || this->sensorType == DEVICE_ID_MAGNETIC_FIELD
-         || this->sensorType == DEVICE_ID_GYROSCOPE)) {
+         || this->sensorType == DEVICE_ID_GYROSCOPE
+         || this->sensorType == DEVICE_ID_GPS)) {
         csv += QString(",,");
+    }
+    else if(this->sensorType == DEVICE_ID_GPS) {
+        csv += QString(",");
     }
 
     return csv;
@@ -54,15 +56,17 @@ QString SensorSample::get_SI()
                 break;
         case DEVICE_ID_MAGNETIC_FIELD : value = QString("%1,%2,%3").arg(data.magnetic.xAxis, 0, 'f', 6).arg(data.magnetic.yAxis, 0, 'f', 6).arg(data.magnetic.zAxis, 0, 'f', 6);
                 break;
-        case DEVICE_ID_GYROSCOPE      : value = QString("Err: no gyro code yet");
+        case DEVICE_ID_GYROSCOPE      : value = QString("Err: no gyroscope code yet");
                 break;
         case DEVICE_ID_PRESSURE       : value = QString("Err: no pressure code yet");
                 break;
         case DEVICE_ID_DEPTH          : value = QString("Err: no depth code yet");
                 break;
-        case DEVICE_ID_GPS            : value = QString("Err: no GPS code yet");
+        case DEVICE_ID_GPS            : value = QString::number(data.geeps.time.year) + ":" + QString::number(data.geeps.time.month) + ":" + QString::number(data.geeps.time.day) + ":" +
+                                                QString::number(data.geeps.time.hour) + ":" + QString::number(data.geeps.time.minute) + ":" + QString::number(data.geeps.time.second) + "," +
+                                                QString::number(data.geeps.position.lon) + " " + QString::number(data.geeps.position.lat);    //TODO: format time and position to taste
                 break;
-        case DEVICE_ID_EKG            : value = QString("Err: no EKG code yet");
+        case DEVICE_ID_EKG            : value = QString::number(data.voltage, 'f');
                 break;
         case DEVICE_ID_SYSTEM         : value = QString("Err: no SYS code yet");
                 break;

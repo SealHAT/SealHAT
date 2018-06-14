@@ -174,8 +174,9 @@ void maindialog::xcel_setDefault()
         0,                                                      // active hours
         ACC_SCALE_2G,                                           // scale
         ACC_HR_50_HZ,                                           // mode
-        0x00,                                                  // sensitivity
-        300                                                    // threshold
+        300,                                                    // threshold
+        0,                                                      // duration
+        0x00                                                    // sensitivity
     };
     xcel_checkTimetoEnable();
 }

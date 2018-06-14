@@ -19,7 +19,6 @@
 
 extern TaskHandle_t xDATA_th;                       // Message accumulator for USB/MEM
 extern FLASH_DESCRIPTOR seal_flash_descriptor;      /* Declare flash descriptor. */
-//extern DATA_TRANSMISSION_t usbPacket;
 
 /**
  * Function to write to the control
