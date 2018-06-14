@@ -47,7 +47,7 @@
        <property name="geometry">
         <rect>
          <x>120</x>
-         <y>270</y>
+         <y>260</y>
          <width>113</width>
          <height>32</height>
         </rect>
@@ -113,7 +113,7 @@ border: none;</string>
        <property name="geometry">
         <rect>
          <x>120</x>
-         <y>170</y>
+         <y>160</y>
          <width>113</width>
          <height>32</height>
         </rect>
@@ -145,7 +145,7 @@ border: none;</string>
        <property name="geometry">
         <rect>
          <x>120</x>
-         <y>220</y>
+         <y>210</y>
          <width>113</width>
          <height>32</height>
         </rect>
@@ -386,7 +386,7 @@ background-color: qconicalgradient(cx:0.352, cy:0.613636, angle:0, stop:0.954545
       <string notr="true">background-color: rgb(152, 162, 173);</string>
      </property>
      <property name="currentIndex">
-      <number>5</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="ConfigureHomePage">
       <widget class="QLabel" name="welcomeHeadingLabel">
@@ -1890,7 +1890,7 @@ color:black;</string>
         <rect>
          <x>20</x>
          <y>100</y>
-         <width>91</width>
+         <width>101</width>
          <height>20</height>
         </rect>
        </property>
@@ -3631,7 +3631,7 @@ color:black;</string>
         <string notr="true">color:black;</string>
        </property>
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Low Activity Sampling Rate:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Low Activity Sampling Period:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_9">
@@ -3639,7 +3639,7 @@ color:black;</string>
         <rect>
          <x>20</x>
          <y>280</y>
-         <width>211</width>
+         <width>221</width>
          <height>21</height>
         </rect>
        </property>
@@ -3647,27 +3647,7 @@ color:black;</string>
         <string notr="true">color:black;</string>
        </property>
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;High Activity Sampling Rate:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-      </widget>
-      <widget class="QTextEdit" name="gps_lowSamplingRateValue">
-       <property name="geometry">
-        <rect>
-         <x>260</x>
-         <y>220</y>
-         <width>104</width>
-         <height>31</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QTextEdit" name="gps_highSamplingRateValue">
-       <property name="geometry">
-        <rect>
-         <x>260</x>
-         <y>280</y>
-         <width>104</width>
-         <height>31</height>
-        </rect>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;High Activity Sampling Period:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
       <widget class="QPushButton" name="gps_timeclear_button">
@@ -3724,6 +3704,64 @@ color:black;</string>
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:36pt; font-weight:600; color: rgb(0, 60, 108); vertical-align:super;&quot;&gt;Global Positioning System&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
+      <widget class="QLineEdit" name="gps_lowSamplingRateValue">
+       <property name="geometry">
+        <rect>
+         <x>260</x>
+         <y>220</y>
+         <width>51</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>3600000</string>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="gps_highSamplingRateValue">
+       <property name="geometry">
+        <rect>
+         <x>260</x>
+         <y>280</y>
+         <width>51</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>30000</string>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_90">
+       <property name="geometry">
+        <rect>
+         <x>320</x>
+         <y>220</y>
+         <width>47</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>ms</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_91">
+       <property name="geometry">
+        <rect>
+         <x>320</x>
+         <y>280</y>
+         <width>47</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>ms</string>
+       </property>
+      </widget>
       <zorder>label_132</zorder>
       <zorder>label_121</zorder>
       <zorder>label_122</zorder>
@@ -3778,10 +3816,12 @@ color:black;</string>
       <zorder>gps_b_22</zorder>
       <zorder>label_2</zorder>
       <zorder>label_9</zorder>
-      <zorder>gps_lowSamplingRateValue</zorder>
-      <zorder>gps_highSamplingRateValue</zorder>
       <zorder>gps_timeclear_button</zorder>
       <zorder>gps_title</zorder>
+      <zorder>gps_lowSamplingRateValue</zorder>
+      <zorder>gps_highSamplingRateValue</zorder>
+      <zorder>label_90</zorder>
+      <zorder>label_91</zorder>
      </widget>
      <widget class="QWidget" name="ekgConfigPage">
       <widget class="QLabel" name="ekgPageDescription">

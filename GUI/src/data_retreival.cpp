@@ -24,15 +24,15 @@ void maindialog::on_storeData_destinationEdit_returnPressed()
 
 void maindialog::on_chooseDestButton_clicked()
 {
+    QString filename = QFileDialog::getSaveFileName(this,
+                                            tr("Download Device Data"),
+                                            QDir::currentPath(),
+                                            tr("CSV (*.csv);;Data File (*.dat);;Text (*.txt);;All (*.*)")
+                                            );
 
-    QString dir = QFileDialog::getExistingDirectory(
-                this,
-                tr("Open Directory"),
-                "C:/Users/hpan5/Downloads/gui",
-                QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
-            );
+    streamOut.setFileName(filename);
 
-    ui->storeData_destinationEdit->setText(dir);
+    ui->storeData_destinationEdit->setText(filename);
 
     //TODO: only set enabled to true if path is valid and COM port is valid too.
     ui->getDataButton->setEnabled(true);

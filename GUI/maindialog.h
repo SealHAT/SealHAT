@@ -305,6 +305,10 @@ private slots:
 
     //void on_batterySizeText_returnPressed();
 
+    void on_retrieveDataButton_clicked();
+
+    void on_button_rescanDataRetrievalCOM_clicked();
+
     private:
         Ui::maindialog  *ui;
         SealHAT_device   device;         // the sealHat device
