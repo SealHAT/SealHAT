@@ -455,11 +455,60 @@ void SealHAT_device::parse_lsm303agr_mag(QDataStream& stream, DATA_HEADER_t head
 
 void SealHAT_device::parse_samm8q(QDataStream& stream, DATA_HEADER_t header)
 {
-    qDebug() << "GPS??? What GPS??????";
+    const int SAMPLE_SIZE = sizeof(gps_log_t);
+
+    QDateTime     timestamp;
+    unsigned int  msPeriod;
+    int           sampleCount = header.size / SAMPLE_SIZE;
+    SENSOR_DATA_t valSI;
+    gps_log_t     gpsSample;
+
+    // TODO: sample rate is going to be interesting because it isn't consistent for GPS?
+    msPeriod = 1;
+
+    // set the time, then subract the period * number of sample for time of first sample in buffer
+    timestamp.setSecsSinceEpoch(header.timestamp);
+    timestamp = timestamp.addMSecs((-msPeriod)*sampleCount);
+
+    while(sampleCount > 0) {
+        stream >> gpsSample;
+        valSI.geeps.position = gpsSample.position;
+        valSI.geeps.time = gpsSample.time;
+        data_q.enqueue(SensorSample(DEVICE_ID_GPS, timestamp, header.packetCount, valSI));
+
+        sampleCount--;
+        timestamp = timestamp.addMSecs(msPeriod);
+    }
+
+    qDebug() << "GPS??? What GPS?????? -______________-";
 }
 
 void SealHAT_device::parse_max30003(QDataStream& stream, DATA_HEADER_t header)
 {
+    const int SAMPLE_SIZE = sizeof(ECG_SAMPLE_t);
+
+    QDateTime     timestamp;
+    unsigned int  msPeriod;
+    int           sampleCount = header.size / SAMPLE_SIZE;
+    SENSOR_DATA_t valSI;
+    qint32        sample;
+
+    // sample rate in ms
+    msPeriod = devCfg.ekgConfig.freq * 1000;
+
+    // set the time, then subract the period * number of sample for time of first sample in buffer
+    timestamp.setSecsSinceEpoch(header.timestamp);
+    timestamp = timestamp.addMSecs((-msPeriod)*sampleCount);
+
+    while(sampleCount > 0) {
+        stream >> sample;
+        valSI.voltage = float(sample >> 14); // 14 is the sizeof(sample.tag + sample.step) but in bits
+        data_q.enqueue(SensorSample(DEVICE_ID_EKG, timestamp, header.packetCount, valSI));
+
+        sampleCount--;
+        timestamp = timestamp.addMSecs(msPeriod);
+    }
+
     qDebug() << "EKG??? What EKG??????";
 }
 
@@ -662,6 +711,60 @@ QDataStream& operator>>(QDataStream& stream, SENSOR_CONFIGS_t& sensorCfg)
     sensorCfg.envConfig       = tmpEnv;
     sensorCfg.gpsConfig       = tmpGPS;
     sensorCfg.ekgConfig       = tmpEKG;
+
+    return stream;
+}
+
+QDataStream& operator>>(QDataStream& stream, gps_log_t& gpsLog)
+{
+    min_pvt_t  position;
+    utc_time_t time;
+    stream.setByteOrder(QDataStream::LittleEndian);
+
+    stream >> position >> time;
+
+    gpsLog.position = position;
+    gpsLog.time     = time;
+
+    return stream;
+}
+
+QDataStream& operator>>(QDataStream& stream, min_pvt_t& gpsPosition)
+{
+    bool        fixOk;
+    int32_t     lon;	/* int32_t */
+    int32_t     lat;	/* int32_t */
+    stream.setByteOrder(QDataStream::LittleEndian);
+
+    stream >> fixOk >> lon >> lat;
+
+    gpsPosition.fixOk = fixOk;
+    gpsPosition.lon   = lon;
+    gpsPosition.lat   = lat;
+
+    return stream;
+}
+
+QDataStream& operator>>(QDataStream& stream, utc_time_t& gpsTime)
+{
+    uint16_t    year;             /**< 0 .. 257 (1980 == 0)         */
+    uint8_t     month;            /**< 1 .. 12                      */
+    uint8_t     day;              /**< 1 .. 31                      */
+    uint8_t     hour;             /**< 0 .. 23                      */
+    uint8_t     minute;           /**< 0 .. 59                      */
+    uint8_t     second;           /**< 0 .. 60                      */
+    int32_t		nano;			  /**< 0 .. 999                     */
+    stream.setByteOrder(QDataStream::LittleEndian);
+
+    stream >> year >> month >> day >> hour >> minute >> second >> nano;
+
+    gpsTime.year   = year;
+    gpsTime.month  = month;
+    gpsTime.day    = day;
+    gpsTime.hour   = hour;
+    gpsTime.minute = minute;
+    gpsTime.second = second;
+    gpsTime.nano   = nano;
 
     return stream;
 }

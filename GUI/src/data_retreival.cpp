@@ -33,4 +33,8 @@ void maindialog::on_chooseDestButton_clicked()
             );
 
     ui->storeData_destinationEdit->setText(dir);
+
+    //TODO: only set enabled to true if path is valid and COM port is valid too.
+    ui->getDataButton->setEnabled(true);
+    ui->getDataButton->setStyleSheet("background-color:rgb(253, 199, 0)");
 }

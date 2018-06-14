@@ -20,8 +20,6 @@ maindialog::maindialog(QWidget *parent) : QDialog(parent), ui(new Ui::maindialog
     // Set size for smaller welcome screen.
     this->setFixedSize(350, 350);
 
-    ui->retrieveDataButton->hide();
-
     //Hide all the warning labels
     labels_hide();
 
@@ -148,4 +146,14 @@ void maindialog::on_streamDataButton_clicked()
 void maindialog::on_batterySizeText_selectionChanged()
 {
     ui->batterySizeText->clear();
+}
+
+void maindialog::on_retrieveDataButton_clicked()
+{
+    this->setFixedSize(850, 558);
+
+    ui->mainStacked->setCurrentIndex(RETRIEVE_MAIN_STACK);
+    ui->ConfigurePages->setCurrentIndex(RETRIEVE_DATA_HOME_PAGE);
+    ui->getDataButton->setEnabled(false);
+    ui->getDataButton->setStyleSheet("background-color:rgb(152, 162, 173)");
 }

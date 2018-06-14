@@ -92,15 +92,7 @@ void SERIAL_task(void* pvParameters)
                         {
                             /* Notify CTRL that the device is to undergo data retrieval and wait for sensors to sleep */
                             xEventGroupSetBits(xSYSEVENTS_handle, EVENT_RETRIEVE);
-                            ulTaskNotifyTake( pdTRUE, portMAX_DELAY); // TODO add timeout and error handling
-
-                            if (ERR_NONE != retrieve_sealhat_data()) {
-                                usb_put(OPERATION_ERROR);
-                            }
-                            else {
-                                usb_put(OPERATION_SUCCESS);
-                            }
-                            xEventGroupClearBits(xSYSEVENTS_handle, EVENT_RETRIEVE);
+                            //ulTaskNotifyTake( pdTRUE, portMAX_DELAY); // TODO add timeout and error handling
                             break;
                         }
                         case STREAM_DATA:
@@ -144,21 +136,24 @@ void SERIAL_task(void* pvParameters)
             }
 
         } /* END if(usb_state() == USB_Configured) */
-        else {
-            /**
-             * If usb is disconnected, make sure USB streaming is disabled.
-             * Leave flash bit as is, since it will either be activated by the calendar or by a command
-             */
-            xEventGroupClearBits(xSYSEVENTS_handle, EVENT_LOGTOUSB);
+        else
+        {
+            /* Log data to flash only (and not USB) if USB not connected. */
             eBits = xEventGroupGetBits(xSYSEVENTS_handle);
-
-            /* Double check VBUS, but if USB is not enumerated then it probably isn't plugged in */
+            
+            if((eBits & EVENT_LOGTOUSB) == EVENT_LOGTOUSB || (eBits & EVENT_LOGTOFLASH) != EVENT_LOGTOFLASH) {
+                xEventGroupClearBits(xSYSEVENTS_handle, EVENT_LOGTOUSB);
+                xEventGroupSetBits(xSYSEVENTS_handle, EVENT_LOGTOFLASH);
+            }
+            
+            /* if the USB disconnects, suspend the serial interface task */
             if ((eBits & EVENT_VBUS) != EVENT_VBUS) {
                 vTaskSuspend(xSERIAL_th);
             }
         } /* END else */
 
         os_sleep(pdMS_TO_TICKS(100));
+        
     } /* END forever loop */
 }
 
