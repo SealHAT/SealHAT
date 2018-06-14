@@ -281,7 +281,7 @@ void SealHAT_device::deserializeDataPackets()
         stream >> tmpHeader;
 
         // ONLY IF the entire packet is in the clean_data queu do we continue to parse and remove it
-        if((unsigned int)clean_data.size() > (sizeof(DATA_HEADER_t) + tmpHeader.size)) {
+        if((unsigned int)clean_data.size() >= (sizeof(DATA_HEADER_t) + tmpHeader.size)) {
 
             switch(tmpHeader.id) {
                 case DEVICE_ID_LIGHT          : parse_max44009(stream, tmpHeader); break;
@@ -299,7 +299,7 @@ void SealHAT_device::deserializeDataPackets()
 
             clean_data.remove(0, (tmpHeader.size + sizeof(DATA_HEADER_t)));
             index = clean_data.indexOf(QByteArray(MSG_START_SYM_STR));
-            if(index > int(tmpHeader.size + sizeof(DATA_HEADER_t))) {
+            if(index > 0) {
                 qDebug() << "warning: index of next header not immediatly after the last! index:" << index << "  arrSize:" << clean_data.size();
             }
         }
@@ -495,8 +495,6 @@ void SealHAT_device::parse_samm8q(QDataStream& stream, DATA_HEADER_t header)
         sampleCount--;
         timestamp = timestamp.addMSecs(msPeriod);
     }
-
-    qDebug() << "GPS??? What GPS?????? -______________-";
 }
 
 void SealHAT_device::parse_max30003(QDataStream& stream, DATA_HEADER_t header)
@@ -524,15 +522,20 @@ void SealHAT_device::parse_max30003(QDataStream& stream, DATA_HEADER_t header)
         sampleCount--;
         timestamp = timestamp.addMSecs(msPeriod);
     }
-
-    qDebug() << "EKG??? What EKG??????";
 }
 
 /***********************************************************************************************/
 /***********************  SIGNAL HANDLERS FOR SERIAL PORT / USB DEVICE  *** ********************/
 /***********************************************************************************************/
-
 void SealHAT_device::StreamingReadyRead_cb()
+{
+    clean_data.append(sealhat.readAll());
+    this->deserializeDataPackets();
+    emit(samplesReady(&data_q));
+    pollTimer.start(5000);
+}
+
+void SealHAT_device::DownloadReadyRead_cb()
 {
     static const int dataAndCRC = (PAGE_SIZE_LESS + sizeof(int32_t));
 

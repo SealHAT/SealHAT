@@ -68,6 +68,7 @@ public slots:
 
 private slots:
     void StreamingReadyRead_cb();
+    void DownloadReadyRead_cb();
     void SerialTimerTimout_cb();
     void SerialError_cb(QSerialPort::SerialPortError error);
 
