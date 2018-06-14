@@ -116,6 +116,19 @@ void GPS_task(void *pvParameters)
         
         if (pdPASS == xResult) { /* there was an interrupt before the rest period was up */
             
+            /* if device should shutdown */
+            if (GPS_NOTIFY_SHUTDOWN & ulNotifyValue) {
+                /* wake it up */
+                gpio_set_pin_level(GPS_EXT_INT, true);
+                os_sleep(pdMS_TO_TICKS(5));
+                
+                /* tell it to go into low power mode indefinitely */
+                gpio_set_pin_level(GPS_EXT_INT, false);
+                gps_nap(0);
+                
+                vTaskSuspend(xGPS_th);
+            }
+            
             /* if requested, reload the high-res movement minutes */
             if (GPS_NOTIFY_HOUR & ulNotifyValue) {
                 moveminutes = GPS_MAXMOVE / activehours;

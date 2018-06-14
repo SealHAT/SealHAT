@@ -37,8 +37,9 @@ typedef enum {
     EVENT_LOGTOUSB      = 0x00000008, // This bit indicates that the device should be streaming data over USB
     EVENT_DEBUG         = 0x00000010, // This bit indicates that the device is in debug mode. this overrides the other modes.
     EVENT_CONFIG_START  = 0x00000020,
-    EVENT_RETRIEVE      = 0x00000040,
-    EVENT_SYS_6         = 0x00000080,
+    EVENT_CONFIG_STOP   = 0x00000040,
+    EVENT_RETRIEVE      = 0x00000080,
+    EVENT_SYS_6         = 0x00000100,
     EVENT_MASK_SYS      = 0x000000FF, // Mask for watching the system flags
 
     // IMU events. names assume pin 1 of the IMU is in the upper right

@@ -8,8 +8,6 @@
  #include "seal_ECG.h"
  #include "seal_DATA.h"
 
- #define ECG_DATA_READY (0x01)
-
  TaskHandle_t           xECG_th;                    // ECG task handle
  static StaticTask_t    xECG_taskbuf;               // task buffer for the ECG task
  static StackType_t     xECG_stack[ECG_STACK_SIZE]; // static stack allocation for ECG task
@@ -23,7 +21,7 @@ void ECG_isr_dataready(void)
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;  // will be set to true by notify if we are awakening a higher priority task
 
     /* Notify the GPS task that the FIFO has enough data to trigger the TxReady interrupt */
-    vTaskNotifyGiveFromISR(xECG_th, &xHigherPriorityTaskWoken);
+    xTaskNotifyFromISR(xECG_th, ECG_NOTIFY_TXRDY, eSetBits, &xHigherPriorityTaskWoken);
 
     /* If xHigherPriorityTaskWoken is now set to pdTRUE then a context switch
     should be performed to ensure the interrupt returns directly to the highest
@@ -75,14 +73,14 @@ void ECG_isr_dataready(void)
 
     /* main task loop */
     for (;;){
-         xResult = xTaskNotifyWait( pdFALSE,          /* Don't clear bits on entry. */
-                                    ULONG_MAX,        /* Clear all bits on exit. */
+         xResult = xTaskNotifyWait( ECG_NOTIFY_NONE,  /* Don't clear bits on entry. */
+                                    ECG_NOTIFY_ALL,   /* Clear all bits on exit. */
                                     &ulNotifyValue,   /* Stores the notified value. */
                                     xMaxBlockTime );  /* Max time to block before writing an error packet */
 
         if (pdPASS == xResult) {
             /* if the watermark was hit */
-            if (ECG_DATA_READY) {
+            if (ECG_NOTIFY_TXRDY) {
                 portENTER_CRITICAL();
                 count = ecg_get_sample_burst(ecg_msg.log, ECG_LOG_SIZE);
                 portEXIT_CRITICAL();

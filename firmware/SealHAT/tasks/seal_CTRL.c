@@ -6,7 +6,10 @@
  */
 
 #include "seal_CTRL.h"
+#include "seal_ECG.h"
+#include "seal_ENV.h"
 #include "seal_GPS.h"
+#include "seal_IMU.h"
 #include "seal_SERIAL.h"
 #include "seal_USB.h"
 #include "sealPrint.h"
@@ -149,6 +152,20 @@ void CTRL_task(void* pvParameters)
         /* if the USB has been attached */
         if (xEventGroupGetBits(xSYSEVENTS_handle) & EVENT_VBUS) {
             vTaskResume(xSERIAL_th);
+            
+            /* if the device is to be configured */
+            if(xEventGroupGetBits(xSYSEVENTS_handle) & EVENT_CONFIG_START) {
+                /* shutdown the devices */
+                CTRL_config_start();
+                xEventGroupClearBits(xSYSEVENTS_handle, EVENT_CONFIG_START);
+                xTaskNotifyGive(xSERIAL_th);
+            }
+            
+            /* if the device is done being configured */
+            if(xEventGroupGetBits(xSYSEVENTS_handle) & EVENT_CONFIG_STOP) {
+                CTRL_config_stop();
+                xEventGroupClearBits(xSYSEVENTS_handle, EVENT_CONFIG_STOP);
+            }                
         }
 
         /* check if the system time has changed */
@@ -244,4 +261,42 @@ void CTRL_hourly_update()
     }
 
 
+}
+
+void CTRL_config_start()
+{
+    // TODO - replace task shutdowns with notify to individual task and allow them to shut themselves down.
+    // TODO - replace the task handles with calls to xTaskGetHandle and use universal sleep notify, then remove includes
+    
+    /* ECG */
+    while (xECG_th && eSuspended != eTaskGetState(xECG_th)) {
+        xTaskNotify(xECG_th, ECG_NOTIFY_SHUTDOWN, eSetBits);
+    }
+
+    /* ENV */
+    while (xENV_th && eSuspended != eTaskGetState(xENV_th)) {
+        vTaskSuspend(xENV_th);
+    }
+
+    /* GPS */
+    while (xGPS_th && eSuspended != eTaskGetState(xGPS_th)) {
+        xTaskNotify(xGPS_th, ECG_NOTIFY_SHUTDOWN, eSetBits);
+    }
+    
+    /* IMU */
+    while (xIMU_th && eSuspended != eTaskGetState(xIMU_th)) {
+        vTaskSuspend(xIMU_th);
+    }
+    
+    gpio_set_pin_level(LED_RED, true);
+}
+
+void CTRL_config_stop()
+{
+    // TODO - replace with more elegant solution, maybe call init functions or resume tasks and use individual startup functions
+    gpio_set_pin_level(LED_GREEN, true);
+    delay_ms(1000);
+    
+    _reset_mcu();
+    while(1) {;}
 }

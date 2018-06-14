@@ -14,6 +14,14 @@
 #define ECG_STACK_SIZE  (900 / sizeof(portSTACK_TYPE))	/* number of 32-bit words to reserve for task */
 #define ECG_TASK_PRI    (tskIDLE_PRIORITY + 2)
 
+typedef enum ECG_NOTIFY_VALS {
+    ECG_NOTIFY_NONE     = 0x00000000,
+    ECG_NOTIFY_TXRDY    = 0x00000001,
+    ECG_NOTIFY_SLEEP    = 0x00000002,
+    ECG_NOTIFY_SHUTDOWN = 0x00000004,
+    ECG_NOTIFY_ALL      = 0xFFFFFFFF
+} ECG_NOTIFY_VALS;
+
 extern TaskHandle_t xECG_th;
 
 int32_t ECG_task_init(void);

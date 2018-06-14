@@ -48,4 +48,14 @@ void vHourlyTimerCallback( TimerHandle_t xTimer );
  */
 void CTRL_hourly_update(void);
 
+/**
+ *  Suspend or shutdown all sensors for configuration
+ */
+void CTRL_config_start();
+
+/**
+ * Resume or restart all sensors after configuration
+ */
+void CTRL_config_stop();
+
 #endif /* SEAL_MSG_H_ */

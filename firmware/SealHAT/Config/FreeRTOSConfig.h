@@ -287,7 +287,7 @@ to exclude the API function. */
 // <q> Include the function to get task state
 // <id> freertos_etaskgetstate
 #ifndef INCLUDE_eTaskGetState
-#define INCLUDE_eTaskGetState 0
+#define INCLUDE_eTaskGetState 1
 #endif
 
 // <q> Include the function to clean task resources

@@ -65,7 +65,7 @@ void SERIAL_task(void* pvParameters)
                             else {
                                 usb_put(OPERATION_SUCCESS);
                             }
-                            xEventGroupClearBits(xSYSEVENTS_handle, EVENT_CONFIG_START);
+                            xEventGroupSetBits(xSYSEVENTS_handle, EVENT_CONFIG_STOP);
                             break;
                         }
                         case VERIFY_CONFIG:
