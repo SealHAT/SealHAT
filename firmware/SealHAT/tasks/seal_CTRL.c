@@ -80,16 +80,16 @@ int32_t CTRL_task_init(void)
     /* set calendar to a default time and set alarm for some time after */
     date.year  = 2018;
     date.month = 5;
-    date.day   = 13;
+    date.day   = 14;
 
     time.hour = 15;
     time.min  = 59;
-    time.sec  = 30;
+    time.sec  = 50;
 
     // TODO enforce start date beyond current date
-    eeprom_data.sensorConfigs.start_year    = 2018; 
+    eeprom_data.sensorConfigs.start_year    = 2019; 
     eeprom_data.sensorConfigs.start_month   = 5;
-    eeprom_data.sensorConfigs.start_day     = 13;
+    eeprom_data.sensorConfigs.start_day     = 14;
     eeprom_data.sensorConfigs.start_hour    = 16;
     
     RTC_ALARM.cal_alarm.datetime.date.year  = eeprom_data.sensorConfigs.start_year;
@@ -136,12 +136,12 @@ void CTRL_task(void* pvParameters)
     // register VBUS detection interrupt
     ext_irq_register(VBUS_DETECT, vbus_detection_cb);
 
-    // TODO: log to flash
-    if(hri_rtcmode0_read_GP_reg(RTC, 0)) {
-        SYSTEM_ERROR_t systemErr;
-        dataheader_init(&systemErr.header);
-        systemErr.header.id = DEVICE_ID_SYSTEM | DEVICE_ERR_TIMEOUT;
-    }
+//     // TODO: log to flash
+//     if(hri_rtcmode0_read_GP_reg(RTC, 0)) {
+//         SYSTEM_ERROR_t systemErr;
+//         dataheader_init(&systemErr.header);
+//         systemErr.header.id = DEVICE_ID_SYSTEM | DEVICE_ERR_TIMEOUT;
+//     }
 
     gpio_toggle_pin_level(LED_GREEN);
     delay_ms(100);
@@ -150,31 +150,31 @@ void CTRL_task(void* pvParameters)
     // enable watchdog timer
     wdt_enable(&WATCHDOG);
     
-    /* before sensors are started, just feed the dog and listen to USB */
-    while( pdFALSE == ulTaskNotifyTake(pdFALSE, pdMS_TO_TICKS(2000)) ) {
-        wdt_feed(&WATCHDOG);
-        
-        if (xEventGroupGetBits(xSYSEVENTS_handle) & EVENT_VBUS) {
-            vTaskResume(xSERIAL_th);
-            
-            /* if the device is to be configured */
-            if(xEventGroupGetBits(xSYSEVENTS_handle) & EVENT_CONFIG_START) {
-                /* continue */
-                xEventGroupClearBits(xSYSEVENTS_handle, EVENT_CONFIG_START);
-                xTaskNotifyGive(xSERIAL_th);
-            }
-            
-            /* if the device is done being configured */
-            if(xEventGroupGetBits(xSYSEVENTS_handle) & EVENT_CONFIG_STOP) {
-                /* reset */
-                xEventGroupClearBits(xSYSEVENTS_handle, EVENT_CONFIG_STOP);
-                _reset_mcu(); for(;;){;}
-            }
-        }
-    }
-    
-    /* allow all sensors to start up */
-    CTRL_resume_all();
+//     /* before sensors are started, just feed the dog and listen to USB */
+//     while( pdFALSE == ulTaskNotifyTake(pdFALSE, pdMS_TO_TICKS(2000)) ) {
+//         wdt_feed(&WATCHDOG);
+//         
+//         if (xEventGroupGetBits(xSYSEVENTS_handle) & EVENT_VBUS) {
+//             vTaskResume(xSERIAL_th);
+//             
+//             /* if the device is to be configured */
+//             if(xEventGroupGetBits(xSYSEVENTS_handle) & EVENT_CONFIG_START) {
+//                 /* continue */
+//                 xEventGroupClearBits(xSYSEVENTS_handle, EVENT_CONFIG_START);
+//                 xTaskNotifyGive(xSERIAL_th);
+//             }
+//             
+//             /* if the device is done being configured */
+//             if(xEventGroupGetBits(xSYSEVENTS_handle) & EVENT_CONFIG_STOP) {
+//                 /* reset */
+//                 xEventGroupClearBits(xSYSEVENTS_handle, EVENT_CONFIG_STOP);
+//                 _reset_mcu(); for(;;){;}
+//             }
+//         }
+//     }
+//     
+//     /* allow all sensors to start up */
+//     CTRL_resume_all();
 
     /* Receive and write data forever. */
     for(;;) {
@@ -187,7 +187,7 @@ void CTRL_task(void* pvParameters)
 
         /* if the USB has been attached */
         if (xEventGroupGetBits(xSYSEVENTS_handle) & EVENT_VBUS) {
-            vTaskResume(xSERIAL_th);
+            if(xSERIAL_th){ vTaskResume(xSERIAL_th); }
             
             /* if the device is to be configured */
             if(xEventGroupGetBits(xSYSEVENTS_handle) & EVENT_CONFIG_START) {
@@ -226,7 +226,7 @@ void CTRL_task(void* pvParameters)
             }
         }
 
-        os_sleep(pdMS_TO_TICKS(1000));
+        os_sleep(pdMS_TO_TICKS(500));
     }
 }
 

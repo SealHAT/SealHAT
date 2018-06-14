@@ -204,9 +204,12 @@ bool SealHAT_device::sendConfig(SENSOR_CONFIGS_t newConfigs)
 {
     const char configCmd = CONFIGURE_DEV;
     QByteArray data;            // for reading bytes out of serial
+  //  QByteArray config2send;
     bool       sendSuccess;     // sent successfuly
     SYSTEM_CONFIG_t sendPacket;
     sendPacket.sensorConfigs = newConfigs;
+
+   // config2send.reserve(sizeof(SYSTEM_CONFIG_t));
 
     if(!sealhat.isOpen()) {
         return false;
@@ -229,20 +232,24 @@ bool SealHAT_device::sendConfig(SENSOR_CONFIGS_t newConfigs)
         data += sealhat.readAll();
         if(data.contains(USB_TEXT_ADVENTURE_MENU)) {
             qDebug() << "received menu, starting download";
-            data.clear();
+         //   data.clear();
             sealhat.write(&configCmd);
 
             // wait for and confirm the read response
-            sealhat.waitForReadyRead(100);
+            sealhat.waitForReadyRead(600);
             data = sealhat.readAll();
-            if(data.at(0) == READY_TO_RECEIVE) {
+            if(data.contains(READY_TO_RECEIVE)) {
                 sendPacket.header.timestamp = QDateTime::currentDateTime().toSecsSinceEpoch();
-                QByteArray config2send((const char*)&newConfigs);
+
+                QByteArray config2send((const char*)&sendPacket, sizeof(SYSTEM_CONFIG_t) + 4 );
+                config2send.remove(16,1);
+                config2send.squeeze();
+                sealhat.write("n");
                 sealhat.write(config2send, sizeof(SYSTEM_CONFIG_t));
-                sealhat.waitForReadyRead(500);
+                sealhat.waitForReadyRead(600);
                 data = sealhat.readAll();
 
-                if(data.at(0) == OPERATION_SUCCESS) {
+                if(data != NULL && data.at(0) == OPERATION_SUCCESS) {
                     sendSuccess = true;
                 }
                 else {

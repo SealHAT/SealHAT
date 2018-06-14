@@ -289,7 +289,7 @@ void maindialog::on_sendConfigsButton_clicked()
     guiConfig.setMemoryCount(4);
     guiConfig.setStartTime(QDateTime::currentDateTime());
 
-    if(device.connectToDevice()) {
+    if(device.connectToDevice(ui->TX_serialPort_comboBox->currentText())) {
         device.sendConfig(guiConfig.getSensorConfig());
     }
     else {

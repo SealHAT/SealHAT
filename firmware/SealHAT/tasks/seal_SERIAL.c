@@ -177,7 +177,7 @@ CMD_RETURN_TYPES configure_sealhat_device()
     bool             packetOK;          /* Checking for incoming packet integrity. */
     uint32_t         retVal;            /* Return value of USB function calls. */
     uint32_t         crc32_check;
-
+    uint32_t         timeout = 0;
     /* Initialize return value. */
     errVal = CMD_ERROR;
 
@@ -186,15 +186,23 @@ CMD_RETURN_TYPES configure_sealhat_device()
     packetOK       = false;
 
     /* Send the ready to receive signal. */
+/*    usb_read((char *)&tempConfigStruct, sizeof(SYSTEM_CONFIG_t));*/
     do {
+//         usb_flushTx();
         retVal = usb_put(READY_TO_RECEIVE);
-    } while((retVal != USB_OK) || (!usb_dtr()));
+    } while((timeout++ < 30) && ((retVal != USB_OK) || (!usb_dtr())));
+/*    delay_ms(600);*/
+    timeout = 0;
 
     /* Wait for configuration packet to arrive. */
-    do {
-        retVal = usb_read(&tempConfigStruct, sizeof(SYSTEM_CONFIG_t));
-    } while((retVal == 0) || (STOP_LISTENING == true));
-
+    usb_flushRx();
+    while('n'!= usb_get());
+    usb_get();
+    delay_ms(1000);
+    usb_read((char *)&tempConfigStruct, sizeof(SYSTEM_CONFIG_t));
+//     do {
+//         retVal = usb_read((char *)&tempConfigStruct, sizeof(SYSTEM_CONFIG_t));
+//     } while((timeout++ < 600) && (tempConfigStruct.header.startSym != MSG_START_SYM));
     // check the packet with CRC32
     crc32_check = 0xFFFFFFFF;
     crc_sync_crc32(&CRC_0, (uint32_t*)&tempConfigStruct.sensorConfigs, sizeof(SENSOR_CONFIGS_t)/sizeof(uint32_t), &crc32_check);
