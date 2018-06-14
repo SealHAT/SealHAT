@@ -149,6 +149,7 @@ private:
 
 private slots:
     void samplesReceived_stream(QQueue<SensorSample>* q);
+    void on_retrieveDataButton_clicked();
 
     // Slots for navigation buttons
     void on_ekgButton_clicked();
@@ -159,7 +160,6 @@ private slots:
     void on_streamDataButton_clicked();
     void on_backButton_clicked();
     void on_configureDevOptionButton_clicked();
-    //void on_retrieveDataButton_clicked();
     void on_backButton_StreamPage_clicked();
     void on_backButton_retrieveData_clicked();
 
@@ -311,9 +311,7 @@ private slots:
         QByteArray       dataBuffer;     // data from the device
         QFile            streamOut;      // stream file output
         SensorConfig     guiConfig;      // configuration being created in the gui
-
         QMap<QString, uint32_t> config;
-        //SENSOR_CONFIGS_t configuration_settings;
 
         QSerialPort *microSerial;
         static const quint16 microSerial_vendor_id = 1003;

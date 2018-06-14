@@ -12,6 +12,7 @@ typedef union {
      AxesSI_t        magnetic;             /**< magnetic vector values are in micro-Tesla (uT) */
      AxesSI_t        orientation;          /**< orientation values are in degrees */
      AxesSI_t        gyro;                 /**< gyroscope values are in rad/s */
+     gps_log_t       geeps;
      float           temperature;          /**< temperature is in degrees centigrade (Celsius) */
      float           distance;             /**< distance in centimeters */
      float           light;                /**< light in SI lux units */
