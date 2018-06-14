@@ -35,7 +35,7 @@ public:
     // get the current device configuration
     bool getConfig();
     // send configuration to the device
-    bool sendConfig(SYSTEM_CONFIG_t newConfigs);
+    bool sendConfig(SENSOR_CONFIGS_t newConfigs);
 
     // check how many sensor samples are ready for consumption
     int queueSize();
