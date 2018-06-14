@@ -734,7 +734,7 @@
 
 #elif SEALHAT_HARDWARE_VERSION == 10060
 
-    #define CONFIG_EIC_EXTINT_MAP {2, PIN_PA18}, {3, PIN_PA19}, {4, PIN_PA20}, {5, PIN_PA21}, {15, PIN_PA27},
+    #define CONFIG_EIC_EXTINT_MAP {2, PIN_PA18}, {3, PIN_PA19}, {4, PIN_PA20}, {5, PIN_PA21}, {15, PIN_PA27}, {8, PIN_PB08},
 
 #endif
 // <<< end of configuration section >>>

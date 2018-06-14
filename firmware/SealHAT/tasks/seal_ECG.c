@@ -41,7 +41,7 @@ void ECG_isr_dataready(void)
         return ERR_NOT_INITIALIZED;
     }
     ecg_synch();
-    
+
     xECG_th = xTaskCreateStatic(ECG_task, "ECG", ECG_STACK_SIZE, NULL, ECG_TASK_PRI, xECG_stack, &xECG_taskbuf);
     configASSERT(xECG_th);
     return ERR_NONE;
@@ -63,7 +63,7 @@ void ECG_isr_dataready(void)
     #endif
 
     /* register the data ready interrupt */
-    ext_irq_register(MOD_INT1, ECG_isr_dataready);
+    ext_irq_register(PIN_PB08, ECG_isr_dataready);
 
     /* prepare the logging header */
     dataheader_init(&ecg_msg.header);
@@ -72,6 +72,7 @@ void ECG_isr_dataready(void)
 
     /* clear the fifo */
     ecg_fifo_reset();
+    bool pinlvl = gpio_get_pin_level(MOD_INT1);
 
     /* main task loop */
     for (;;){
@@ -108,7 +109,11 @@ void ECG_isr_dataready(void)
             }
         } // END Notification response
         else {
+            pinlvl = gpio_get_pin_level(MOD_INT1);
             ecg_synch();
+            ecg_fifo_reset();
+            pinlvl = gpio_get_pin_level(MOD_INT1);
+            delay_ms(1);
         }
     } // END forever loop
  }

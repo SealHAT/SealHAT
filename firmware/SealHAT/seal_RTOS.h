@@ -15,7 +15,7 @@
 #include "semphr.h"
 #include "limits.h"
 #include "event_groups.h"
-#include "stream_buffer.h"
+#include "message_buffer.h"
 
 #include "driver_init.h"
 #include "atmel_start_pins.h"
