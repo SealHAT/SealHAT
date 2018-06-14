@@ -14,7 +14,7 @@ void vApplicationIdleHook(void)
 void vApplicationTickHook(void)
 {
     #ifdef SEAL_DEBUG
-//    gpio_toggle_pin_level(LED_RED);
+    gpio_toggle_pin_level(LED_RED);
     #endif
 }
 

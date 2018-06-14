@@ -27,39 +27,39 @@
  *
  *  Returns: void
  **************************************************************/
-void maindialog::submitConfig(){
+void maindialog::submitConfig() {
     QString acc_timeName = "Accelerometer Time";
-    uint32_t acc_timeValue = configuration_settings.accConfig.activeHour;
+    uint32_t acc_timeValue = guiConfig.getAccelConfig().activeHour;
     QString acc_scaleName = "Accelerometer Scale";
-    uint32_t acc_scaleValue = configuration_settings.accConfig.scale;
+    uint32_t acc_scaleValue = guiConfig.getAccelConfig().scale;
     QString acc_modeName = "Accelerometer Mode";
-    uint32_t acc_modeValue = configuration_settings.accConfig.opMode;
+    uint32_t acc_modeValue = guiConfig.getAccelConfig().opMode;
     QString acc_sensitivityName = "Accelerometer Sensitivity";
-    uint32_t sensor_sensitivityValue = configuration_settings.accConfig.sensitivity;
+    uint32_t sensor_sensitivityValue = guiConfig.getAccelConfig().sensitivity;
     QString acc_thresholdName = "Accelerometer Threshold";
-    uint32_t sensor_thresholdValue = configuration_settings.accConfig.threshold;
+    uint32_t sensor_thresholdValue = guiConfig.getAccelConfig().threshold;
 
     QString mag_timeName = "Magnetometer Time";
-    uint32_t mag_timeValue = configuration_settings.magConfig.activeHour;
+    uint32_t mag_timeValue = guiConfig.getMagConfig().activeHour;
     QString mag_mode = "Magnetometer Mode";
-    uint32_t mag_modeValue = configuration_settings.magConfig.opMode;
+    uint32_t mag_modeValue = guiConfig.getMagConfig().opMode;
 
     QString ekg_timeName = "EKG Time";
-    uint32_t ekg_timeValue = configuration_settings.ekgConfig.activeHour;
+    uint32_t ekg_timeValue = guiConfig.getModularConfig().activeHour;
     QString ekg_spsName = "EKG Sample Rate";
-    uint32_t ekg_spsValue = configuration_settings.ekgConfig.rate;
+    uint32_t ekg_spsValue = guiConfig.getModularConfig().rate;
     QString ekg_gainName = "EKG Gain";
-    uint32_t ekg_gainValue = configuration_settings.ekgConfig.gain;
+    uint32_t ekg_gainValue = guiConfig.getModularConfig().gain;
     QString ekg_lpfreqName = "EKG Low Pass Frequency";
-    uint32_t ekg_lpfreqValue = configuration_settings.ekgConfig.freq;
+    uint32_t ekg_lpfreqValue = guiConfig.getModularConfig().freq;
 
     QString templight_timeName = "Temperature and Light Time";
-    uint32_t templight_timeValue = configuration_settings.envConfig.activeHour;
+    uint32_t templight_timeValue = guiConfig.getEnvConfig().activeHour;
     QString templight_sampleperiodName = "Temperature and Light Sample Period";
-    uint32_t templight_sampleperiodValue = configuration_settings.envConfig.period;
+    uint32_t templight_sampleperiodValue = guiConfig.getEnvConfig().period;
 
     QString gps_timeName = "GPS Time";
-    uint32_t gps_timeValue = configuration_settings.gpsConfig.activeHour;
+    uint32_t gps_timeValue = guiConfig.getGPSConfig().activeHour;
 
     config.insert(acc_timeName,acc_timeValue);
     config.insert(acc_scaleName,acc_scaleValue);
@@ -82,8 +82,6 @@ void maindialog::submitConfig(){
     config.insert(ekg_lpfreqName,ekg_lpfreqValue);
 
     config.insert(gps_timeName,gps_timeValue);
-
-
 }
 
 
@@ -180,26 +178,26 @@ void maindialog::configureSettingListDisplay()
 {
     ui->xcel_configList->clear();
 
-    uint8_t acc_freqSelect = (configuration_settings.accConfig.opMode/16)%10 - 1;
-    uint8_t acc_pwrSelect = (configuration_settings.accConfig.opMode%16)/4;
+    uint8_t acc_freqSelect = (guiConfig.getAccelConfig().opMode/16)%10 - 1;
+    uint8_t acc_pwrSelect = (guiConfig.getAccelConfig().opMode%16)/4;
 
-    uint8_t mag_freqSelect = (configuration_settings.magConfig.opMode%16)/4;
-    uint8_t mag_pwrSelect = (configuration_settings.magConfig.opMode/16)%10;
+    uint8_t mag_freqSelect = (guiConfig.getMagConfig().opMode%16)/4;
+    uint8_t mag_pwrSelect = (guiConfig.getMagConfig().opMode/16)%10;
 
     QString acc_PWRMode[3]{"Normal", "High Resolution", "Low Power"};
     QString mag_PWRMode[2]{"Normal", "Low Power"};
     QString acc_direction[3]{"Sway", "Surge", "Heave"};
 
     QString acc_timeName = "Time : ";
-    QString acc_timeValue = QString::number(num_Hours(configuration_settings.accConfig.activeHour)) + " h ";
+    QString acc_timeValue = QString::number(guiConfig.countHours(guiConfig.getAccelConfig().activeHour)) + " h ";
     QString acc_scaleName = "                                            Accelerometer Scale : ";
-    QString acc_scaleValue = QString::number(2 << ((configuration_settings.accConfig.scale/16)%10)) + " g ";
+    QString acc_scaleValue = QString::number(2 << ((guiConfig.getAccelConfig().scale/16)%10)) + " g ";
     QString acc_powerMode = "\nPower Mode : " + acc_PWRMode[acc_pwrSelect];
 
     QString acc_freqName = "            Sampling rate : ";
     QString acc_freqValue = QString::number(accFrequency[acc_freqSelect]) + " Hz ";
     QString acc_sensitivityName = "\nEnabled Direction : ";
-    uint8_t xcel_sensitivity = configuration_settings.accConfig.sensitivity;
+    uint8_t xcel_sensitivity = guiConfig.getAccelConfig().sensitivity;
     QString sensor_sensitivityValue = "";
     if((xcel_sensitivity&(MOTION_INT_X_LOW|MOTION_INT_X_HIGH)))
     {
@@ -214,9 +212,9 @@ void maindialog::configureSettingListDisplay()
         sensor_sensitivityValue += " Heave ";
     }
 
-    //QString sensor_sensitivityValue = QString::number(configuration_settings.accConfig.acc_sensitivity);
+    //QString sensor_sensitivityValue = QString::number(guiConfig.getAccelConfig().acc_sensitivity);
     QString acc_thresholdName = "       Threshold : ";
-    QString sensor_thresholdValue = QString::number(((double)configuration_settings.accConfig.threshold/1000), 'f', 2) + " g ";
+    QString sensor_thresholdValue = QString::number(((double)guiConfig.getAccelConfig().threshold/1000), 'f', 2) + " g ";
 
     ui->xcel_configList->setText(acc_timeName + acc_timeValue +
                                 acc_scaleName + acc_scaleValue +
@@ -229,7 +227,7 @@ void maindialog::configureSettingListDisplay()
 
 
     QString mag_timeName = "Magnetometer Time : ";
-    QString mag_timeValue = QString::number(num_Hours(configuration_settings.magConfig.activeHour)) + " h ";
+    QString mag_timeValue = QString::number(guiConfig.countHours(guiConfig.getMagConfig().activeHour)) + " h ";
     QString mag_powerMode = "\nPower Mode : " + mag_PWRMode[mag_pwrSelect];
     QString mag_freqName = "            Sampling rate : ";
     QString mag_freqValue = QString::number(magFrequency[mag_freqSelect])  + " Hz ";
@@ -241,13 +239,13 @@ void maindialog::configureSettingListDisplay()
     uint8_t ekg_lowpassFrequencyValue[4] = {0,40,100,150};
 
     QString ekg_timeName = "EKG Time : ";
-    QString ekg_timeValue = QString::number(num_Hours(configuration_settings.ekgConfig.activeHour))+ " h ";
+    QString ekg_timeValue = QString::number(guiConfig.countHours(guiConfig.getModularConfig().activeHour))+ " h ";
     QString ekg_spsName = "                       EKG Sample Rate : ";
-    QString ekg_spsValue = QString::number( (512/(pow(2,(uint8_t)configuration_settings.ekgConfig.rate))) ) + " samples/s ";
+    QString ekg_spsValue = QString::number( (512/(pow(2,(uint8_t)guiConfig.getModularConfig().rate))) ) + " samples/s ";
     QString ekg_gainName = "\nEKG Gain : ";
-    QString ekg_gainValue = QString::number( 20 * (pow(2,(uint8_t)configuration_settings.ekgConfig.gain) ) ) + " V ";
+    QString ekg_gainValue = QString::number( 20 * (pow(2,(uint8_t)guiConfig.getModularConfig().gain) ) ) + " V ";
     QString ekg_lpfreqName = "                   EKG Low Pass Frequency : ";
-    QString ekg_lpfreqValue = QString::number(ekg_lowpassFrequencyValue[configuration_settings.ekgConfig.freq]) + " Hz ";
+    QString ekg_lpfreqValue = QString::number(ekg_lowpassFrequencyValue[guiConfig.getModularConfig().freq]) + " Hz ";
 
     ui->ekg_configList->setText(ekg_timeName + ekg_timeValue +
                                 ekg_spsName + ekg_spsValue +
@@ -257,15 +255,15 @@ void maindialog::configureSettingListDisplay()
 
 
     QString templight_timeName = "Temperature & Light Time : ";
-    QString templight_timeValue = QString::number(num_Hours(configuration_settings.envConfig.activeHour)) + " h ";
+    QString templight_timeValue = QString::number(guiConfig.countHours(guiConfig.getEnvConfig().activeHour)) + " h ";
     QString templight_sampleperiodName = "\nTemperature and Light Sample Period : ";
-    QString templight_sampleperiodValue = QString::number(configuration_settings.envConfig.activeHour) + " s ";
+    QString templight_sampleperiodValue = QString::number(guiConfig.getEnvConfig().activeHour) + " s ";
     ui->temp_configList->setText(templight_timeName + templight_timeValue +
                                 templight_sampleperiodName + templight_sampleperiodValue
                                 );
 
     QString gps_timeName = "GPS Time : ";
-    QString gps_timeValue = QString::number(num_Hours(configuration_settings.gpsConfig.activeHour)) + " h ";
+    QString gps_timeValue = QString::number(guiConfig.countHours(guiConfig.getGPSConfig().activeHour)) + " h ";
     ui->gps_configList->setText(gps_timeName + gps_timeValue);
 }
 
@@ -287,26 +285,14 @@ void maindialog::on_sendConfigsButton_clicked()
 
     on_TX_ReScanButton_clicked();
 
-    configuration_settings.num_flash_chips = 4;
+    guiConfig.setMemoryCount(4);
+    guiConfig.setStartTime(QDateTime::currentDateTime());
 
-    //Need to fill in config id
-    QDateTime date  = QDateTime::currentDateTime();
-    QString   year  = date.toString("yyyy");
-    QString   month = date.toString("M");
-    QString   day   = date.toString("d");
-    QString   time  = date.toString("hhmmss");
-
-    configuration_settings.start_year  =  year.toUInt();
-    configuration_settings.start_month =  month.toUInt();
-    configuration_settings.start_day   =  day.toUInt();
-    configuration_settings.start_hour  =  time.toUInt();    // TODO: this looks like it won't work
-
-    //sendSerial_Config();
-
-    //newConfigPacket.header
-    //newConfigPacket.sensorConfigs = configuration_settings;
-
-
-    //device.sendConfig(newConfigPacket);
+    if(device.connectToDevice(ui->TX_serialPort_comboBox->currentText())) {
+        device.sendConfig(guiConfig.getSensorConfig());
+    }
+    else {
+        qDebug() << "failed to connect to device";
+    }
 }
 

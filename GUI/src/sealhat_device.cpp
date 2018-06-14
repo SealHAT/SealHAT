@@ -204,11 +204,26 @@ bool SealHAT_device::getConfig()
     return retval;
 }
 
-bool SealHAT_device::sendConfig(SYSTEM_CONFIG_t newConfigs)
+bool SealHAT_device::sendConfig(SENSOR_CONFIGS_t newConfigs)
 {
     const char configCmd = CONFIGURE_DEV;
     QByteArray data;            // for reading bytes out of serial
     bool       sendSuccess;     // sent successfuly
+    SYSTEM_CONFIG_t sendPacket;
+    sendPacket.sensorConfigs = newConfigs;
+
+    if(!sealhat.isOpen()) {
+        return false;
+    }
+
+    crc32.initInstance(1);
+    crc32.pushData(1, (char*)&sendPacket.sensorConfigs, sizeof(SENSOR_CONFIGS_t));
+    sendPacket.crc32 = crc32.releaseInstance(1);
+
+    sendPacket.header.id = DEVICE_ID_CONFIG;
+    sendPacket.header.packetCount = 0;
+    sendPacket.header.startSym = MSG_START_SYM;
+    sendPacket.header.size = sizeof(SENSOR_CONFIGS_t)+4;
 
     // set default return value
     sendSuccess = false;
@@ -225,6 +240,7 @@ bool SealHAT_device::sendConfig(SYSTEM_CONFIG_t newConfigs)
             sealhat.waitForReadyRead(100);
             data = sealhat.readAll();
             if(data.at(0) == READY_TO_RECEIVE) {
+                sendPacket.header.timestamp = QDateTime::currentDateTime().toSecsSinceEpoch();
                 QByteArray config2send((const char*)&newConfigs);
                 sealhat.write(config2send, sizeof(SYSTEM_CONFIG_t));
                 sealhat.waitForReadyRead(500);

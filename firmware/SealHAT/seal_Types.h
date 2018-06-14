@@ -7,6 +7,7 @@
 
 #ifndef SEAL_TYPES_H_
 #define SEAL_TYPES_H_
+#include <stdint.h>
 
 // SealHAT hardware version: The format is two digits each for Major.Minor.patch with two digits
 // for each number (NO LEADING ZEROS)
