@@ -88,14 +88,21 @@ void DATA_task(void* pvParameters)
     int32_t err;
     (void)pvParameters;
     static DATA_TRANSMISSION_t usbPacket;
+    static uint32_t idx;
     uint32_t pageIndex;         /* Loop control for iterating over flash pages. */
     uint32_t numPagesWritten;   /* Total number of pages currently written to flash. */
+
+    err = xStreamBufferSetTriggerLevel(xDATA_sb, PAGE_SIZE_LESS);
 
     /* Receive and write data forever. */
     for(;;)
     {
         /* Receive a page worth of data. */
-        xStreamBufferReceive(xDATA_sb, usbPacket.data, PAGE_SIZE_LESS, portMAX_DELAY);
+        idx = 0;
+        while(idx < PAGE_SIZE_LESS) {
+            err = xStreamBufferReceive(xDATA_sb, (usbPacket.data + idx), (PAGE_SIZE_LESS - idx), portMAX_DELAY);
+            idx += err;
+        }
         
         /* Log data to flash if the appropriate flag is set. */
         if((xEventGroupGetBits(xSYSEVENTS_handle) & EVENT_LOGTOFLASH) != 0)
