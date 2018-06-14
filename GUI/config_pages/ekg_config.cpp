@@ -17,12 +17,12 @@ void maindialog::ekg_getloadData(){
             bit_Mask = (0x01 << shift_property);
             if((configuration_settings.ekgConfig.activeHour&bit_Mask))
             {
-                      button->setProperty("clicked", true);
-                      button->setStyleSheet("background-color:rgb(34,139,34)");
-
+                button->setProperty("clicked", true);
+                button->setStyleSheet("background-color:rgb(142, 152, 163);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
             }else{
                 button->setProperty("clicked", false);
-                button->setStyleSheet("background-color:rgb(152, 162, 173)");
+                button->setStyleSheet("background-color:rgb(202, 212, 223);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
+
             }
         }
     }
@@ -79,13 +79,13 @@ void maindialog::on_ekg_SW_clicked()
 {
 
     QString title = ui->ekg_SW->text();
-    if(title == "Enable")
+    if(title == "ENABLE SENSOR")
     {
         ekg_Disable(false);
         ekg_disable_button(false);
-        ui->ekg_SW->setText("Disable");
+        ui->ekg_SW->setText("DISABLE SENSOR");
     }else{
-        ui->ekg_SW->setText("Enable");
+        ui->ekg_SW->setText("ENABLE SENSOR");
         ekg_Disable(true);
         ekg_disable_button(true);
     }

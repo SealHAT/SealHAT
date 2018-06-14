@@ -17,6 +17,12 @@
  **************************************************************/
 void maindialog::on_backButton_clicked()
 {
+    if(streamOut.isOpen()) {
+        streamOut.flush();
+        streamOut.close();
+    }
+    device.disconnectFromDevice();
+
     // Sets the dialog back to a login screen
     this->setFixedSize(350, 350);
     ui->mainStacked->setCurrentIndex(WELCOME_MAIN_STACK);

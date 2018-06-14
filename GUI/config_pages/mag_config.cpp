@@ -12,12 +12,12 @@ void maindialog::mag_getloadData(){
             bit_Mask = (0x01 << shift_property);
             if((configuration_settings.magConfig.activeHour&bit_Mask))
             {
-                      button->setProperty("clicked", true);
-                      button->setStyleSheet("background-color:rgb(34,139,34)");
+                button->setProperty("clicked", true);
+                button->setStyleSheet("background-color:rgb(142, 152, 163);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
 
             }else{
                 button->setProperty("clicked", false);
-                button->setStyleSheet("background-color:rgb(152, 162, 173)");
+                button->setStyleSheet("background-color:rgb(202, 212, 223);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
             }
         }
     }
@@ -139,13 +139,13 @@ void maindialog::mag_setDefault()
 void maindialog::on_mag_SW_clicked()
 {
     QString title = ui->mag_SW->text();
-    if(title == "Enable")
+    if(title == "ENABLE SENSOR")
     {
-        ui->mag_SW->setText("Disable");
+        ui->mag_SW->setText("DISABLE SENSOR");
         IMUmag_Disable(false);
         mag_disable_button(false);
     }else{
-        ui->mag_SW->setText("Enable");
+        ui->mag_SW->setText("ENABLE SENSOR");
         IMUmag_Disable(true);
         mag_disable_button(true);
     }

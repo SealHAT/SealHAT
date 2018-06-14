@@ -111,17 +111,6 @@ void maindialog::on_configureDevOptionButton_clicked()
     setActiveButtonColor(CONFIGURE_DEV_HOME_PAGE);
 }
 
-/*
-void maindialog::on_retrieveDataButton_clicked()
-{
-    this->setFixedSize(850, 558);
-
-    ui->mainStacked->setCurrentIndex(RETRIEVE_MAIN_STACK);
-    ui->ConfigurePages->setCurrentIndex(RETRIEVE_DATA_HOME_PAGE);
-    //on_RX_ReScanButton_clicked();
-    this->centerDialog();
-}*/
-
 /**
  * Center the contents of the page.
  **/
@@ -152,8 +141,20 @@ void maindialog::on_retrieveDataButton_clicked()
 {
     this->setFixedSize(850, 558);
 
+    on_button_rescanDataRetrievalCOM_clicked();
+
     ui->mainStacked->setCurrentIndex(RETRIEVE_MAIN_STACK);
     ui->ConfigurePages->setCurrentIndex(RETRIEVE_DATA_HOME_PAGE);
     ui->getDataButton->setEnabled(false);
     ui->getDataButton->setStyleSheet("background-color:rgb(152, 162, 173)");
+}
+
+void maindialog::on_button_rescanDataRetrievalCOM_clicked()
+{
+    ui->comboBox_retrieveData->clear();
+
+    foreach (const QSerialPortInfo &serialPortInfo, QSerialPortInfo::availablePorts())
+    {
+        ui->comboBox_retrieveData->addItem(serialPortInfo.portName());
+    }
 }

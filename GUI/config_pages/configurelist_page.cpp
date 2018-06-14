@@ -281,6 +281,7 @@ void maindialog::on_configureHomeButton_clicked()
 
 void maindialog::on_sendConfigsButton_clicked()
 {
+    SYSTEM_CONFIG_t newConfigPacket;
     configureSettingListDisplay();
     setActiveButtonColor(CONFIGURE_DEV_HOME_PAGE);
 
@@ -300,6 +301,12 @@ void maindialog::on_sendConfigsButton_clicked()
     configuration_settings.start_day   =  day.toUInt();
     configuration_settings.start_hour  =  time.toUInt();    // TODO: this looks like it won't work
 
-    sendSerial_Config();
+    //sendSerial_Config();
+
+    //newConfigPacket.header
+    //newConfigPacket.sensorConfigs = configuration_settings;
+
+
+    //device.sendConfig(newConfigPacket);
 }
 

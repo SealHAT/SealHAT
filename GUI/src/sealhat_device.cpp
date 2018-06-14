@@ -130,6 +130,8 @@ bool SealHAT_device::download()
     // get the current device configuration, so data is interpreted correctly
     getConfig();
 
+    qDebug() << "After getConfig().";
+
     sealhat.setDataTerminalReady(true);
     if(sealhat.waitForReadyRead(800)) {
         data += sealhat.readAll();
@@ -163,7 +165,9 @@ bool SealHAT_device::getConfig()
 
     sealhat.setDataTerminalReady(true);
     if(sealhat.waitForReadyRead(800)) {
+        qDebug() << "Aqui";
         data += sealhat.readAll();
+        qDebug() << "Aqui dos";
         if(data.contains(USB_TEXT_ADVENTURE_MENU)) {
             qDebug() << "received menu, getting config";
 
