@@ -16,6 +16,7 @@
 #include <QThread>
 #include <QSemaphore>
 #include "src/sealhat_device.h"
+#include "src/sensorconfig.h"
 
 #include "seal_Types.h"
 #include "analyze.h"
@@ -166,7 +167,6 @@ private slots:
 
 //Main function control
     //void hour_clicked();
-    void sensors_setDefault();
     void sensors_timeTable_control();
     void labels_hide();
     void sensor_esitimation_control();
@@ -315,16 +315,16 @@ private slots:
 
     private:
         Ui::maindialog *ui;
+
+
+
+
         QMap<QString, uint32_t> config;
         SENSOR_CONFIGS_t configuration_settings;
 
         QSerialPort *microSerial;
         static const quint16 microSerial_vendor_id = 1003;
         static const quint16 microSerial_product_id = 9220;
-
-        SealHAT_device  device;         // the sealHat device
-        QByteArray      dataBuffer;     // data from the device
-        QFile           streamOut;      // stream file output
 
         QByteArray sampleBuf;
         QByteArray header_ba;

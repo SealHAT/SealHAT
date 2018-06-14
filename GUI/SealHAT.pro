@@ -30,7 +30,8 @@ SOURCES += main.cpp\
     src/data_streaming.cpp \
     src/data_retreival.cpp \
     src/sensorsample.cpp \
-    src/crc32.cpp
+    src/crc32.cpp \
+    src/sensorconfig.cpp
 
 FORMS    += \
     maindialog.ui
@@ -42,7 +43,8 @@ HEADERS  += \
     ../firmware/SealHAT/seal_Types.h \
     src/sealhat_device.h \
     src/sensorsample.h \
-    src/crc32.h
+    src/crc32.h \
+    src/sensorconfig.h
 
 RESOURCES += \
     images.qrc

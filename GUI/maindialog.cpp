@@ -26,7 +26,11 @@ maindialog::maindialog(QWidget *parent) : QDialog(parent), ui(new Ui::maindialog
     labels_hide();
 
     //Set all the sensor configuration back to default
-    sensors_setDefault();
+    xcel_setDefault();
+    mag_setDefault();
+    ekg_setDefault();
+    temp_setDefault();
+    gps_setDefault();
 
     //Caculate default power consumption, battery lifetime and
     generalEstimation();
@@ -40,19 +44,6 @@ maindialog::maindialog(QWidget *parent) : QDialog(parent), ui(new Ui::maindialog
     on_TX_ReScanButton_clicked();
     on_RXstream_ReScanButton_clicked();
 
-}
-
-/*
- * Set all the sensors to default configuration
- * and default display
-*/
-void maindialog::sensors_setDefault()
-{
-    xcel_setDefault();
-    mag_setDefault();
-    ekg_setDefault();
-    temp_setDefault();
-    gps_setDefault();
 }
 
 void maindialog::sensor_esitimation_control(){

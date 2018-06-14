@@ -90,11 +90,13 @@ double micro_activehour;
  *  Returns: void
  **************************************************************/
 uint8_t maindialog::num_Hours(uint32_t x) {
-  uint8_t hours =0;
-  while(x!=0) {
-    x = x & (x-1);
-     hours++;
+  int hours = 0;
+
+  while(x) {
+    hours += x & 1;
+    x >>= 1;
   }
+
   return hours;
 }
 
