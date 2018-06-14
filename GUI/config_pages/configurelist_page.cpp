@@ -289,6 +289,11 @@ void maindialog::on_sendConfigsButton_clicked()
     guiConfig.setMemoryCount(4);
     guiConfig.setStartTime(QDateTime::currentDateTime());
 
-    device.sendConfig(guiConfig.getSensorConfig());
+    if(device.connectToDevice()) {
+        device.sendConfig(guiConfig.getSensorConfig());
+    }
+    else {
+        qDebug() << "failed to connect to device";
+    }
 }
 
