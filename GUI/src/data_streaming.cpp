@@ -88,11 +88,10 @@ void maindialog::samplesReceived_stream(QQueue<SensorSample>* q)
 
 void maindialog::on_captureDatatoFile_button_clicked()
 {
-
     QString filename = QFileDialog::getSaveFileName(this,
-                                                    tr("Choose a file to save data to"),
+                                                    tr("Capture Stream Data"),
                                                     QDir::currentPath(),
-                                                    tr("All (*.*);;CSV (*.csv);;Data File (*.dat);;Text (*.txt)")
+                                                    tr("CSV (*.csv);;Data File (*.dat);;Text (*.txt);;All (*.*)")
                                                     );
 
     streamOut.setFileName(filename);
@@ -103,11 +102,6 @@ void maindialog::on_captureDatatoFile_button_clicked()
 
 void maindialog::on_backButton_StreamPage_clicked()
 {
-    if(streamOut.isOpen()) {
-        streamOut.flush();
-        streamOut.close();
-    }
-    device.disconnectFromDevice();
     on_backButton_clicked();
 }
 
@@ -118,22 +112,17 @@ void maindialog::on_backButton_retrieveData_clicked()
 
 void maindialog::on_getDataButton_clicked()
 {
-    QString path = ui->storeData_destinationEdit->text();
-    QDir dir;
-
-    if(!dir.exists(path)){
-        dir.mkpath(path);
-        QMessageBox::information(this,tr("created new directory"), path);
+    if(!streamOut.open(QIODevice::Truncate | QIODevice::WriteOnly | QIODevice::Text)) {
+        qDebug() << "Error opening stream output file!";
     }
 
-    QFile file( path +"/config.out.txt");
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-           return;
-    qDebug()<<"file now exists";
+    qDebug() << "About to download data.";
 
-       QTextStream out(&file);
-       //file.close();
+    //connect to serial port
+    device.connectToDevice(ui->comboBox_retrieveData->currentText());
 
+    //get dataaaa
+    device.download();
 }
 
 /**************************************************************

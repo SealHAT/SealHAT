@@ -271,3 +271,13 @@ void maindialog::on_TX_ReScanButton_clicked()
         ui->TX_serialPort_comboBox->addItem(serialPortInfo.portName());
     }
 }
+
+void maindialog::on_button_rescanDataRetrievalCOM_clicked()
+{
+    ui->comboBox_retrieveData->clear();
+
+    foreach (const QSerialPortInfo &serialPortInfo, QSerialPortInfo::availablePorts())
+    {
+        ui->comboBox_retrieveData->addItem(serialPortInfo.portName());
+    }
+}

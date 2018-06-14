@@ -12,12 +12,12 @@ void maindialog::temp_getloadData(){
             bit_Mask = (0x01 << shift_property);
             if((guiConfig.getEnvConfig().activeHour&bit_Mask))
             {
-                      button->setProperty("clicked", true);
-                      button->setStyleSheet("background-color:rgb(34,139,34)");
+                button->setProperty("clicked", true);
+                button->setStyleSheet("background-color:rgb(142, 152, 163);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
 
             }else{
                 button->setProperty("clicked", false);
-                button->setStyleSheet("background-color:rgb(152, 162, 173)");
+                button->setStyleSheet("background-color:rgb(202, 212, 223);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
             }
         }
     }
@@ -30,13 +30,13 @@ void maindialog::temp_getloadData(){
 void maindialog::on_temp_SW_clicked()
 {
     QString title = ui->temp_SW->text();
-    if(title == "Enable")
+    if(title == "ENABLE SENSOR")
     {
         temp_disable(false);
         temp_disable_button(false);
-        ui->temp_SW->setText("Disable");
+        ui->temp_SW->setText("DISABLE SENSOR");
     }else{
-        ui->temp_SW->setText("Enable");
+        ui->temp_SW->setText("ENABLE SENSOR");
         temp_disable_button(true);
         temp_disable(true);
     }
