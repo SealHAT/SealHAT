@@ -127,7 +127,10 @@ void IMU_task(void* pvParameters)
                 if(err < 0) {
                     accMsg.header.id  |= DEVICE_ERR_COMMUNICATIONS;
                     accMsg.header.size = 0;
-                    ctrlLog_write((uint8_t*)&accMsg, sizeof(DATA_HEADER_t));
+                    err = ctrlLog_write((uint8_t*)&accMsg, sizeof(DATA_HEADER_t));
+                    if(err == 0) {
+                        gpio_set_pin_level(LED_RED, false);
+                    }
                     accMsg.header.id &= ~(DEVICE_ERR_MASK);
                 }
                 else {
@@ -153,7 +156,10 @@ void IMU_task(void* pvParameters)
 
                 if(magItr >= IMU_LOG_SIZE) {
                     timestamp_FillHeader(&magMsg.header);
-                    ctrlLog_write((uint8_t*)&magMsg, sizeof(IMU_MSG_t));
+                    err = ctrlLog_write((uint8_t*)&magMsg, sizeof(IMU_MSG_t));
+                    if(err == 0) {
+                        gpio_set_pin_level(LED_RED, false);
+                    }
                     magMsg.header.id &= ~(DEVICE_ERR_MASK);
                     magItr = 0;
                 }

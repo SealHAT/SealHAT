@@ -304,9 +304,6 @@ private slots:
     void on_configureHomeButton_clicked();
 
     //void on_batterySizeText_returnPressed();
-
-    void on_retrieveDataButton_clicked();
-
     void on_button_rescanDataRetrievalCOM_clicked();
 
     private:

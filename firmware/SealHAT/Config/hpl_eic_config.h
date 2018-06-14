@@ -736,14 +736,14 @@
 // <i> This defines input sense trigger
 // <id> eic_arch_sense15
 #ifndef CONF_EIC_SENSE15
-#define CONF_EIC_SENSE15 EIC_NMICTRL_NMISENSE_RISE_Val
+#define CONF_EIC_SENSE15 EIC_NMICTRL_NMISENSE_FALL_Val
 #endif
 
 // <q> External Interrupt 15 Asynchronous Edge Detection Mode
 // <i> Indicates the external interrupt 15 detection mode operated synchronously or asynchronousl
 // <id> eic_arch_asynch15
 #ifndef CONF_EIC_ASYNCH15
-#define CONF_EIC_ASYNCH15 1
+#define CONF_EIC_ASYNCH15 0
 #endif
 
 // </e>
