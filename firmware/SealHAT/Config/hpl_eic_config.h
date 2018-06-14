@@ -1,7 +1,11 @@
-#include "atmel_start_pins.h"
 /* Auto-generated config file hpl_eic_config.h */
 #ifndef HPL_EIC_CONFIG_H
 #define HPL_EIC_CONFIG_H
+#include "atmel_start_pins.h"
+
+#ifndef SEALHAT_HARDWARE_VERSION
+#error "SEALHAT HARDWARE VERSION MUST BE DEFINED!"
+#endif
 
 // <<< Use Configuration Wizard in Context Menu >>>
 
@@ -138,8 +142,14 @@
 
 // <e> Interrupt 2 Settings
 // <id> eic_arch_enable_irq_setting2
-#ifndef CONF_EIC_ENABLE_IRQ_SETTING2
-#define CONF_EIC_ENABLE_IRQ_SETTING2 0
+#if SEALHAT_HARDWARE_VERSION == 10040
+    #ifndef CONF_EIC_ENABLE_IRQ_SETTING2
+    #define CONF_EIC_ENABLE_IRQ_SETTING2 0
+    #endif
+#elif SEALHAT_HARDWARE_VERSION == 10060
+    #ifndef CONF_EIC_ENABLE_IRQ_SETTING2
+    #define CONF_EIC_ENABLE_IRQ_SETTING2 1
+    #endif
 #endif
 
 // <q> External Interrupt 2 Filter Enable
@@ -165,9 +175,16 @@
 // <EIC_NMICTRL_NMISENSE_LOW_Val"> Low-level detection
 // <i> This defines input sense trigger
 // <id> eic_arch_sense2
+#if SEALHAT_HARDWARE_VERSION == 10040
 #ifndef CONF_EIC_SENSE2
 #define CONF_EIC_SENSE2 EIC_NMICTRL_NMISENSE_NONE_Val
 #endif
+#elif SEALHAT_HARDWARE_VERSION == 10060
+#ifndef CONF_EIC_SENSE2
+#define CONF_EIC_SENSE2 EIC_NMICTRL_NMISENSE_BOTH_Val
+#endif
+#endif
+
 
 // <q> External Interrupt 2 Asynchronous Edge Detection Mode
 // <i> Indicates the external interrupt 2 detection mode operated synchronously or asynchronousl
@@ -433,7 +450,7 @@
 // <e> Interrupt 9 Settings
 // <id> eic_arch_enable_irq_setting9
 #ifndef CONF_EIC_ENABLE_IRQ_SETTING9
-#define CONF_EIC_ENABLE_IRQ_SETTING9 1
+#define CONF_EIC_ENABLE_IRQ_SETTING9 0
 #endif
 
 // <q> External Interrupt 9 Filter Enable
@@ -516,9 +533,16 @@
 
 // <e> Interrupt 11 Settings
 // <id> eic_arch_enable_irq_setting11
+#if SEALHAT_HARDWARE_VERSION == 10040
 #ifndef CONF_EIC_ENABLE_IRQ_SETTING11
 #define CONF_EIC_ENABLE_IRQ_SETTING11 1
 #endif
+#elif SEALHAT_HARDWARE_VERSION == 10060
+#ifndef CONF_EIC_ENABLE_IRQ_SETTING11
+#define CONF_EIC_ENABLE_IRQ_SETTING11 0
+#endif
+#endif
+
 
 // <q> External Interrupt 11 Filter Enable
 // <i> Indicates whether the external interrupt 11 filter is enabled or not
@@ -719,14 +743,10 @@
 // <i> Indicates the external interrupt 15 detection mode operated synchronously or asynchronousl
 // <id> eic_arch_asynch15
 #ifndef CONF_EIC_ASYNCH15
-#define CONF_EIC_ASYNCH15 0
+#define CONF_EIC_ASYNCH15 1
 #endif
 
 // </e>
-
-#ifndef SEALHAT_HARDWARE_VERSION
-    #error "SEALHAT HARDWARE VERSION MUST BE DEFINED!"
-#endif
 
 #if SEALHAT_HARDWARE_VERSION == 10040
 

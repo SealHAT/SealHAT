@@ -223,6 +223,8 @@ int32_t _ext_irq_enable(const uint32_t pin, const bool enable)
 	return ERR_NONE;
 }
 
+
+#include "seal_IMU.h"
 /**
  * \brief Inter EIC interrupt handler
  */
@@ -233,6 +235,10 @@ static void _ext_irq_handler(void)
 	uint32_t          pin = INVALID_PIN_NUMBER;
 
 	hri_eic_clear_INTFLAG_reg(EIC, flags);
+
+    if(flags & 0x8000){
+        MagnetometerDataReadyISR();
+    }
 
 	ASSERT(callback);
 

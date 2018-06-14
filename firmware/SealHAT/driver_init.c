@@ -119,7 +119,7 @@ void EXTERNAL_IRQ_init(void)
 	                       // <GPIO_PULL_DOWN"> Pull-down
 	                       GPIO_PULL_OFF);
 
-	gpio_set_pin_function(VBUS_DETECT, PINMUX_PA11A_EIC_EXTINT11);
+	gpio_set_pin_function(VBUS_DETECT, PINMUX_PA18A_EIC_EXTINT2);
 
 	// Set pin direction to input
 	gpio_set_pin_direction(IMU_INT_MAG, GPIO_DIRECTION_IN);
