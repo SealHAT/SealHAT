@@ -27,7 +27,7 @@
  *
  *  Returns: void
  **************************************************************/
-void maindialog::submitConfig(){
+void maindialog::submitConfig() {
     QString acc_timeName = "Accelerometer Time";
     uint32_t acc_timeValue = guiConfig.getAccelConfig().activeHour;
     QString acc_scaleName = "Accelerometer Scale";
@@ -82,8 +82,6 @@ void maindialog::submitConfig(){
     config.insert(ekg_lpfreqName,ekg_lpfreqValue);
 
     config.insert(gps_timeName,gps_timeValue);
-
-
 }
 
 
@@ -289,7 +287,7 @@ void maindialog::on_sendConfigsButton_clicked()
     guiConfig.setMemoryCount(4);
     guiConfig.setStartTime(QDateTime::currentDateTime());
 
-    if(device.connectToDevice()) {
+    if(device.connectToDevice(ui->TX_serialPort_comboBox->currentText())) {
         device.sendConfig(guiConfig.getSensorConfig());
     }
     else {
