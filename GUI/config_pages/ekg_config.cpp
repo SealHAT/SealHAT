@@ -15,7 +15,7 @@ void maindialog::ekg_getloadData(){
         if(button->property("button_shift").isValid()) {
             shift_property = button->property("button_shift").toInt();
             bit_Mask = (0x01 << shift_property);
-            if((configuration_settings.ekgConfig.activeHour&bit_Mask))
+            if((guiConfig.getModularConfig().activeHour&bit_Mask))
             {
                       button->setProperty("clicked", true);
                       button->setStyleSheet("background-color:rgb(34,139,34)");
@@ -27,9 +27,9 @@ void maindialog::ekg_getloadData(){
         }
     }
 
-    uint16_t ekg_spsSelect = 512/(pow(2,(uint8_t)configuration_settings.ekgConfig.rate));
-        uint8_t ekg_gainSelect = configuration_settings.ekgConfig.gain;
-        uint8_t ekg_lpFreqSelect = configuration_settings.ekgConfig.freq;
+    uint16_t ekg_spsSelect = 512/(pow(2,(uint8_t)guiConfig.getModularConfig().rate));
+        uint8_t ekg_gainSelect = guiConfig.getModularConfig().gain;
+        uint8_t ekg_lpFreqSelect = guiConfig.getModularConfig().freq;
 
         if(ekg_spsSelect== 512)
         {
@@ -57,21 +57,24 @@ void maindialog::ekg_getloadData(){
 
 void maindialog::on_ekg_gainBox_currentIndexChanged(int index)
 {
+    MOD_CFG_t temp = guiConfig.getModularConfig();
+
     switch(index){
     case EKG_20_GAIN:
-        configuration_settings.ekgConfig.gain = ECG_GAIN_20_V;
+        temp.gain = ECG_GAIN_20_V;
         break;
     case EKG_40_GAIN:
-        configuration_settings.ekgConfig.gain = ECG_GAIN_40_V;
+        temp.gain = ECG_GAIN_40_V;
         break;
     case EKG_80_GAIN:
-        configuration_settings.ekgConfig.gain = ECG_GAIN_80_V;
+        temp.gain = ECG_GAIN_80_V;
         break;
     case EKG_160_GAIN:
-        configuration_settings.ekgConfig.gain = ECG_GAIN_160_V;
+        temp.gain = ECG_GAIN_160_V;
         break;
     }
 
+    guiConfig.setModular(temp);
 }
 
 
@@ -93,7 +96,7 @@ void maindialog::on_ekg_SW_clicked()
 }
 
 void maindialog::ekg_checkTimetoEnable(){
-    if(configuration_settings.ekgConfig.activeHour){
+    if(guiConfig.getModularConfig().activeHour){
         ekg_Disable(false);
     }else{
         ekg_Disable(true);
@@ -102,7 +105,6 @@ void maindialog::ekg_checkTimetoEnable(){
 
 void maindialog::ekg_setDefault()
 {
-    uint16_t size;
     ui->ekg_odr128->setChecked(true);
     on_ekg_odr128_clicked();
 
@@ -110,19 +112,22 @@ void maindialog::ekg_setDefault()
     ui->ekg_LPfreqBox->setCurrentIndex(EKG_LP_FREQ_40HZ);
     on_ekg_timeclear_button_clicked();
 
-    size = sizeof(ECG_SAMPLE_RATE_t) + sizeof(ECG_GAIN_t) + sizeof(ECG_LOW_PASS_t);
-    configuration_settings.ekgConfig = {
+    MOD_CFG_t temp = {
         0,                                          // active hours
         ECG_RATE_MIN_SPS,                           // sampling rate
         ECG_GAIN_20_V,                              // gain
         ECG_LP_40_HZ                                // frequency
     };
+
+    guiConfig.setModular(temp);
+
     ekg_checkTimetoEnable();
 }
 
 
 void maindialog::ekg_hour_clicked()
 {
+    MOD_CFG_t temp = guiConfig.getModularConfig();
 
     QPushButton* button = qobject_cast<QPushButton*>(sender());
     if(!button->property("clicked").isValid()) {
@@ -132,11 +137,12 @@ void maindialog::ekg_hour_clicked()
     button->setProperty("clicked", !clicked);
         if(!clicked) {
             button->setStyleSheet("background-color:rgb(253,199,0);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
-            configuration_settings.ekgConfig.activeHour |= 1 << button->property("button_shift").toInt();
+            temp.activeHour |= 1 << button->property("button_shift").toInt();
         } else {
             button->setStyleSheet("background-color:rgb(202, 212, 223);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
-            configuration_settings.ekgConfig.activeHour &= ~(1 << button->property("button_shift").toInt());
+            temp.activeHour &= ~(1 << button->property("button_shift").toInt());
         }
+    guiConfig.setModular(temp);
 }
 
 void maindialog::ekg_timeTable_control()
@@ -176,72 +182,80 @@ void maindialog::ekg_Disable(bool disable)
 
 void maindialog::on_ekg_odr128_clicked()
 {
+    MOD_CFG_t temp = guiConfig.getModularConfig();
     int rmIndex1;
     int rmIndex2;
-        configuration_settings.ekgConfig.rate = ECG_RATE_MIN_SPS;
-        rmIndex1 = ui->ekg_LPfreqBox->findText("100 Hz");
-        if(rmIndex1 >= 0)
-        {
-            ui->ekg_LPfreqBox->setCurrentIndex(EKG_LP_FREQ_40HZ);
-            on_ekg_LPfreqBox_currentIndexChanged(EKG_LP_FREQ_40HZ);
-            ui->ekg_LPfreqBox->removeItem(rmIndex1);
-        }
-        rmIndex2 = ui->ekg_LPfreqBox->findText("150 Hz");
-        if(rmIndex2 >= 0)
-        {
-            ui->ekg_LPfreqBox->setCurrentIndex(EKG_LP_FREQ_40HZ);
-            on_ekg_LPfreqBox_currentIndexChanged(EKG_LP_FREQ_40HZ);
-            ui->ekg_LPfreqBox->removeItem(rmIndex2);
-        }
+
+    temp.rate = ECG_RATE_MIN_SPS;
+    rmIndex1 = ui->ekg_LPfreqBox->findText("100 Hz");
+    if(rmIndex1 >= 0)
+    {
+        ui->ekg_LPfreqBox->setCurrentIndex(EKG_LP_FREQ_40HZ);
+        on_ekg_LPfreqBox_currentIndexChanged(EKG_LP_FREQ_40HZ);
+        ui->ekg_LPfreqBox->removeItem(rmIndex1);
+    }
+    rmIndex2 = ui->ekg_LPfreqBox->findText("150 Hz");
+    if(rmIndex2 >= 0)
+    {
+        ui->ekg_LPfreqBox->setCurrentIndex(EKG_LP_FREQ_40HZ);
+        on_ekg_LPfreqBox_currentIndexChanged(EKG_LP_FREQ_40HZ);
+        ui->ekg_LPfreqBox->removeItem(rmIndex2);
+    }
+
+    guiConfig.setModular(temp);
 }
 
 void maindialog::on_ekg_odr256_clicked()
 {
     int addIndex;
     int rmIndex2;
+    MOD_CFG_t temp = guiConfig.getModularConfig();
 
-        configuration_settings.ekgConfig.rate = ECG_RATE_MED_SPS;
-        addIndex = ui->ekg_LPfreqBox->findText("100 Hz");
-        if(addIndex < 0)
-        {
-            ui->ekg_LPfreqBox->insertItem(EKG_LP_FREQ_100HZ,"100 Hz");
-        }
-        rmIndex2 = ui->ekg_LPfreqBox->findText("150 Hz");
-        if(rmIndex2 >= 0)
-        {
-            ui->ekg_LPfreqBox->setCurrentIndex(EKG_LP_FREQ_100HZ);
-            on_ekg_LPfreqBox_currentIndexChanged(EKG_LP_FREQ_100HZ);
-            ui->ekg_LPfreqBox->removeItem(rmIndex2);
-        }
+    temp.rate = ECG_RATE_MED_SPS;
+    addIndex = ui->ekg_LPfreqBox->findText("100 Hz");
+    if(addIndex < 0)
+    {
+        ui->ekg_LPfreqBox->insertItem(EKG_LP_FREQ_100HZ,"100 Hz");
+    }
+    rmIndex2 = ui->ekg_LPfreqBox->findText("150 Hz");
+    if(rmIndex2 >= 0)
+    {
+        ui->ekg_LPfreqBox->setCurrentIndex(EKG_LP_FREQ_100HZ);
+        on_ekg_LPfreqBox_currentIndexChanged(EKG_LP_FREQ_100HZ);
+        ui->ekg_LPfreqBox->removeItem(rmIndex2);
+    }
+    guiConfig.setModular(temp);
 }
 
 void maindialog::on_ekg_odr512_clicked()
 {
     int addIndex1;
     int addIndex2;
+    MOD_CFG_t temp = guiConfig.getModularConfig();
 
-        configuration_settings.ekgConfig.rate = ECG_RATE_MAX_SPS;
-        addIndex1 = ui->ekg_LPfreqBox->findText("100 Hz");
-        addIndex2 = ui->ekg_LPfreqBox->findText("150 Hz");
-        if(addIndex1 < 0)
-        {
-            ui->ekg_LPfreqBox->addItem("100 Hz");
-        }
-        if(addIndex2 < 0)
-        {
-            ui->ekg_LPfreqBox->addItem("150 Hz");
-        }
-
+    temp.rate = ECG_RATE_MAX_SPS;
+    addIndex1 = ui->ekg_LPfreqBox->findText("100 Hz");
+    addIndex2 = ui->ekg_LPfreqBox->findText("150 Hz");
+    if(addIndex1 < 0)
+    {
+        ui->ekg_LPfreqBox->addItem("100 Hz");
+    }
+    if(addIndex2 < 0)
+    {
+        ui->ekg_LPfreqBox->addItem("150 Hz");
+    }
+    guiConfig.setModular(temp);
 }
 
 void maindialog::ekg_disable_button(bool disable)
 {
+    MOD_CFG_t temp = guiConfig.getModularConfig();
     for(QPushButton* button : ui->ekgConfigPage->findChildren<QPushButton*>()) {
         if(button->property("button_shift").isValid())
         {
             button->setDisabled(disable);
             if(disable){
-                configuration_settings.ekgConfig.activeHour = 0;
+                temp.activeHour = 0;
                 button->setProperty("clicked", false);
                 button->setStyleSheet("background-color:rgb(142, 152, 163);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
             }else{
@@ -249,25 +263,28 @@ void maindialog::ekg_disable_button(bool disable)
             }
         }
     }
+    guiConfig.setModular(temp);
 }
 
 void maindialog::on_ekg_LPfreqBox_currentIndexChanged(int index)
 {
+    MOD_CFG_t temp = guiConfig.getModularConfig();
+
     switch (index) {
     case EKG_LP_FREQ_BYPASS:
-        configuration_settings.ekgConfig.freq= ECG_LP_BYPASS;
+        temp.freq= ECG_LP_BYPASS;
         break;
     case EKG_LP_FREQ_40HZ:
-        configuration_settings.ekgConfig.freq= ECG_LP_40_HZ;
+        temp.freq= ECG_LP_40_HZ;
         break;
     case EKG_LP_FREQ_100HZ:
-        configuration_settings.ekgConfig.freq= ECG_LP_100_HZ;
+        temp.freq= ECG_LP_100_HZ;
         break;
     case EKG_LP_FREQ_150HZ:
-        configuration_settings.ekgConfig.freq= ECG_LP_150_HZ;
+        temp.freq= ECG_LP_150_HZ;
         break;
     }
-
+    guiConfig.setModular(temp);
 }
 
 
@@ -275,14 +292,16 @@ void maindialog::on_ekg_LPfreqBox_currentIndexChanged(int index)
 
 void maindialog::on_ekg_timeclear_button_clicked()
 {
+    MOD_CFG_t temp = guiConfig.getModularConfig();
     for(QPushButton* button : ui->ekgConfigPage->findChildren<QPushButton*>())
     {
         if(button->property("button_shift").isValid())
         {
-            configuration_settings.ekgConfig.activeHour = 0;
+            temp.activeHour = 0;
             button->setProperty("clicked", false);
             button->setStyleSheet("background-color:rgb(202, 212, 223);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
         }
     }
+    guiConfig.setModular(temp);
 }
 

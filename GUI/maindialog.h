@@ -16,9 +16,9 @@
 #include <QThread>
 #include <QSemaphore>
 #include "src/sealhat_device.h"
+#include "src/sensorconfig.h"
 
 #include "seal_Types.h"
-#include "analyze.h"
 
 #define SPLIT_MSG_START_SYM (0xDEAD)
 namespace Ui {class maindialog;}
@@ -43,7 +43,7 @@ class maindialog : public QDialog
     double powerEst;
     uint32_t storageEst;
 
-    //Time button mask and setting
+    // Time button mask and setting
     uint8_t shift_property;
     uint32_t bit_Mask;
 
@@ -144,35 +144,37 @@ public:
 private:
     // helper function to write to stream boxes
     void writeToStreamBox(QTextEdit* textBox, QString str);
+    // changes the highlighting of the buttons
+    void setActiveButtonColor(CONFIGURE_PAGES pageToHighlight);
 
 private slots:
     void samplesReceived_stream(QQueue<SensorSample>* q);
+    void on_retrieveDataButton_clicked();
 
-//Page switch
+    // Slots for navigation buttons
     void on_ekgButton_clicked();
     void on_gpsButton_clicked();
     void on_magButton_clicked();
     void on_xcelButton_clicked();
     void on_temperatureButton_clicked();
-
     void on_streamDataButton_clicked();
-    void on_backButton_clicked(); //
-    void on_configureDevOptionButton_clicked(); //
-    //void on_retrieveDataButton_clicked(); //
+    void on_backButton_clicked();
+    void on_configureDevOptionButton_clicked();
     void on_backButton_StreamPage_clicked();
-
-    void setActiveButtonColor(CONFIGURE_PAGES pageToHighlight);
     void on_backButton_retrieveData_clicked();
 
-//Main function control
+    // clears and re-populates the serial port list
+    void on_TX_ReScanButton_clicked();
+    void on_RXstream_ReScanButton_clicked();
+
+    //Main function control
     //void hour_clicked();
-    void sensors_setDefault();
     void sensors_timeTable_control();
     void labels_hide();
     void sensor_esitimation_control();
     void display_setReadOnly();
 
-//Accelerometer
+    //Accelerometer
     void xcel_setDefault();
 
     void on_xcel_SW_clicked();
@@ -287,22 +289,12 @@ private slots:
     void loaddata_fromSensors();
 
 //Estimation&Analyzation
-    uint8_t num_Hours(uint32_t x) ;
-    void powerEstimation();
-    void storageEstimation();
+
     void generalEstimation();
 
     void on_batterySizeText_selectionChanged();
 
     void on_batterySizeText_editingFinished();
-
-//TX side of GUI
-    void on_TX_ReScanButton_clicked();
-    QByteArray config_serialize();
-    void sendSerial_Config();
-
-//RX side of GUI
-    void on_RXstream_ReScanButton_clicked();
 
 //Data Sample Stream
     void on_captureDatatoFile_button_clicked();
@@ -313,30 +305,17 @@ private slots:
 
     //void on_batterySizeText_returnPressed();
 
-    void on_retrieveDataButton_clicked();
-
-private:
-        Ui::maindialog *ui;
+    private:
+        Ui::maindialog  *ui;
+        SealHAT_device   device;         // the sealHat device
+        QByteArray       dataBuffer;     // data from the device
+        QFile            streamOut;      // stream file output
+        SensorConfig     guiConfig;      // configuration being created in the gui
         QMap<QString, uint32_t> config;
-        SENSOR_CONFIGS_t configuration_settings;
 
         QSerialPort *microSerial;
         static const quint16 microSerial_vendor_id = 1003;
         static const quint16 microSerial_product_id = 9220;
-
-        SealHAT_device  device;         // the sealHat device
-        QByteArray      dataBuffer;     // data from the device
-        QFile           streamOut;      // stream file output
-
-        QByteArray sampleBuf;
-        QByteArray header_ba;
-        QString serialDataBuffer;
-        QString acc_DataBuffer;
-        QString mag_DataBuffer;
-        QString light_DataBuffer;
-        QString temp_DataBuffer;
-        QString gps_DataBuffer;
-        QString ekg_DataBuffer;
 
         QString microSerial_port_name;
         int pos;

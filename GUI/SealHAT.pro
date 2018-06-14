@@ -17,20 +17,19 @@ SOURCES += main.cpp\
     maindialog.cpp \
     analyze.cpp \
     loading_data.cpp \
-    config_pages/configure.cpp \
     config_pages/configurelist_page.cpp \
     config_pages/ekg_config.cpp \
     config_pages/gps_config.cpp \
     config_pages/mag_config.cpp \
     config_pages/temp_config.cpp \
     config_pages/xcel_config.cpp \
-    src/usb_sending_serialization.cpp \
-    src/usb_serial_port_setup.cpp \
     src/sealhat_device.cpp \
     src/data_streaming.cpp \
     src/data_retreival.cpp \
     src/sensorsample.cpp \
-    src/crc32.cpp
+    src/crc32.cpp \
+    src/sensorconfig.cpp \
+    src/lsm303config.cpp
 
 FORMS    += \
     maindialog.ui
@@ -38,11 +37,12 @@ FORMS    += \
 
 HEADERS  += \
     maindialog.h \
-    analyze.h \
     ../firmware/SealHAT/seal_Types.h \
     src/sealhat_device.h \
     src/sensorsample.h \
-    src/crc32.h
+    src/crc32.h \
+    src/sensorconfig.h \
+    src/lsm303config.h
 
 RESOURCES += \
     images.qrc

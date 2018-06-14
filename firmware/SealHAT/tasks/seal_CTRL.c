@@ -180,7 +180,7 @@ void CTRL_task(void* pvParameters)
     for(;;) {
         /* feed the mangy dog */
         #ifdef SEAL_DEBUG
- //           gpio_toggle_pin_level(LED_GREEN);
+            gpio_toggle_pin_level(LED_GREEN);
         #endif
 
         wdt_feed(&WATCHDOG);
