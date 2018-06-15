@@ -199,10 +199,11 @@ CMD_RETURN_TYPES configure_sealhat_device()
     while('n'!= usb_get());
     usb_get();
     delay_ms(1000);
-    usb_read((char *)&tempConfigStruct, sizeof(SYSTEM_CONFIG_t));
-//     do {
-//         retVal = usb_read((char *)&tempConfigStruct, sizeof(SYSTEM_CONFIG_t));
-//     } while((timeout++ < 600) && (tempConfigStruct.header.startSym != MSG_START_SYM));
+
+    do {
+         retVal = usb_read((char *)&tempConfigStruct, sizeof(SYSTEM_CONFIG_t));
+    } while((timeout++ < 600) && (tempConfigStruct.header.startSym != MSG_START_SYM));
+    
     // check the packet with CRC32
     crc32_check = 0xFFFFFFFF;
     crc_sync_crc32(&CRC_0, (uint32_t*)&tempConfigStruct.sensorConfigs, sizeof(SENSOR_CONFIGS_t)/sizeof(uint32_t), &crc32_check);
