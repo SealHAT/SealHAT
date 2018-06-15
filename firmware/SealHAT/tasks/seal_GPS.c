@@ -71,12 +71,13 @@ void GPS_task(void *pvParameters)
     int32_t     err;                /* for catching API errors                  */
     BaseType_t  xResult;            /* holds return value of blocking function  */
     TickType_t  xMaxBlockTime;      /* max time to wait for the task to resume  */
+    uint8_t     trash[22];
     static GPS_MSG_t gps_msg;	    /* holds the GPS message to store in flash  */
     
     (void)pvParameters;
     activehours = 0;
-    eeprom_data.sensorConfigs.gpsConfig.idleRate = 75000;    // TODO remove after EEPROM is set
-    eeprom_data.sensorConfigs.gpsConfig.activeRate = 30000;    // TODO remove after EEPROM is set
+    eeprom_data.sensorConfigs.gpsConfig.idleRate = 36000;    // TODO remove after EEPROM is set
+    eeprom_data.sensorConfigs.gpsConfig.activeRate = 18000;    // TODO remove after EEPROM is set
     
     for(int i = 0; i < 24; i++) {   /* determine the amount of active hours per day */
         activehours += (eeprom_data.sensorConfigs.gpsConfig.activeHour >> i) & 1;
@@ -103,9 +104,13 @@ void GPS_task(void *pvParameters)
     /* enable the data ready interrupt (TxReady) */
     ext_irq_register(GPS_TXD, GPS_isr_dataready);
     
+    while (false == gpio_get_pin_level(GPS_TXD)) { 
+        os_sleep(pdMS_TO_TICKS(2000));
+    }
     /* put the device to sleep until its period is up */
     gpio_set_pin_level(GPS_EXT_INT, false);
     gps_nap(samplerate);
+    gps_read_i2c(trash, 22);
     for (;;) {
         /* wait for notification from ISR, returns `pdTRUE` if task, else `pdFALSE` */
         xResult = xTaskNotifyWait( GPS_NOTIFY_NONE, /* bits to clear on entry       */
@@ -129,13 +134,14 @@ void GPS_task(void *pvParameters)
                 /* copy the GPS FIFO over I2C */
                 err = gps_readfifo() ? ERR_TIMEOUT : ERR_NONE;
 
-                /* put device back to sleep */
-                gpio_set_pin_level(GPS_EXT_INT, false);
-                gps_nap(samplerate);
-                
                 /* and log it, noting communication error if needed */
                 GPS_log(&gps_msg, err, DEVICE_ERR_COMMUNICATIONS);
                 xMaxBlockTime = pdMS_TO_TICKS(samplerate);
+
+                /* put device back to sleep */
+                gpio_set_pin_level(GPS_EXT_INT, false);
+                gps_nap(samplerate);
+                gps_read_i2c(trash, 22);
             }
             
             /* if motion has been detected by the IMU */
@@ -160,7 +166,7 @@ void GPS_task(void *pvParameters)
                     /* put device back to sleep */
                     gpio_set_pin_level(GPS_EXT_INT, false);
                     gps_nap(samplerate);
-                    
+                    gps_read_i2c(trash, 22);
                     xMaxBlockTime = pdMS_TO_TICKS(samplerate);
                     xTimerChangePeriod(xGPS_timer, pdMS_TO_TICKS(60000), 0);
                 }
@@ -184,18 +190,19 @@ void GPS_task(void *pvParameters)
                     /* put device back to sleep */
                     gpio_set_pin_level(GPS_EXT_INT, false);
                     gps_nap(samplerate);
-                    
+
                     xMaxBlockTime = pdMS_TO_TICKS(samplerate);
                 }
             }
         } else { /* there was no interrupt and the GPS has slept for one period */
             gpio_set_pin_level(GPS_EXT_INT, true);
             os_sleep(5);
-            
+
             /* if it is the first wakeup */
             if (xMaxBlockTime == samplerate) {   
                 /* load fix settings and wait for a fix/FIFO interrupt */
                 gps_loadcfg(0xFFFF);
+                gps_readfifo();
                 gpio_set_pin_level(GPS_EXT_INT, false);
                 xMaxBlockTime = pdMS_TO_TICKS(GPS_WAIT_TIME); /* allow time to receive a fix */
             } else { 
@@ -210,6 +217,7 @@ void GPS_task(void *pvParameters)
                     err = gps_readfifo() ? ERR_TIMEOUT : ERR_NONE;
                     GPS_log(&gps_msg, err, DEVICE_ERR_OVERFLOW | DEVICE_ERR_TIMEOUT);
                     gps_nap(samplerate);
+                    gps_read_i2c(trash, 22);
                 } else {
                     /* GPS is responsive, allow full sleep cycle */
                     xMaxBlockTime = pdMS_TO_TICKS(samplerate);
@@ -256,14 +264,11 @@ int32_t GPS_log(GPS_MSG_t *msg, const int32_t ERR, const DEVICE_ERR_CODES_t ERR_
     if (ERR < 0) {
         /* if an error occurred with the FIFO, log the error */
         msg->header.id  |= ERR_CODES;
-        msg->header.size = 0;
-        logsize = sizeof(DATA_HEADER_t);
-    } else {
-        /* otherwise, extract the GPS data and log it */
-        logcount = gps_parsefifo(msg->log, GPS_LOG_SIZE);
-        msg->header.size = logcount * sizeof(gps_log_t);
-        logsize = sizeof(DATA_HEADER_t) + msg->header.size;
     }
+    /* otherwise, extract the GPS data and log it */
+    logcount = gps_parsefifo(msg->log, GPS_LOG_SIZE);
+    msg->header.size = logcount * sizeof(gps_log_t);
+    logsize = sizeof(DATA_HEADER_t) + msg->header.size;
 
     /* write the message to flash */
     return ctrlLog_write((uint8_t*)msg, logsize);
