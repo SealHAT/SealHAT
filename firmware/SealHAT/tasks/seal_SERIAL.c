@@ -193,7 +193,7 @@ CMD_RETURN_TYPES configure_sealhat_device()
     /* Wait for configuration packet to arrive. */
     do {
         retVal = usb_read(&tempConfigStruct, sizeof(SYSTEM_CONFIG_t));
-    } while((retVal == 0) || (STOP_LISTENING == true));
+    } while(retVal != USB_OK || !usb_dtr()); // ((timeout++ < 600) && (tempConfigStruct.header.startSym != MSG_START_SYM))
 
     // check the packet with CRC32
     crc32_check = 0xFFFFFFFF;

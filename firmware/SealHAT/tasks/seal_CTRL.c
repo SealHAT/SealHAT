@@ -72,12 +72,12 @@ int32_t CTRL_task_init(void)
 
     /* set calendar to a default time and set alarm for some time after */
     date.year  = 2018;
-    date.month = 5;
-    date.day   = 4;
+    date.month = 6;
+    date.day   = 14;
 
-    time.hour = 15;
-    time.min  = 59;
-    time.sec  = 50;
+    time.hour = 19;
+    time.min  = 30;
+    time.sec  = 35;
 
     // TODO enforce start date beyond current date
     RTC_ALARM.cal_alarm.datetime.date.year  = eeprom_data.sensorConfigs.start_year;
@@ -86,7 +86,7 @@ int32_t CTRL_task_init(void)
     RTC_ALARM.cal_alarm.datetime.time.hour  = eeprom_data.sensorConfigs.start_hour;
     RTC_ALARM.cal_alarm.datetime.time.min   = 0;
     RTC_ALARM.cal_alarm.datetime.time.sec   = 0;
-    RTC_ALARM.cal_alarm.option              = CALENDAR_ALARM_MATCH_YEAR;
+    RTC_ALARM.cal_alarm.option              = CALENDAR_ALARM_MATCH_HOUR;
     RTC_ALARM.cal_alarm.mode                = ONESHOT;
 
     // return values not checked since they  ALWAYS returns ERR_NONE.

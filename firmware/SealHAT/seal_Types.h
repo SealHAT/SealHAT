@@ -127,7 +127,7 @@ typedef struct __attribute__((__packed__)) {
 } ECG_MSG_t;
 
 /***********************GUI------------->MICROCONTROLLER*****************/
-typedef struct{
+typedef struct __attribute__((__packed__)){
    uint32_t         activeHour;     // active hours: the hours this sensor is active
    ACC_FULL_SCALE_t scale;          // full scale reading level (2G, 4G, etc)
    ACC_OPMODE_t     opMode;           // accelerometer mode, sets the power mode and sample rate
@@ -136,24 +136,24 @@ typedef struct{
    uint8_t          sensitivity;    // axis to check for motion as defined by ACC_MOTION_AXIS_t
 } ACC_CFG_t;
 
-typedef struct{
+typedef struct __attribute__((__packed__)){
    uint32_t         activeHour;     // active hours: the hours this sensor is active
    MAG_OPMODE_t     opMode;           // magnetometer mode. sets the rate and power levels
 } MAG_CFG_t;
 
 
-typedef struct{
+typedef struct __attribute__((__packed__)){
    uint32_t         activeHour;     // active hours: the hours this sensor is active
    uint16_t         period;         // period of sampling in seconds
 } ENV_CFG_t;
 
-typedef struct{
+typedef struct __attribute__((__packed__)){
    uint32_t           activeHour;   // active hours: the hours this sensor is active
    uint32_t           activeRate;   // period of sampling while animal is moving in seconds
    uint32_t           idleRate;     // period of sampling while animal is idle in seconds
 } GPS_CFG_t;
 
-typedef struct{
+typedef struct __attribute__((__packed__)){
    uint32_t           activeHour;   // active hours: the hours this sensor is active
    ECG_SAMPLE_RATE_t  rate;         // sample rate of the ekg
    ECG_GAIN_t         gain;         // gain setting of the ekg
