@@ -125,7 +125,7 @@ void assert_triggered(const char *file, uint32_t line);
 // <i> Default is 1KHz
 // <id> freertos_tick_rate_hz
 #ifndef configTICK_RATE_HZ
-#define configTICK_RATE_HZ ((TickType_t)32)
+#define configTICK_RATE_HZ ((TickType_t)16)
 #endif
 
 //define name of tickless idle implementation (look in tickless.c)
