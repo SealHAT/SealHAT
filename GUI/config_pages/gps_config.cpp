@@ -123,7 +123,6 @@ void maindialog::gps_disable_button(bool disable)
         if(button->property("button_shift").isValid()) {
             button->setDisabled(disable);
             if(disable){
-                gps_setDefault();
                 button->setProperty("clicked", false);
                 button->setStyleSheet("background-color:rgb(142, 152, 163);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
             }else{
