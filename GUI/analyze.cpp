@@ -28,6 +28,7 @@ void maindialog::generalEstimation(){
     QPalette warning_palette;
     warning_palette.setColor(QPalette::WindowText, Qt::red);
     double StorageConsump = guiConfig.getEstimatedMemoryUse();
+    qDebug() << "StorageConsump is " << StorageConsump;
     QString storageconsumpString = " " + QString::number(StorageConsump,'f',2) + " % ";
 
 
@@ -42,6 +43,7 @@ void maindialog::generalEstimation(){
     ui->storageConsumption_Text->setText(storageconsumpString);
 
     powerEst = guiConfig.getPowerUse();
+    //qDebug() << "powerEst is " << powerEst;
     on_batterySizeText_editingFinished();
 }
 

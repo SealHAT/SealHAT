@@ -13,7 +13,7 @@ void maindialog::mag_getloadData(){
             if((guiConfig.getMagConfig().activeHour&bit_Mask))
             {
                 button->setProperty("clicked", true);
-                button->setStyleSheet("background-color:rgb(142, 152, 163);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
+                button->setStyleSheet("background-color:rgb(253,199,0);border:none;border-right-style:solid;border-left-style:solid;border-color:rgb(132, 142, 153);border-width:1px;border-top-style:none;border-bottom-style:none;");
 
             }else{
                 button->setProperty("clicked", false);
