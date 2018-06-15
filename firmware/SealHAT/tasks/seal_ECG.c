@@ -72,7 +72,6 @@ void ECG_isr_dataready(void)
 
     /* clear the fifo */
     ecg_fifo_reset();
-    bool pinlvl = gpio_get_pin_level(MOD_INT1);
 
     /* main task loop */
     for (;;){
@@ -109,11 +108,8 @@ void ECG_isr_dataready(void)
             }
         } // END Notification response
         else {
-            pinlvl = gpio_get_pin_level(MOD_INT1);
             ecg_synch();
             ecg_fifo_reset();
-            pinlvl = gpio_get_pin_level(MOD_INT1);
-            delay_ms(1);
         }
     } // END forever loop
  }

@@ -284,6 +284,7 @@ void EIC_Handler(void)
 {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;  // will be set to true by notify if we are awakening a higher priority task
     volatile uint32_t flags = hri_eic_read_INTFLAG_reg(EIC);
+
     hri_eic_clear_INTFLAG_reg(EIC, flags);
 
     if(flags & (1 << EIC_NUM_VBUS)) {
