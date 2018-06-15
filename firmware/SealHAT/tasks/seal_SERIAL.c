@@ -201,8 +201,8 @@ CMD_RETURN_TYPES configure_sealhat_device()
     delay_ms(1000);
 
     do {
-         retVal = usb_read((char *)&tempConfigStruct, sizeof(SYSTEM_CONFIG_t));
-    } while((timeout++ < 600) && (tempConfigStruct.header.startSym != MSG_START_SYM));
+         retVal = usb_read((uint8_t *)&tempConfigStruct, sizeof(SYSTEM_CONFIG_t));
+    } while(retVal != USB_OK || !usb_dtr());// ((timeout++ < 600) && (tempConfigStruct.header.startSym != MSG_START_SYM)) || 
     
     // check the packet with CRC32
     crc32_check = 0xFFFFFFFF;
