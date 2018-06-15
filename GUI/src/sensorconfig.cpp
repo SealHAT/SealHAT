@@ -1,4 +1,5 @@
 #include "sensorconfig.h"
+#include <QDebug>
 
 #define STORAGECAPACITY         (8000000000.0)
 
@@ -171,12 +172,14 @@ double SensorConfig::getPowerUse()
      double gps_activePower;
      double gps_inactivePower = GPS_SB_PWR * (24 - countHours(gpsConfig.activeHour));
      if(gpsConfig.activeHour <= 2){
-         gps_activePower = (((GPS_ACQ_PWR*30.0/15.0)  + (GPS_SB_PWR* (30*14.0/15.0)))/30)  * countHours(gpsConfig.activeHour);
+         gps_activePower = (((GPS_ACQ_PWR/15.0)  + (GPS_SB_PWR* (14.0/15.0))))  * countHours(gpsConfig.activeHour);
      }else{
-         gps_activePower = (( (GPS_ACQ_PWR*30/15) + (GPS_SB_PWR* (30*14.0/15.0)) )/30) * 2 + ((GPS_ACQ_PWR*45.0)  + (GPS_SB_PWR* (3600-45)))  * (countHours(gpsConfig.activeHour)-2)/3600;
+         gps_activePower = (( (GPS_ACQ_PWR/15.0) + (GPS_SB_PWR* (14.0/15.0)))) * 2 + ((GPS_ACQ_PWR*30.0/3600.0)  + (GPS_SB_PWR* (3300.0)/3600.0))  * (countHours(gpsConfig.activeHour)-2);
      }
 
      double gps_totalPower = gps_inactivePower + gps_activePower;
+     qDebug() << "gps_active hours is " << countHours(gpsConfig.activeHour);
+     qDebug() << "gps_activePower is " << gps_activePower;
 
      /*MEMORY POWER*/  //what is the correct SPI time
      double memory_totalpower = getEstimatedMemoryUse() * SPI_SPEED/3600 * SPI_CURRENT
@@ -220,5 +223,7 @@ double SensorConfig::getEstimatedMemoryUse()
     //Ekg size(bytes) of samples per day
     storage += ((3 * ECG_LOG_SIZE) + sizeof(DATA_HEADER_t)) * (sampleCount[MODULAR]/ECG_LOG_SIZE);
 
-    return (((double)storage * 90.0)/(memoryCount*250000000)) * 100;
+    qDebug() << "storage is" << storage;
+
+    return (((double)storage * 90.0)/((double)memoryCount*250000000)) * 100;
 }
