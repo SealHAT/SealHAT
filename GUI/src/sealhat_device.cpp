@@ -236,25 +236,17 @@ bool SealHAT_device::sendConfig(SENSOR_CONFIGS_t newConfigs)
             data.clear();
             sealhat.write(&configCmd);
 
-            // wait for and confirm the read response
-            sealhat.waitForReadyRead(100);
+            sendPacket.header.timestamp = QDateTime::currentDateTime().toSecsSinceEpoch();
+            QByteArray config2send((const char*)&sendPacket, sizeof(SYSTEM_CONFIG_t));
+            sealhat.write(config2send, sizeof(SYSTEM_CONFIG_t));
+            sealhat.waitForReadyRead(500);
             data = sealhat.readAll();
-            if(data.at(0) == READY_TO_RECEIVE) {
-                sendPacket.header.timestamp = QDateTime::currentDateTime().toSecsSinceEpoch();
-                QByteArray config2send((const char*)&newConfigs);
-                sealhat.write(config2send, sizeof(SYSTEM_CONFIG_t));
-                sealhat.waitForReadyRead(500);
-                data = sealhat.readAll();
 
-                if(data.at(0) == OPERATION_SUCCESS) {
-                    sendSuccess = true;
-                }
-                else {
-                    qDebug() << "Config sent, but no confirmation received";
-                }
+            if(data.size() > 0 && data.at(0) == OPERATION_SUCCESS) {
+                sendSuccess = true;
             }
             else {
-                qDebug() << "No ready to receive signal, aborting";
+                qDebug() << "Config sent, but no confirmation received";
             }
         }
         else {

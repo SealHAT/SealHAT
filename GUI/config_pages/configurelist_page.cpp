@@ -279,7 +279,6 @@ void maindialog::on_configureHomeButton_clicked()
 
 void maindialog::on_sendConfigsButton_clicked()
 {
-    SYSTEM_CONFIG_t newConfigPacket;
     configureSettingListDisplay();
     setActiveButtonColor(CONFIGURE_DEV_HOME_PAGE);
 

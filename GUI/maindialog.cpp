@@ -146,6 +146,7 @@ void maindialog::on_batterySizeText_selectionChanged()
 void maindialog::on_backButton_clicked()
 {
     // Sets the dialog back to a login screen
+    this->device.disconnectFromDevice();
     this->setFixedSize(350, 350);
     ui->mainStacked->setCurrentIndex(WELCOME_MAIN_STACK);
     ui->StartPageStacked->setCurrentIndex(INITIAL_PAGE);

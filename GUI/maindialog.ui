@@ -386,7 +386,7 @@ background-color: qconicalgradient(cx:0.352, cy:0.613636, angle:0, stop:0.954545
       <string notr="true">background-color: rgb(152, 162, 173);</string>
      </property>
      <property name="currentIndex">
-      <number>3</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="ConfigureHomePage">
       <widget class="QLabel" name="welcomeHeadingLabel">

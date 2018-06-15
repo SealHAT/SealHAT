@@ -11,7 +11,7 @@ int main(void)
 {
     // clear the I2C buses. I2C devices can lock up the bus if there was a reset during a transaction.
     i2c_unblock_bus(ENV_SDA, ENV_SCL);
-    i2c_unblock_bus(GPS_SDA, GPS_SCL);
+    i2c_unblock_bus(GPS_SDA, GPS_SCL);  
     i2c_unblock_bus(IMU_SDA, IMU_SCL);
 
     // set FLASH CS pins HIGH
