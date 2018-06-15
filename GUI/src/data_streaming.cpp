@@ -31,6 +31,13 @@ void maindialog::on_startStream_button_clicked()
         if(ui->RXstream_serialPort_comboBox->count()) {
             if(device.connectToDevice(ui->RXstream_serialPort_comboBox->currentText())) {
 
+                ui->temp_streamText->clear();
+                ui->light_streamText->clear();
+                ui->gps_streamText->clear();
+                ui->ekg_streamText->clear();
+                ui->xcel_streamText->clear();
+                ui->mag_streamText->clear();
+
                 ui->startStream_button->setText("STOP STREAMING");
                 device.startStream();
                 connect(&device, &SealHAT_device::samplesReady, this, &maindialog::samplesReceived_stream);
