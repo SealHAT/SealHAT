@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Atmel Studio Solution File, Format Version 11.00
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "SealHAT", "SealHAT\SealHAT.cproj", "{32ED250C-6B89-4095-9D7A-6481AE4C65B4}"
+Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "sealHAT", "SealHAT\sealHAT.cppproj", "{DCE6C7E3-EE26-4D79-826B-08594B9AD897}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,11 +11,10 @@ Global
 		Release|ARM = Release|ARM
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{32ED250C-6B89-4095-9D7A-6481AE4C65B4}.Debug|ARM.ActiveCfg = Debug|ARM
-		{32ED250C-6B89-4095-9D7A-6481AE4C65B4}.Debug|ARM.Build.0 = Debug|ARM
-		{32ED250C-6B89-4095-9D7A-6481AE4C65B4}.Debug|ARM.Deploy.0 = Debug|ARM
-		{32ED250C-6B89-4095-9D7A-6481AE4C65B4}.Release|ARM.ActiveCfg = Release|ARM
-		{32ED250C-6B89-4095-9D7A-6481AE4C65B4}.Release|ARM.Build.0 = Release|ARM
+		{DCE6C7E3-EE26-4D79-826B-08594B9AD897}.Debug|ARM.ActiveCfg = Debug|ARM
+		{DCE6C7E3-EE26-4D79-826B-08594B9AD897}.Debug|ARM.Build.0 = Debug|ARM
+		{DCE6C7E3-EE26-4D79-826B-08594B9AD897}.Release|ARM.ActiveCfg = Release|ARM
+		{DCE6C7E3-EE26-4D79-826B-08594B9AD897}.Release|ARM.Build.0 = Release|ARM
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

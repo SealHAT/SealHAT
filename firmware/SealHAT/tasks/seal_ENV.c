@@ -25,8 +25,7 @@ int32_t ENV_task_init(const int32_t period)
 
 void ENV_task(void* pvParameters)
 {
-    static ENV_MSG_t lightMsg;             // data buffer for storing light samples to send
-    static ENV_MSG_t tempMsg;             // data buffer for storing temperature samples to send
+    static ENV_MSG_t envMsg;            // data buffer for storing light samples to send
     int32_t     err;                    // for catching API errors
     TickType_t  xPeriod;                // the period of the sampling in seconds
     TickType_t  xLastWakeTime;          // last wake time variable for timing
@@ -39,11 +38,10 @@ void ENV_task(void* pvParameters)
     err = max44009_init(&I2C_ENV, LIGHT_ADD_GND);
 
     // set the header data
-    dataheader_init(&lightMsg.header);
-    dataheader_init(&tempMsg.header);
-    lightMsg.header.size     = ENV_LOG_SIZE * sizeof(uint16_t);
+    dataheader_init(&envMsg.header);
+    envMsg.header.size     = ENV_LOG_SIZE * sizeof(uint16_t);
     tempMsg.header.size      = ENV_LOG_SIZE * sizeof(uint16_t);
-    lightMsg.header.id       = DEVICE_ID_LIGHT;
+    envMsg.header.id       = DEVICE_ID_LIGHT;
     tempMsg.header.id        = DEVICE_ID_TEMPERATURE;
 
     // Initialize the xLastWakeTime variable with the current time.
@@ -61,7 +59,7 @@ void ENV_task(void* pvParameters)
             vTaskDelayUntil(&xLastWakeTime, xPeriod);
 
             // reset the message header and set the timestamp
-            timestamp_FillHeader(&lightMsg.header);
+            timestamp_FillHeader(&envMsg.header);
             timestamp_FillHeader(&tempMsg.header);
 
             // start an asynchronous temperature reading
@@ -71,7 +69,7 @@ void ENV_task(void* pvParameters)
 
             //  read the light level
             portENTER_CRITICAL();
-            err = max44009_read(&lightMsg.data[i]);
+            err = max44009_read(&envMsg.data[i]);
             portEXIT_CRITICAL();
 
             // wait for the temperature sensor to finish
@@ -89,6 +87,6 @@ void ENV_task(void* pvParameters)
 
         // send data to the CTRL task once done
         err = ctrlLog_write((uint8_t*)&tempMsg, sizeof(ENV_MSG_t));
-        err = ctrlLog_write((uint8_t*)&lightMsg, sizeof(ENV_MSG_t));
+        err = ctrlLog_write((uint8_t*)&envMsg, sizeof(ENV_MSG_t));
     }
 } 

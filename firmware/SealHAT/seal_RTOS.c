@@ -60,7 +60,6 @@ void dataheader_init(DATA_HEADER_t* header)
     header->size        = 0;
     header->id          = 0;
     header->timestamp   = 0;
-    header->packetCount = 0;
     header->startSym    = MSG_START_SYM;
 }
 

@@ -3,18 +3,18 @@
   <PropertyGroup>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectVersion>7.0</ProjectVersion>
-    <ToolchainName>com.Atmel.ARMGCC.C</ToolchainName>
-    <ProjectGuid>{32ed250c-6b89-4095-9d7a-6481ae4c65b4}</ProjectGuid>
+    <ToolchainName>com.Atmel.ARMGCC.CPP</ToolchainName>
+    <ProjectGuid>dce6c7e3-ee26-4d79-826b-08594b9ad897</ProjectGuid>
     <avrdevice>ATSAML21G18B</avrdevice>
     <avrdeviceseries>none</avrdeviceseries>
     <OutputType>Executable</OutputType>
-    <Language>C</Language>
+    <Language>CPP</Language>
     <OutputFileName>$(MSBuildProjectName)</OutputFileName>
     <OutputFileExtension>.elf</OutputFileExtension>
     <OutputDirectory>$(MSBuildProjectDirectory)\$(Configuration)</OutputDirectory>
-    <AssemblyName>SealHAT</AssemblyName>
-    <Name>SealHAT</Name>
-    <RootNamespace>SealHAT</RootNamespace>
+    <AssemblyName>sealHAT_cpp</AssemblyName>
+    <Name>sealHAT_cpp</Name>
+    <RootNamespace>sealHAT_cpp</RootNamespace>
     <ToolchainFlavour>Native</ToolchainFlavour>
     <KeepTimersRunning>true</KeepTimersRunning>
     <OverrideVtor>false</OverrideVtor>
@@ -26,17 +26,17 @@
     <OverrideVtorValue>exception_table</OverrideVtorValue>
     <BootSegment>2</BootSegment>
     <ResetRule>0</ResetRule>
-    <eraseonlaunchrule>1</eraseonlaunchrule>
+    <eraseonlaunchrule>0</eraseonlaunchrule>
     <EraseKey />
     <AsfFrameworkConfig>
-      <framework-data>
+      <framework-data xmlns="">
         <options />
         <configurations />
         <files />
         <documentation help="" />
         <offline-documentation help="" />
         <dependencies>
-          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.33.0" />
+          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.39.0" />
         </dependencies>
       </framework-data>
     </AsfFrameworkConfig>
@@ -261,7 +261,7 @@
       </AcmeProjectConfig>
     </AcmeProjectConfig>
     <avrtool>com.atmel.avrdbg.tool.samice</avrtool>
-    <avrtoolserialnumber>801001446</avrtoolserialnumber>
+    <avrtoolserialnumber>59300183</avrtoolserialnumber>
     <avrdeviceexpectedsignature>0x10810214</avrdeviceexpectedsignature>
     <avrtoolinterface>SWD</avrtoolinterface>
     <com_atmel_avrdbg_tool_samice>
@@ -273,7 +273,7 @@
         <JlinkConfigFile>C:\Users\kmcarrin\Documents\SealHAT_Repos\SealHAT\SealHAT\jlink.config</JlinkConfigFile>
       </ToolOptions>
       <ToolType>com.atmel.avrdbg.tool.samice</ToolType>
-      <ToolNumber>801001446</ToolNumber>
+      <ToolNumber>59300183</ToolNumber>
       <ToolName>J-Link</ToolName>
     </com_atmel_avrdbg_tool_samice>
     <avrtoolinterfaceclock>4000000</avrtoolinterfaceclock>
@@ -291,306 +291,338 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <ToolchainSettings>
-      <ArmGcc>
-  <armgcc.common.outputfiles.hex>True</armgcc.common.outputfiles.hex>
-  <armgcc.common.outputfiles.lss>True</armgcc.common.outputfiles.lss>
-  <armgcc.common.outputfiles.eep>True</armgcc.common.outputfiles.eep>
-  <armgcc.common.outputfiles.bin>True</armgcc.common.outputfiles.bin>
-  <armgcc.common.outputfiles.srec>True</armgcc.common.outputfiles.srec>
-  <armgcc.compiler.symbols.DefSymbols>
-    <ListValues>
-      <Value>NDEBUG</Value>
-    </ListValues>
-  </armgcc.compiler.symbols.DefSymbols>
-  <armgcc.compiler.directories.IncludePaths>
-    <ListValues>
-      <Value>%24(PackRepoDir)\arm\cmsis\5.0.1\CMSIS\Include\</Value>
-      <Value>%24(PackRepoDir)\atmel\SAML21_DFP\1.2.120\saml21b\include</Value>
-      <Value>../Config</Value>
-      <Value>../</Value>
-      <Value>../examples</Value>
-      <Value>../hal/include</Value>
-      <Value>../hal/utils/include</Value>
-      <Value>../hpl/core</Value>
-      <Value>../hpl/dmac</Value>
-      <Value>../hpl/dsu</Value>
-      <Value>../hpl/eic</Value>
-      <Value>../hpl/gclk</Value>
-      <Value>../hpl/mclk</Value>
-      <Value>../hpl/nvmctrl</Value>
-      <Value>../hpl/osc32kctrl</Value>
-      <Value>../hpl/oscctrl</Value>
-      <Value>../hpl/pac</Value>
-      <Value>../hpl/pm</Value>
-      <Value>../hpl/port</Value>
-      <Value>../hpl/rtc</Value>
-      <Value>../hpl/sercom</Value>
-      <Value>../hpl/tc</Value>
-      <Value>../hpl/usb</Value>
-      <Value>../hpl/wdt</Value>
-      <Value>../hri</Value>
-      <Value>../thirdparty/RTOS</Value>
-      <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0</Value>
-      <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/Source/include</Value>
-      <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/Source/portable/GCC/ARM_CM0</Value>
-      <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/module_config</Value>
-      <Value>../usb</Value>
-      <Value>../usb/class/cdc</Value>
-      <Value>../usb/class/cdc/device</Value>
-      <Value>../usb/device</Value>
-    </ListValues>
-  </armgcc.compiler.directories.IncludePaths>
-  <armgcc.compiler.optimization.level>Optimize for size (-Os)</armgcc.compiler.optimization.level>
-  <armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>True</armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>
-  <armgcc.compiler.warnings.AllWarnings>True</armgcc.compiler.warnings.AllWarnings>
-  <armgcc.linker.general.UseNewlibNano>True</armgcc.linker.general.UseNewlibNano>
-  <armgcc.linker.libraries.Libraries>
-    <ListValues>
-      <Value>libm</Value>
-    </ListValues>
-  </armgcc.linker.libraries.Libraries>
-  <armgcc.linker.libraries.LibrarySearchPaths>
-    <ListValues>
-      <Value>%24(ProjectDir)\Device_Startup</Value>
-    </ListValues>
-  </armgcc.linker.libraries.LibrarySearchPaths>
-  <armgcc.linker.optimization.GarbageCollectUnusedSections>True</armgcc.linker.optimization.GarbageCollectUnusedSections>
-  <armgcc.linker.miscellaneous.LinkerFlags>-Tsaml21g18b_flash.ld</armgcc.linker.miscellaneous.LinkerFlags>
-  <armgcc.assembler.general.IncludePaths>
-    <ListValues>
-      <Value>%24(PackRepoDir)\arm\cmsis\5.0.1\CMSIS\Include\</Value>
-      <Value>%24(PackRepoDir)\atmel\SAML21_DFP\1.2.120\saml21b\include</Value>
-      <Value>../Config</Value>
-      <Value>../</Value>
-      <Value>../examples</Value>
-      <Value>../hal/include</Value>
-      <Value>../hal/utils/include</Value>
-      <Value>../hpl/core</Value>
-      <Value>../hpl/dmac</Value>
-      <Value>../hpl/dsu</Value>
-      <Value>../hpl/eic</Value>
-      <Value>../hpl/gclk</Value>
-      <Value>../hpl/mclk</Value>
-      <Value>../hpl/nvmctrl</Value>
-      <Value>../hpl/osc32kctrl</Value>
-      <Value>../hpl/oscctrl</Value>
-      <Value>../hpl/pac</Value>
-      <Value>../hpl/pm</Value>
-      <Value>../hpl/port</Value>
-      <Value>../hpl/rtc</Value>
-      <Value>../hpl/sercom</Value>
-      <Value>../hpl/tc</Value>
-      <Value>../hpl/usb</Value>
-      <Value>../hpl/wdt</Value>
-      <Value>../hri</Value>
-      <Value>../thirdparty/RTOS</Value>
-      <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0</Value>
-      <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/Source/include</Value>
-      <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/Source/portable/GCC/ARM_CM0</Value>
-      <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/module_config</Value>
-      <Value>../usb</Value>
-      <Value>../usb/class/cdc</Value>
-      <Value>../usb/class/cdc/device</Value>
-      <Value>../usb/device</Value>
-    </ListValues>
-  </armgcc.assembler.general.IncludePaths>
-  <armgcc.preprocessingassembler.general.IncludePaths>
-    <ListValues>
-      <Value>%24(PackRepoDir)\arm\cmsis\5.0.1\CMSIS\Include\</Value>
-      <Value>%24(PackRepoDir)\atmel\SAML21_DFP\1.2.120\saml21b\include</Value>
-      <Value>../Config</Value>
-      <Value>../</Value>
-      <Value>../examples</Value>
-      <Value>../hal/include</Value>
-      <Value>../hal/utils/include</Value>
-      <Value>../hpl/core</Value>
-      <Value>../hpl/dmac</Value>
-      <Value>../hpl/dsu</Value>
-      <Value>../hpl/eic</Value>
-      <Value>../hpl/gclk</Value>
-      <Value>../hpl/mclk</Value>
-      <Value>../hpl/nvmctrl</Value>
-      <Value>../hpl/osc32kctrl</Value>
-      <Value>../hpl/oscctrl</Value>
-      <Value>../hpl/pac</Value>
-      <Value>../hpl/pm</Value>
-      <Value>../hpl/port</Value>
-      <Value>../hpl/rtc</Value>
-      <Value>../hpl/sercom</Value>
-      <Value>../hpl/tc</Value>
-      <Value>../hpl/usb</Value>
-      <Value>../hpl/wdt</Value>
-      <Value>../hri</Value>
-      <Value>../thirdparty/RTOS</Value>
-      <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0</Value>
-      <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/Source/include</Value>
-      <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/Source/portable/GCC/ARM_CM0</Value>
-      <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/module_config</Value>
-      <Value>../usb</Value>
-      <Value>../usb/class/cdc</Value>
-      <Value>../usb/class/cdc/device</Value>
-      <Value>../usb/device</Value>
-    </ListValues>
-  </armgcc.preprocessingassembler.general.IncludePaths>
-</ArmGcc>
+      <ArmGccCpp>
+        <armgcc.common.outputfiles.hex>True</armgcc.common.outputfiles.hex>
+        <armgcc.common.outputfiles.lss>True</armgcc.common.outputfiles.lss>
+        <armgcc.common.outputfiles.eep>True</armgcc.common.outputfiles.eep>
+        <armgcc.common.outputfiles.bin>True</armgcc.common.outputfiles.bin>
+        <armgcc.common.outputfiles.srec>True</armgcc.common.outputfiles.srec>
+        <armgcc.compiler.symbols.DefSymbols>
+          <ListValues>
+            <Value>NDEBUG</Value>
+          </ListValues>
+        </armgcc.compiler.symbols.DefSymbols>
+        <armgcc.compiler.directories.IncludePaths>
+          <ListValues>
+            <Value>%24(PackRepoDir)\arm\cmsis\5.0.1\CMSIS\Include\</Value>
+            <Value>%24(PackRepoDir)\atmel\SAML21_DFP\1.2.120\saml21b\include</Value>
+            <Value>../Config</Value>
+            <Value>../</Value>
+            <Value>../examples</Value>
+            <Value>../hal/include</Value>
+            <Value>../hal/utils/include</Value>
+            <Value>../hpl/core</Value>
+            <Value>../hpl/dmac</Value>
+            <Value>../hpl/dsu</Value>
+            <Value>../hpl/eic</Value>
+            <Value>../hpl/gclk</Value>
+            <Value>../hpl/mclk</Value>
+            <Value>../hpl/nvmctrl</Value>
+            <Value>../hpl/osc32kctrl</Value>
+            <Value>../hpl/oscctrl</Value>
+            <Value>../hpl/pac</Value>
+            <Value>../hpl/pm</Value>
+            <Value>../hpl/port</Value>
+            <Value>../hpl/rtc</Value>
+            <Value>../hpl/sercom</Value>
+            <Value>../hpl/tc</Value>
+            <Value>../hpl/usb</Value>
+            <Value>../hpl/wdt</Value>
+            <Value>../hri</Value>
+            <Value>../thirdparty/RTOS</Value>
+            <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0</Value>
+            <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/Source/include</Value>
+            <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/Source/portable/GCC/ARM_CM0</Value>
+            <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/module_config</Value>
+            <Value>../usb</Value>
+            <Value>../usb/class/cdc</Value>
+            <Value>../usb/class/cdc/device</Value>
+            <Value>../usb/device</Value>
+          </ListValues>
+        </armgcc.compiler.directories.IncludePaths>
+        <armgcc.compiler.optimization.level>Optimize for size (-Os)</armgcc.compiler.optimization.level>
+        <armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>True</armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>
+        <armgcc.compiler.warnings.AllWarnings>True</armgcc.compiler.warnings.AllWarnings>
+        <armgcccpp.compiler.symbols.DefSymbols>
+          <ListValues>
+            <Value>NDEBUG</Value>
+          </ListValues>
+        </armgcccpp.compiler.symbols.DefSymbols>
+        <armgcccpp.compiler.directories.IncludePaths>
+          <ListValues>
+            <Value>%24(PackRepoDir)\arm\cmsis\5.0.1\CMSIS\Include\</Value>
+            <Value>%24(PackRepoDir)\atmel\SAML21_DFP\1.2.120\saml21b\include</Value>
+          </ListValues>
+        </armgcccpp.compiler.directories.IncludePaths>
+        <armgcccpp.compiler.optimization.level>Optimize for size (-Os)</armgcccpp.compiler.optimization.level>
+        <armgcccpp.compiler.optimization.PrepareFunctionsForGarbageCollection>True</armgcccpp.compiler.optimization.PrepareFunctionsForGarbageCollection>
+        <armgcccpp.compiler.warnings.AllWarnings>True</armgcccpp.compiler.warnings.AllWarnings>
+        <armgcccpp.linker.libraries.Libraries>
+          <ListValues>
+            <Value>libm</Value>
+          </ListValues>
+        </armgcccpp.linker.libraries.Libraries>
+        <armgcccpp.linker.libraries.LibrarySearchPaths>
+          <ListValues>
+            <Value>%24(ProjectDir)\Device_Startup</Value>
+          </ListValues>
+        </armgcccpp.linker.libraries.LibrarySearchPaths>
+        <armgcccpp.linker.optimization.GarbageCollectUnusedSections>True</armgcccpp.linker.optimization.GarbageCollectUnusedSections>
+        <armgcccpp.linker.miscellaneous.LinkerFlags>-Tsaml21g18b_flash.ld</armgcccpp.linker.miscellaneous.LinkerFlags>
+        <armgcccpp.assembler.general.IncludePaths>
+          <ListValues>
+            <Value>%24(PackRepoDir)\arm\cmsis\5.0.1\CMSIS\Include\</Value>
+            <Value>%24(PackRepoDir)\atmel\SAML21_DFP\1.2.120\saml21b\include</Value>
+            <Value>../Config</Value>
+            <Value>../</Value>
+            <Value>../examples</Value>
+            <Value>../hal/include</Value>
+            <Value>../hal/utils/include</Value>
+            <Value>../hpl/core</Value>
+            <Value>../hpl/dmac</Value>
+            <Value>../hpl/dsu</Value>
+            <Value>../hpl/eic</Value>
+            <Value>../hpl/gclk</Value>
+            <Value>../hpl/mclk</Value>
+            <Value>../hpl/nvmctrl</Value>
+            <Value>../hpl/osc32kctrl</Value>
+            <Value>../hpl/oscctrl</Value>
+            <Value>../hpl/pac</Value>
+            <Value>../hpl/pm</Value>
+            <Value>../hpl/port</Value>
+            <Value>../hpl/rtc</Value>
+            <Value>../hpl/sercom</Value>
+            <Value>../hpl/tc</Value>
+            <Value>../hpl/usb</Value>
+            <Value>../hpl/wdt</Value>
+            <Value>../hri</Value>
+            <Value>../thirdparty/RTOS</Value>
+            <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0</Value>
+            <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/Source/include</Value>
+            <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/Source/portable/GCC/ARM_CM0</Value>
+            <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/module_config</Value>
+            <Value>../usb</Value>
+            <Value>../usb/class/cdc</Value>
+            <Value>../usb/class/cdc/device</Value>
+            <Value>../usb/device</Value>
+          </ListValues>
+        </armgcccpp.assembler.general.IncludePaths>
+        <armgcccpp.preprocessingassembler.general.IncludePaths>
+          <ListValues>
+            <Value>%24(PackRepoDir)\arm\cmsis\5.0.1\CMSIS\Include\</Value>
+            <Value>%24(PackRepoDir)\atmel\SAML21_DFP\1.2.120\saml21b\include</Value>
+            <Value>../Config</Value>
+            <Value>../</Value>
+            <Value>../examples</Value>
+            <Value>../hal/include</Value>
+            <Value>../hal/utils/include</Value>
+            <Value>../hpl/core</Value>
+            <Value>../hpl/dmac</Value>
+            <Value>../hpl/dsu</Value>
+            <Value>../hpl/eic</Value>
+            <Value>../hpl/gclk</Value>
+            <Value>../hpl/mclk</Value>
+            <Value>../hpl/nvmctrl</Value>
+            <Value>../hpl/osc32kctrl</Value>
+            <Value>../hpl/oscctrl</Value>
+            <Value>../hpl/pac</Value>
+            <Value>../hpl/pm</Value>
+            <Value>../hpl/port</Value>
+            <Value>../hpl/rtc</Value>
+            <Value>../hpl/sercom</Value>
+            <Value>../hpl/tc</Value>
+            <Value>../hpl/usb</Value>
+            <Value>../hpl/wdt</Value>
+            <Value>../hri</Value>
+            <Value>../thirdparty/RTOS</Value>
+            <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0</Value>
+            <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/Source/include</Value>
+            <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/Source/portable/GCC/ARM_CM0</Value>
+            <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/module_config</Value>
+            <Value>../usb</Value>
+            <Value>../usb/class/cdc</Value>
+            <Value>../usb/class/cdc/device</Value>
+            <Value>../usb/device</Value>
+          </ListValues>
+        </armgcccpp.preprocessingassembler.general.IncludePaths>
+      </ArmGccCpp>
     </ToolchainSettings>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <ToolchainSettings>
-      <ArmGcc>
-  <armgcc.common.outputfiles.hex>True</armgcc.common.outputfiles.hex>
-  <armgcc.common.outputfiles.lss>True</armgcc.common.outputfiles.lss>
-  <armgcc.common.outputfiles.eep>True</armgcc.common.outputfiles.eep>
-  <armgcc.common.outputfiles.bin>True</armgcc.common.outputfiles.bin>
-  <armgcc.common.outputfiles.srec>True</armgcc.common.outputfiles.srec>
-  <armgcc.compiler.symbols.DefSymbols>
-    <ListValues>
-      <Value>DEBUG</Value>
-    </ListValues>
-  </armgcc.compiler.symbols.DefSymbols>
-  <armgcc.compiler.directories.IncludePaths>
-    <ListValues>
-      <Value>%24(PackRepoDir)\arm\cmsis\5.0.1\CMSIS\Include\</Value>
-      <Value>%24(PackRepoDir)\atmel\SAML21_DFP\1.2.120\saml21b\include</Value>
-      <Value>../utilities</Value>
-      <Value>../lsm303</Value>
-      <Value>../max44009</Value>
-      <Value>../sam-m8q</Value>
-      <Value>../si705x</Value>
-      <Value>../storage</Value>
-      <Value>../tasks</Value>
-      <Value>../Config</Value>
-      <Value>../</Value>
-      <Value>../examples</Value>
-      <Value>../hal/include</Value>
-      <Value>../hal/utils/include</Value>
-      <Value>../hpl/core</Value>
-      <Value>../hpl/dmac</Value>
-      <Value>../hpl/dsu</Value>
-      <Value>../hpl/eic</Value>
-      <Value>../hpl/gclk</Value>
-      <Value>../hpl/mclk</Value>
-      <Value>../hpl/nvmctrl</Value>
-      <Value>../hpl/osc32kctrl</Value>
-      <Value>../hpl/oscctrl</Value>
-      <Value>../hpl/pac</Value>
-      <Value>../hpl/pm</Value>
-      <Value>../hpl/port</Value>
-      <Value>../hpl/rtc</Value>
-      <Value>../hpl/sercom</Value>
-      <Value>../hpl/tc</Value>
-      <Value>../hpl/usb</Value>
-      <Value>../hpl/wdt</Value>
-      <Value>../hri</Value>
-      <Value>../thirdparty/RTOS</Value>
-      <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0</Value>
-      <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/Source/include</Value>
-      <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/Source/portable/GCC/ARM_CM0</Value>
-      <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/module_config</Value>
-      <Value>../usb</Value>
-      <Value>../usb/class/cdc</Value>
-      <Value>../usb/class/cdc/device</Value>
-      <Value>../usb/device</Value>
-    </ListValues>
-  </armgcc.compiler.directories.IncludePaths>
-  <armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>True</armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>
-  <armgcc.compiler.optimization.PrepareDataForGarbageCollection>True</armgcc.compiler.optimization.PrepareDataForGarbageCollection>
-  <armgcc.compiler.optimization.DebugLevel>Maximum (-g3)</armgcc.compiler.optimization.DebugLevel>
-  <armgcc.compiler.warnings.AllWarnings>True</armgcc.compiler.warnings.AllWarnings>
-  <armgcc.compiler.warnings.ExtraWarnings>True</armgcc.compiler.warnings.ExtraWarnings>
-  <armgcc.linker.general.UseNewlibNano>True</armgcc.linker.general.UseNewlibNano>
-  <armgcc.linker.libraries.Libraries>
-    <ListValues>
-      <Value>libm</Value>
-    </ListValues>
-  </armgcc.linker.libraries.Libraries>
-  <armgcc.linker.libraries.LibrarySearchPaths>
-    <ListValues>
-      <Value>%24(ProjectDir)\Device_Startup</Value>
-    </ListValues>
-  </armgcc.linker.libraries.LibrarySearchPaths>
-  <armgcc.linker.optimization.GarbageCollectUnusedSections>True</armgcc.linker.optimization.GarbageCollectUnusedSections>
-  <armgcc.linker.memorysettings.ExternalRAM />
-  <armgcc.linker.miscellaneous.LinkerFlags>-Tsaml21g18b_flash.ld</armgcc.linker.miscellaneous.LinkerFlags>
-  <armgcc.assembler.general.IncludePaths>
-    <ListValues>
-      <Value>%24(PackRepoDir)\arm\cmsis\5.0.1\CMSIS\Include\</Value>
-      <Value>%24(PackRepoDir)\atmel\SAML21_DFP\1.2.120\saml21b\include</Value>
-      <Value>../Config</Value>
-      <Value>../</Value>
-      <Value>../examples</Value>
-      <Value>../hal/include</Value>
-      <Value>../hal/utils/include</Value>
-      <Value>../hpl/core</Value>
-      <Value>../hpl/dmac</Value>
-      <Value>../hpl/dsu</Value>
-      <Value>../hpl/eic</Value>
-      <Value>../hpl/gclk</Value>
-      <Value>../hpl/mclk</Value>
-      <Value>../hpl/nvmctrl</Value>
-      <Value>../hpl/osc32kctrl</Value>
-      <Value>../hpl/oscctrl</Value>
-      <Value>../hpl/pac</Value>
-      <Value>../hpl/pm</Value>
-      <Value>../hpl/port</Value>
-      <Value>../hpl/rtc</Value>
-      <Value>../hpl/sercom</Value>
-      <Value>../hpl/tc</Value>
-      <Value>../hpl/usb</Value>
-      <Value>../hpl/wdt</Value>
-      <Value>../hri</Value>
-      <Value>../thirdparty/RTOS</Value>
-      <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0</Value>
-      <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/Source/include</Value>
-      <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/Source/portable/GCC/ARM_CM0</Value>
-      <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/module_config</Value>
-      <Value>../usb</Value>
-      <Value>../usb/class/cdc</Value>
-      <Value>../usb/class/cdc/device</Value>
-      <Value>../usb/device</Value>
-    </ListValues>
-  </armgcc.assembler.general.IncludePaths>
-  <armgcc.assembler.debugging.DebugLevel>Default (-g)</armgcc.assembler.debugging.DebugLevel>
-  <armgcc.preprocessingassembler.general.IncludePaths>
-    <ListValues>
-      <Value>%24(PackRepoDir)\arm\cmsis\5.0.1\CMSIS\Include\</Value>
-      <Value>%24(PackRepoDir)\atmel\SAML21_DFP\1.2.120\saml21b\include</Value>
-      <Value>../Config</Value>
-      <Value>../</Value>
-      <Value>../examples</Value>
-      <Value>../hal/include</Value>
-      <Value>../hal/utils/include</Value>
-      <Value>../hpl/core</Value>
-      <Value>../hpl/dmac</Value>
-      <Value>../hpl/dsu</Value>
-      <Value>../hpl/eic</Value>
-      <Value>../hpl/gclk</Value>
-      <Value>../hpl/mclk</Value>
-      <Value>../hpl/nvmctrl</Value>
-      <Value>../hpl/osc32kctrl</Value>
-      <Value>../hpl/oscctrl</Value>
-      <Value>../hpl/pac</Value>
-      <Value>../hpl/pm</Value>
-      <Value>../hpl/port</Value>
-      <Value>../hpl/rtc</Value>
-      <Value>../hpl/sercom</Value>
-      <Value>../hpl/tc</Value>
-      <Value>../hpl/usb</Value>
-      <Value>../hpl/wdt</Value>
-      <Value>../hri</Value>
-      <Value>../thirdparty/RTOS</Value>
-      <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0</Value>
-      <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/Source/include</Value>
-      <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/Source/portable/GCC/ARM_CM0</Value>
-      <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/module_config</Value>
-      <Value>../usb</Value>
-      <Value>../usb/class/cdc</Value>
-      <Value>../usb/class/cdc/device</Value>
-      <Value>../usb/device</Value>
-    </ListValues>
-  </armgcc.preprocessingassembler.general.IncludePaths>
-  <armgcc.preprocessingassembler.debugging.DebugLevel>Default (-Wa,-g)</armgcc.preprocessingassembler.debugging.DebugLevel>
-</ArmGcc>
+      <ArmGccCpp>
+        <armgcc.common.outputfiles.hex>True</armgcc.common.outputfiles.hex>
+        <armgcc.common.outputfiles.lss>True</armgcc.common.outputfiles.lss>
+        <armgcc.common.outputfiles.eep>True</armgcc.common.outputfiles.eep>
+        <armgcc.common.outputfiles.bin>True</armgcc.common.outputfiles.bin>
+        <armgcc.common.outputfiles.srec>True</armgcc.common.outputfiles.srec>
+        <armgcc.compiler.symbols.DefSymbols>
+          <ListValues>
+            <Value>DEBUG</Value>
+          </ListValues>
+        </armgcc.compiler.symbols.DefSymbols>
+        <armgcc.compiler.directories.IncludePaths>
+          <ListValues>
+            <Value>%24(PackRepoDir)\arm\cmsis\5.0.1\CMSIS\Include\</Value>
+            <Value>%24(PackRepoDir)\atmel\SAML21_DFP\1.2.120\saml21b\include</Value>
+            <Value>../utilities</Value>
+            <Value>../lsm303</Value>
+            <Value>../max44009</Value>
+            <Value>../sam-m8q</Value>
+            <Value>../si705x</Value>
+            <Value>../storage</Value>
+            <Value>../tasks</Value>
+            <Value>../Config</Value>
+            <Value>../</Value>
+            <Value>../examples</Value>
+            <Value>../hal/include</Value>
+            <Value>../hal/utils/include</Value>
+            <Value>../hpl/core</Value>
+            <Value>../hpl/dmac</Value>
+            <Value>../hpl/dsu</Value>
+            <Value>../hpl/eic</Value>
+            <Value>../hpl/gclk</Value>
+            <Value>../hpl/mclk</Value>
+            <Value>../hpl/nvmctrl</Value>
+            <Value>../hpl/osc32kctrl</Value>
+            <Value>../hpl/oscctrl</Value>
+            <Value>../hpl/pac</Value>
+            <Value>../hpl/pm</Value>
+            <Value>../hpl/port</Value>
+            <Value>../hpl/rtc</Value>
+            <Value>../hpl/sercom</Value>
+            <Value>../hpl/tc</Value>
+            <Value>../hpl/usb</Value>
+            <Value>../hpl/wdt</Value>
+            <Value>../hri</Value>
+            <Value>../thirdparty/RTOS</Value>
+            <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0</Value>
+            <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/Source/include</Value>
+            <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/Source/portable/GCC/ARM_CM0</Value>
+            <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/module_config</Value>
+            <Value>../usb</Value>
+            <Value>../usb/class/cdc</Value>
+            <Value>../usb/class/cdc/device</Value>
+            <Value>../usb/device</Value>
+          </ListValues>
+        </armgcc.compiler.directories.IncludePaths>
+        <armgcc.compiler.optimization.level>Optimize (-O1)</armgcc.compiler.optimization.level>
+        <armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>True</armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>
+        <armgcc.compiler.optimization.PrepareDataForGarbageCollection>True</armgcc.compiler.optimization.PrepareDataForGarbageCollection>
+        <armgcc.compiler.optimization.DebugLevel>Maximum (-g3)</armgcc.compiler.optimization.DebugLevel>
+        <armgcc.compiler.warnings.AllWarnings>True</armgcc.compiler.warnings.AllWarnings>
+        <armgcc.compiler.warnings.ExtraWarnings>True</armgcc.compiler.warnings.ExtraWarnings>
+        <armgcc.compiler.miscellaneous.OtherFlags>-std=c99</armgcc.compiler.miscellaneous.OtherFlags>
+        <armgcccpp.compiler.symbols.DefSymbols>
+          <ListValues>
+            <Value>DEBUG</Value>
+          </ListValues>
+        </armgcccpp.compiler.symbols.DefSymbols>
+        <armgcccpp.compiler.directories.IncludePaths>
+          <ListValues>
+            <Value>%24(PackRepoDir)\arm\cmsis\5.0.1\CMSIS\Include\</Value>
+            <Value>%24(PackRepoDir)\atmel\SAML21_DFP\1.2.120\saml21b\include</Value>
+          </ListValues>
+        </armgcccpp.compiler.directories.IncludePaths>
+        <armgcccpp.compiler.optimization.level>Optimize (-O1)</armgcccpp.compiler.optimization.level>
+        <armgcccpp.compiler.optimization.PrepareFunctionsForGarbageCollection>True</armgcccpp.compiler.optimization.PrepareFunctionsForGarbageCollection>
+        <armgcccpp.compiler.optimization.PrepareDataForGarbageCollection>True</armgcccpp.compiler.optimization.PrepareDataForGarbageCollection>
+        <armgcccpp.compiler.optimization.DebugLevel>Maximum (-g3)</armgcccpp.compiler.optimization.DebugLevel>
+        <armgcccpp.compiler.warnings.AllWarnings>True</armgcccpp.compiler.warnings.AllWarnings>
+        <armgcccpp.compiler.warnings.ExtraWarnings>True</armgcccpp.compiler.warnings.ExtraWarnings>
+        <armgcccpp.compiler.miscellaneous.OtherFlags>-std=c++11</armgcccpp.compiler.miscellaneous.OtherFlags>
+        <armgcccpp.linker.libraries.Libraries>
+          <ListValues>
+            <Value>libm</Value>
+          </ListValues>
+        </armgcccpp.linker.libraries.Libraries>
+        <armgcccpp.linker.libraries.LibrarySearchPaths>
+          <ListValues>
+            <Value>%24(ProjectDir)\Device_Startup</Value>
+          </ListValues>
+        </armgcccpp.linker.libraries.LibrarySearchPaths>
+        <armgcccpp.linker.optimization.GarbageCollectUnusedSections>True</armgcccpp.linker.optimization.GarbageCollectUnusedSections>
+        <armgcccpp.linker.memorysettings.ExternalRAM />
+        <armgcccpp.linker.miscellaneous.LinkerFlags>-Tsaml21g18b_flash.ld</armgcccpp.linker.miscellaneous.LinkerFlags>
+        <armgcccpp.assembler.general.IncludePaths>
+          <ListValues>
+            <Value>%24(PackRepoDir)\arm\cmsis\5.0.1\CMSIS\Include\</Value>
+            <Value>%24(PackRepoDir)\atmel\SAML21_DFP\1.2.120\saml21b\include</Value>
+            <Value>../Config</Value>
+            <Value>../</Value>
+            <Value>../examples</Value>
+            <Value>../hal/include</Value>
+            <Value>../hal/utils/include</Value>
+            <Value>../hpl/core</Value>
+            <Value>../hpl/dmac</Value>
+            <Value>../hpl/dsu</Value>
+            <Value>../hpl/eic</Value>
+            <Value>../hpl/gclk</Value>
+            <Value>../hpl/mclk</Value>
+            <Value>../hpl/nvmctrl</Value>
+            <Value>../hpl/osc32kctrl</Value>
+            <Value>../hpl/oscctrl</Value>
+            <Value>../hpl/pac</Value>
+            <Value>../hpl/pm</Value>
+            <Value>../hpl/port</Value>
+            <Value>../hpl/rtc</Value>
+            <Value>../hpl/sercom</Value>
+            <Value>../hpl/tc</Value>
+            <Value>../hpl/usb</Value>
+            <Value>../hpl/wdt</Value>
+            <Value>../hri</Value>
+            <Value>../thirdparty/RTOS</Value>
+            <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0</Value>
+            <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/Source/include</Value>
+            <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/Source/portable/GCC/ARM_CM0</Value>
+            <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/module_config</Value>
+            <Value>../usb</Value>
+            <Value>../usb/class/cdc</Value>
+            <Value>../usb/class/cdc/device</Value>
+            <Value>../usb/device</Value>
+          </ListValues>
+        </armgcccpp.assembler.general.IncludePaths>
+        <armgcccpp.assembler.debugging.DebugLevel>Default (-g)</armgcccpp.assembler.debugging.DebugLevel>
+        <armgcccpp.preprocessingassembler.general.IncludePaths>
+          <ListValues>
+            <Value>%24(PackRepoDir)\arm\cmsis\5.0.1\CMSIS\Include\</Value>
+            <Value>%24(PackRepoDir)\atmel\SAML21_DFP\1.2.120\saml21b\include</Value>
+            <Value>../Config</Value>
+            <Value>../</Value>
+            <Value>../examples</Value>
+            <Value>../hal/include</Value>
+            <Value>../hal/utils/include</Value>
+            <Value>../hpl/core</Value>
+            <Value>../hpl/dmac</Value>
+            <Value>../hpl/dsu</Value>
+            <Value>../hpl/eic</Value>
+            <Value>../hpl/gclk</Value>
+            <Value>../hpl/mclk</Value>
+            <Value>../hpl/nvmctrl</Value>
+            <Value>../hpl/osc32kctrl</Value>
+            <Value>../hpl/oscctrl</Value>
+            <Value>../hpl/pac</Value>
+            <Value>../hpl/pm</Value>
+            <Value>../hpl/port</Value>
+            <Value>../hpl/rtc</Value>
+            <Value>../hpl/sercom</Value>
+            <Value>../hpl/tc</Value>
+            <Value>../hpl/usb</Value>
+            <Value>../hpl/wdt</Value>
+            <Value>../hri</Value>
+            <Value>../thirdparty/RTOS</Value>
+            <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0</Value>
+            <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/Source/include</Value>
+            <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/Source/portable/GCC/ARM_CM0</Value>
+            <Value>../thirdparty/RTOS/freertos/FreeRTOSV10.0.0/module_config</Value>
+            <Value>../usb</Value>
+            <Value>../usb/class/cdc</Value>
+            <Value>../usb/class/cdc/device</Value>
+            <Value>../usb/device</Value>
+          </ListValues>
+        </armgcccpp.preprocessingassembler.general.IncludePaths>
+        <armgcccpp.preprocessingassembler.debugging.DebugLevel>Default (-Wa,-g)</armgcccpp.preprocessingassembler.debugging.DebugLevel>
+      </ArmGccCpp>
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
@@ -1080,7 +1112,7 @@
     <Compile Include="lsm303\LSM303_types.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="main.c">
+    <Compile Include="main.cpp">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="max30003\ecg.c">
@@ -1099,15 +1131,6 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="max30003\max30003_private.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="max44009\max44009.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="max44009\max44009.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="max44009\max44009_private.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="sam-m8q\gps.c">
@@ -1164,13 +1187,25 @@
     <Compile Include="seal_Types.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="si705x\si705x.c">
+    <Compile Include="sensors\environment\max44009.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="si705x\si705x.h">
+    <Compile Include="sensors\environment\max44009.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="si705x\si705x_private.h">
+    <Compile Include="sensors\environment\max44009_private.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="sensors\environment\si705x.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="sensors\environment\si705x.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="sensors\environment\si705x_defs.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="sensors\environment\temperature.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="storage\flash_io.c">
@@ -1404,9 +1439,10 @@
     <Folder Include="hpl\usb\" />
     <Folder Include="hpl\wdt\" />
     <Folder Include="hri\" />
-    <Folder Include="max44009" />
     <Folder Include="lsm303" />
     <Folder Include="max30003" />
+    <Folder Include="sensors" />
+    <Folder Include="sensors\environment" />
     <Folder Include="thirdparty\" />
     <Folder Include="thirdparty\RTOS\" />
     <Folder Include="thirdparty\RTOS\freertos\" />
@@ -1425,7 +1461,6 @@
     <Folder Include="usb\class\cdc\device\" />
     <Folder Include="usb\device\" />
     <Folder Include="utilities" />
-    <Folder Include="si705x" />
     <Folder Include="sam-m8q" />
     <Folder Include="sam-m8q\ubxproto" />
   </ItemGroup>

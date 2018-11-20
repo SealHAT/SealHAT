@@ -90,47 +90,77 @@ typedef enum {
 
 /** Header for data packets from the device **/
 typedef struct __attribute__((__packed__)){
-    uint16_t startSym;    // symbol to indicate start of packet
-    uint8_t  id;	      // Upper four bits is the device ID, lower four are device specific event flags
-    uint8_t  packetCount; // counter to number packets from a specific sensor in leu of milliseconds
+    uint8_t startSym;    // symbol to indicate start of packet
+    struct {
+        uint8_t devID : 4;  // the device ID
+        uint8_t flags : 4;  // event flags
+    } id;
     uint32_t timestamp;   // timestamp, seconds since reference year
     uint16_t size;		  // size of data packet to follow in bytes
 } DATA_HEADER_t;
 
 typedef struct __attribute__((__packed__)){
     DATA_HEADER_t header;    // packet header
-    uint32_t      data[2];   // size of the GP reg in RTC
+    union {
+        uint32_t data[2];   // size of the GP reg in RTC
+        uint8_t  str[22];
+    };
 } SYSTEM_ERROR_t;
 
-#define ENV_LOG_SIZE            (15)
 typedef struct __attribute__((__packed__)){
     DATA_HEADER_t header;
-    uint16_t      data[ENV_LOG_SIZE];
+    uint16_t      light;
+    uint16_t      temp;
+    uint16_t      volt;
+    uint16_t      reserved;
 } ENV_MSG_t;
 
-#define IMU_LOG_SIZE               (25)
+#define IMU_LOG_SIZE               (52)
 typedef struct __attribute__((__packed__)){
     DATA_HEADER_t header;
-    AxesRaw_t     data[IMU_LOG_SIZE];
+    AxesRaw_t     dataA[IMU_LOG_SIZE];
 } IMU_MSG_t;
 
-#define GPS_LOG_SIZE               (2)
 typedef struct __attribute__((__packed__)) {
-    DATA_HEADER_t header;
-    gps_log_t     log[GPS_LOG_SIZE];
+    ENV_MSG_t     envData;
+    int32_t       lon;
+    int32_t       lat;
+    uint32_t      hAcc;
+    uint32_t      vAcc;
 } GPS_MSG_t;
 
-#define  ECG_LOG_SIZE              (24)
+#define  ECG_LOG_SIZE              (130)
 typedef struct __attribute__((__packed__)) {
     DATA_HEADER_t header;
     ECG_SAMPLE_t  log[ECG_LOG_SIZE];
 } ECG_MSG_t;
 
-/***********************GUI------------->MICROCONTROLLER*****************/
+/*** All messages should be a multiple of 16 ***/
+typedef char assert_sys_size_16[ (sizeof(SYSTEM_ERROR_t)%16)? -1 : 1 ];
+typedef char assert_env_size_16[ (sizeof(ENV_MSG_t)%16)? -1 : 1 ];
+typedef char assert_imu_size_16[ (sizeof(IMU_MSG_t)%16)? -1 : 1 ];
+typedef char assert_gps_size_16[ (sizeof(GPS_MSG_t)%16)? -1 : 1 ];
+typedef char assert_ecg_size_16[ (sizeof(ECG_MSG_t)%16)? -1 : 1 ];
+
+/************************************************************************/
+/***                    GUI<------------->MICROCONTROLLER              ***/
+/************************************************************************/
+/** struct sensor_s is used to describe basic information about a specific sensor */
+typedef struct {
+    char     name[12];              // sensor name
+    uint8_t  type;                  // this sensor's type (ex. SENSOR_TYPE_LIGHT)
+    uint8_t  sensor_id;             // unique sensor identifier
+    uint8_t  version;               // version of the hardware + driver
+    float    max_value;             // maximum value of this sensor's value in SI units
+    float    min_value;             // minimum value of this sensor's value in SI units
+    float    resolution;            // smallest difference between two values reported by this sensor
+    int32_t  min_period;            // delay in milliseconds between events. zero = not a constant rate. negative = undefined.
+} SENSOR_INFO_t;
+
 typedef struct{
    uint32_t         activeHour;     // active hours: the hours this sensor is active
    ACC_FULL_SCALE_t scale;          // full scale reading level (2G, 4G, etc)
-   ACC_OPMODE_t     opMode;           // accelerometer mode, sets the power mode and sample rate
+   ACC_OPMODE_t     opMode;         // accelerometer mode, sets the power mode and sample rate
    int16_t          threshold;      // threshold of motion to detect in milligravity
    int16_t          duration;       // Duration of movement to detect. not used.
    uint8_t          sensitivity;    // axis to check for motion as defined by ACC_MOTION_AXIS_t
@@ -138,7 +168,7 @@ typedef struct{
 
 typedef struct{
    uint32_t         activeHour;     // active hours: the hours this sensor is active
-   MAG_OPMODE_t     opMode;           // magnetometer mode. sets the rate and power levels
+   MAG_OPMODE_t     opMode;         // magnetometer mode. sets the rate and power levels
 } MAG_CFG_t;
 
 
@@ -161,19 +191,13 @@ typedef struct{
 } MOD_CFG_t;
 
 typedef struct __attribute__((__packed__)){
-    uint8_t              num_flash_chips;      // number of flash chips installed on device
-
-    // day the device should begin data collection
-    uint8_t              start_day;            // range from 1 to 28/29/30/31
-    uint8_t              start_month;          // range from 1 to 12
-    uint16_t             start_year;           // absolute year >= 1970
-    uint8_t              start_hour;           // hour of the day the device will start logging. range 0-23
-
-    ACC_CFG_t            accConfig;           // configuration data for the accelerometer
-    MAG_CFG_t            magConfig;           // configuration data for the magnetometer
-    ENV_CFG_t            envConfig;           // configuration data for the temperature sensor
-    GPS_CFG_t            gpsConfig;           // configuration data for the GPS
-    MOD_CFG_t            ekgConfig;           // configuration data for the EKG
+    uint8_t              num_flash_chips;       // number of flash chips installed on device
+    uint32_t             startTime;             // seconds since 1 JAN 1970
+    ACC_CFG_t            accConfig;             // configuration data for the accelerometer
+    MAG_CFG_t            magConfig;             // configuration data for the magnetometer
+    ENV_CFG_t            envConfig;             // configuration data for the temperature sensor
+    GPS_CFG_t            gpsConfig;             // configuration data for the GPS
+    MOD_CFG_t            ekgConfig;             // configuration data for the EKG
 } SENSOR_CONFIGS_t;
 
 typedef struct __attribute__((__packed__)){
